@@ -7,7 +7,7 @@ import com.onarandombox.MultiverseCore.MultiverseCore;
 
 public class MVNPPluginListener extends ServerListener {
 	
-	MultiverseNetherPortals plugin;
+	private MultiverseNetherPortals plugin;
 	
 	public MVNPPluginListener(MultiverseNetherPortals plugin) {
 		this.plugin = plugin;

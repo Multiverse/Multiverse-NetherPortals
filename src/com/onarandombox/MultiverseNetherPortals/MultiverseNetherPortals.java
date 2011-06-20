@@ -17,13 +17,15 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	protected static DebugLog debugLog;
 	protected MultiverseCore core;
 	protected MVNPPluginListener pluginListener;
+	protected MVNPPlayerListener playerListener;
 	
 	
 	@Override
 	public void onEnable() {
-		pluginListener = new MVNPPluginListener(this);
+		this.pluginListener = new MVNPPluginListener(this);
 	    // Register the PLUGIN_ENABLE Event as we will need to keep an eye out for the Core Enabling if we don't find it initially.
-        getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, pluginListener, Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, pluginListener, Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Type.ENTITY_PORTAL_ENTER, playerListener, Priority.Normal, this);
         
 		log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 	}
