@@ -82,7 +82,7 @@ public class MVNPPlayerListener extends PlayerListener {
 	
 	private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
 		World tpto = this.plugin.getServer().getWorld(worldstring);
-		if (tpto != null) {
+		if (tpto != null && plugin.core.ph.canEnterWorld(event.getPlayer(), tpto)) {
 			// Set the output location to the same XYZ coords but different world
 			// TODO: Add scaling
 			fromLocation.setWorld(tpto);
