@@ -6,6 +6,8 @@ import org.bukkit.World.Environment;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
+import com.onarandombox.MultiverseCore.MVWorld;
+
 public class MVNPPlayerListener extends PlayerListener {
 	
 	private MultiverseNetherPortals plugin;
@@ -85,6 +87,10 @@ public class MVNPPlayerListener extends PlayerListener {
 		if (tpto != null && plugin.core.ph.canEnterWorld(event.getPlayer(), tpto)) {
 			// Set the output location to the same XYZ coords but different world
 			// TODO: Add scaling
+			double toScaling = plugin.core.worlds.get(tpto.getName()).scaling;
+			double fromScaling = plugin.core.worlds.get(event.getFrom().getWorld().getName()).scaling;
+			
+			fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
 			fromLocation.setWorld(tpto);
 			event.setTo(fromLocation);
 			System.out.print("I will try to take you to: " + worldstring);
@@ -94,5 +100,12 @@ public class MVNPPlayerListener extends PlayerListener {
 			// otherwise they sit in the jelly stuff forever!
 			event.setTo(fromLocation);
 		}
+	}
+
+	private Location getScaledLocation(Location fromLocation, double fromScaling, double toScaling) {
+		double scaling = toScaling/fromScaling;
+		fromLocation.setX(fromLocation.getX() * fromScaling);
+		fromLocation.setY(fromLocation.getY() * fromScaling);
+		return fromLocation;
 	}
 }
