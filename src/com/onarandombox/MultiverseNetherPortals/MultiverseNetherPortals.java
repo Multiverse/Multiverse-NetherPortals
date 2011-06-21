@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.config.Configuration;
 
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.utils.DebugLog;
@@ -14,11 +15,16 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	
 	public static final Logger log = Logger.getLogger("Minecraft");
 	public static final String logPrefix = "[MultiVerse-NetherPortals] ";
+	private static final String NETEHR_PORTALS_CONFIG = "config.yml";
 	protected static DebugLog debugLog;
 	protected MultiverseCore core;
 	protected MVNPPluginListener pluginListener;
 	protected MVNPEntityListener entityListener;
 	protected MVNPPlayerListener playerListener;
+	protected Configuration MVNPconfig;
+	private static final String DEFAULT_NETHER_SUFFIX = "_nether";
+	protected String netherPrefix = "";
+	protected String netherSuffix = DEFAULT_NETHER_SUFFIX;
 	
 	@Override
 	public void onEnable() {
@@ -30,6 +36,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        
 		this.pluginListener = new MVNPPluginListener(this);
 		this.entityListener = new MVNPEntityListener(this);
 		this.playerListener = new MVNPPlayerListener(this);
@@ -39,8 +46,25 @@ public class MultiverseNetherPortals extends JavaPlugin {
 		this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, playerListener, Priority.Normal, this);
 		
 		log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
+		
+		loadConfig();
 	}
 	
+	private void loadConfig() {
+		this.MVNPconfig = new Configuration(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
+		this.MVNPconfig.load();
+		
+		this.netherPrefix = this.MVNPconfig.getString("netherportals.name.prefix", netherPrefix);
+		this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", netherSuffix);
+		
+		if(this.netherPrefix.length() == 0 && this.netherSuffix.length() == 0) {
+			log.warning(logPrefix + "I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
+			this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", netherSuffix);
+		}
+		
+		this.MVNPconfig.save();
+	}
+
 	@Override
 	public void onDisable() {
 		log.info(logPrefix + "- Disabled");

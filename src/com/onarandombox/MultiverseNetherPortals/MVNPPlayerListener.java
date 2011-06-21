@@ -6,7 +6,6 @@ import org.bukkit.World.Environment;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
-
 public class MVNPPlayerListener extends PlayerListener {
 	
 	private MultiverseNetherPortals plugin;
@@ -17,30 +16,73 @@ public class MVNPPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerPortal(PlayerPortalEvent event) {
-		Location fromLocation = event.getFrom();
-		String fromWorldString = fromLocation.getWorld().getName();
-		// TODO: Allow custom naming
-		final int netherNameLength = 7;
-		if (fromLocation.getWorld().getEnvironment() == Environment.NETHER) {
-			if(fromWorldString.length() > netherNameLength && fromWorldString.substring(fromWorldString.length() - netherNameLength, fromWorldString.length()).equalsIgnoreCase("_nether")) {
+		Location currentLocation = event.getFrom();
+		String currentWorld = currentLocation.getWorld().getName();
+		if (currentLocation.getWorld().getEnvironment() == Environment.NETHER) {
+			if (isValidNetherName(currentWorld)) {
 				
-				String worldstring = fromWorldString.substring(0,fromWorldString.length() - netherNameLength);
-				
-				
-				getNewTeleportLocation(event, fromLocation, worldstring);
+				this.getNewTeleportLocation(event, currentLocation, getNormalName(currentWorld));
 				
 			} else {
 				System.out.print("You're in a nether world, but it's not named {WORLDNAME}_nether. I'm just going to leave you here...");
 				event.setCancelled(true);
 			}
 		} else {
-			getNewTeleportLocation(event, fromLocation, fromWorldString + "_nether");
+			this.getNewTeleportLocation(event, currentLocation, getNetherName(currentWorld));
 		}
 	}
-
+	
+	/**
+	 * Returns true if the world meets the naming criteria for a nether world. It is NOT checked against the actual worlds here!
+	 * 
+	 * @param world The world name to check
+	 * @return True if the world has the correct
+	 */
+	private boolean isValidNetherName(String world) {
+		try {
+			if (world.matches("^" + plugin.netherPrefix + ".+" + plugin.netherSuffix + "$")) {
+				return true;
+			}
+		} catch (IndexOutOfBoundsException e) {
+		}
+		return false;
+	}
+	
+	/**
+	 * Takes a given normal name and adds the nether prefix and suffix onto it!
+	 * @param normalName
+	 * @return
+	 */
+	private String getNetherName(String normalName) {
+		System.out.print("Getting nether name...");
+		return this.plugin.netherPrefix + normalName + this.plugin.netherSuffix;
+	}
+	
+	/**
+	 * Takes a given normal name chops the suffix and prefix off!
+	 * @param normalName
+	 * @return
+	 */
+	private String getNormalName(String netherName) {
+		// Start by copying the nether name, we're going to transform it into a normal name!
+		String normalName = netherName;
+		// Chop off the prefix
+		if (plugin.netherPrefix.length() > 0) {
+			String[] split = normalName.split(plugin.netherPrefix);
+			normalName = split[1];
+		}
+		// Chop off the suffix
+		if (plugin.netherSuffix.length() > 0) {
+			String[] split = normalName.split(plugin.netherSuffix);
+			normalName = split[0];
+		}
+		// All we're left with is the normal world. Don't worry if it exists, the method below will handle that!
+		return normalName;
+	}
+	
 	private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
-		World tpto = this.plugin.getServer().getWorld(worldstring); 
-		if(tpto != null) {
+		World tpto = this.plugin.getServer().getWorld(worldstring);
+		if (tpto != null) {
 			// Set the output location to the same XYZ coords but different world
 			// TODO: Add scaling
 			fromLocation.setWorld(tpto);
