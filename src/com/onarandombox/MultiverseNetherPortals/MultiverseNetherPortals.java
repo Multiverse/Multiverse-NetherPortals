@@ -36,7 +36,8 @@ public class MultiverseNetherPortals extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        
+        // As soon as we know MVCore was found, we can use the debug log!
+        debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
 		this.pluginListener = new MVNPPluginListener(this);
 		this.entityListener = new MVNPEntityListener(this);
 		this.playerListener = new MVNPPlayerListener(this);
@@ -46,6 +47,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
 		this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, playerListener, Priority.Normal, this);
 		
 		log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
+		
 		
 		loadConfig();
 	}
@@ -73,7 +75,6 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		getDataFolder().mkdirs();
-		debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
 	}
 	
 	/**
