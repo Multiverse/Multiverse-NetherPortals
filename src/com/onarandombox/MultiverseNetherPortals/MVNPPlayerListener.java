@@ -2,7 +2,6 @@ package com.onarandombox.MultiverseNetherPortals;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.World.Environment;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
@@ -18,15 +17,8 @@ public class MVNPPlayerListener extends PlayerListener {
 	public void onPlayerPortal(PlayerPortalEvent event) {
 		Location currentLocation = event.getFrom();
 		String currentWorld = currentLocation.getWorld().getName();
-		if (currentLocation.getWorld().getEnvironment() == Environment.NETHER) {
-			if (isValidNetherName(currentWorld)) {
-				
-				this.getNewTeleportLocation(event, currentLocation, getNormalName(currentWorld));
-				
-			} else {
-				System.out.print("You're in a nether world, but it's not named {WORLDNAME}_nether. I'm just going to leave you here...");
-				event.setCancelled(true);
-			}
+		if (isValidNetherName(currentWorld)) {
+			this.getNewTeleportLocation(event, currentLocation, getNormalName(currentWorld));
 		} else {
 			this.getNewTeleportLocation(event, currentLocation, getNetherName(currentWorld));
 		}
@@ -50,6 +42,7 @@ public class MVNPPlayerListener extends PlayerListener {
 	
 	/**
 	 * Takes a given normal name and adds the nether prefix and suffix onto it!
+	 * 
 	 * @param normalName
 	 * @return
 	 */
@@ -60,6 +53,7 @@ public class MVNPPlayerListener extends PlayerListener {
 	
 	/**
 	 * Takes a given normal name chops the suffix and prefix off!
+	 * 
 	 * @param normalName
 	 * @return
 	 */
@@ -99,9 +93,9 @@ public class MVNPPlayerListener extends PlayerListener {
 			event.setTo(fromLocation);
 		}
 	}
-
+	
 	private Location getScaledLocation(Location fromLocation, double fromScaling, double toScaling) {
-		double scaling = toScaling/fromScaling;
+		double scaling = toScaling / fromScaling;
 		fromLocation.setX(fromLocation.getX() * scaling);
 		fromLocation.setY(fromLocation.getY() * scaling);
 		return fromLocation;
