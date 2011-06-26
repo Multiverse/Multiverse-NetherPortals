@@ -6,8 +6,6 @@ import org.bukkit.World.Environment;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
-import com.onarandombox.MultiverseCore.MVWorld;
-
 public class MVNPPlayerListener extends PlayerListener {
 	
 	private MultiverseNetherPortals plugin;
@@ -42,7 +40,7 @@ public class MVNPPlayerListener extends PlayerListener {
 	 */
 	private boolean isValidNetherName(String world) {
 		try {
-			if (world.matches("^" + plugin.netherPrefix + ".+" + plugin.netherSuffix + "$")) {
+			if (world.matches("^" + this.plugin.netherPrefix + ".+" + this.plugin.netherSuffix + "$")) {
 				return true;
 			}
 		} catch (IndexOutOfBoundsException e) {
@@ -69,13 +67,13 @@ public class MVNPPlayerListener extends PlayerListener {
 		// Start by copying the nether name, we're going to transform it into a normal name!
 		String normalName = netherName;
 		// Chop off the prefix
-		if (plugin.netherPrefix.length() > 0) {
-			String[] split = normalName.split(plugin.netherPrefix);
+		if (this.plugin.netherPrefix.length() > 0) {
+			String[] split = normalName.split(this.plugin.netherPrefix);
 			normalName = split[1];
 		}
 		// Chop off the suffix
-		if (plugin.netherSuffix.length() > 0) {
-			String[] split = normalName.split(plugin.netherSuffix);
+		if (this.plugin.netherSuffix.length() > 0) {
+			String[] split = normalName.split(this.plugin.netherSuffix);
 			normalName = split[0];
 		}
 		// All we're left with is the normal world. Don't worry if it exists, the method below will handle that!
@@ -84,11 +82,11 @@ public class MVNPPlayerListener extends PlayerListener {
 	
 	private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
 		World tpto = this.plugin.getServer().getWorld(worldstring);
-		if (tpto != null && plugin.core.ph.canEnterWorld(event.getPlayer(), tpto)) {
+		if (tpto != null && this.plugin.core.ph.canEnterWorld(event.getPlayer(), tpto)) {
 			// Set the output location to the same XYZ coords but different world
 			// TODO: Add scaling
-			double toScaling = plugin.core.worlds.get(tpto.getName()).scaling;
-			double fromScaling = plugin.core.worlds.get(event.getFrom().getWorld().getName()).scaling;
+			double toScaling = this.plugin.core.getMVWorld(tpto.getName()).getScaling();
+			double fromScaling = this.plugin.core.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
 			
 			fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
 			fromLocation.setWorld(tpto);

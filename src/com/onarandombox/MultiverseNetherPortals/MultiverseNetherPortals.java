@@ -19,7 +19,6 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	protected static DebugLog debugLog;
 	protected MultiverseCore core;
 	protected MVNPPluginListener pluginListener;
-	protected MVNPEntityListener entityListener;
 	protected MVNPPlayerListener playerListener;
 	protected Configuration MVNPconfig;
 	private static final String DEFAULT_NETHER_SUFFIX = "_nether";
@@ -28,10 +27,10 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		core = (MultiverseCore) getServer().getPluginManager().getPlugin("Multiverse-Core");
+		this.core = (MultiverseCore) getServer().getPluginManager().getPlugin("Multiverse-Core");
 
 	    // Test if the Core was found, if not we'll disable this plugin.
-        if (core == null) {
+        if (this.core == null) {
             log.info(logPrefix + "Multiverse-Core not found, will keep looking.");
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -39,12 +38,10 @@ public class MultiverseNetherPortals extends JavaPlugin {
         // As soon as we know MVCore was found, we can use the debug log!
         debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
 		this.pluginListener = new MVNPPluginListener(this);
-		this.entityListener = new MVNPEntityListener(this);
 		this.playerListener = new MVNPPlayerListener(this);
 		// Register the PLUGIN_ENABLE Event as we will need to keep an eye out for the Core Enabling if we don't find it initially.
-		this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, pluginListener, Priority.Normal, this);
-		this.getServer().getPluginManager().registerEvent(Type.ENTITY_PORTAL_ENTER, entityListener, Priority.Normal, this);
-		this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, playerListener, Priority.Normal, this);
+		this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, this.pluginListener, Priority.Normal, this);
+		this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, this.playerListener, Priority.Normal, this);
 		
 		log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 		
@@ -56,12 +53,12 @@ public class MultiverseNetherPortals extends JavaPlugin {
 		this.MVNPconfig = new Configuration(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
 		this.MVNPconfig.load();
 		
-		this.netherPrefix = this.MVNPconfig.getString("netherportals.name.prefix", netherPrefix);
-		this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", netherSuffix);
+		this.netherPrefix = this.MVNPconfig.getString("netherportals.name.prefix", this.netherPrefix);
+		this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", this.netherSuffix);
 		
 		if(this.netherPrefix.length() == 0 && this.netherSuffix.length() == 0) {
 			log.warning(logPrefix + "I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
-			this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", netherSuffix);
+			this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", this.netherSuffix);
 		}
 		
 		this.MVNPconfig.save();

@@ -15,7 +15,7 @@ public class MVNPPluginListener extends ServerListener {
 	
 	public void onPluginEnable(PluginEnableEvent event) {
 		if (event.getPlugin().getDescription().getName().equals("Multiverse-Core")) {
-			this.plugin.core = ((MultiverseCore) plugin.getServer().getPluginManager().getPlugin("Multiverse-Core"));
+			this.plugin.core = ((MultiverseCore) this.plugin.getServer().getPluginManager().getPlugin("Multiverse-Core"));
 			this.plugin.getServer().getPluginManager().enablePlugin(this.plugin);
 		}
 	}
