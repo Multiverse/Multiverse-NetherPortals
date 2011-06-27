@@ -97,7 +97,7 @@ public class MVNPPlayerListener extends PlayerListener {
 	private Location getScaledLocation(Location fromLocation, double fromScaling, double toScaling) {
 		double scaling = toScaling / fromScaling;
 		fromLocation.setX(fromLocation.getX() * scaling);
-		fromLocation.setY(fromLocation.getY() * scaling);
+		fromLocation.setZ(fromLocation.getZ() * scaling);
 		return fromLocation;
 	}
 }
