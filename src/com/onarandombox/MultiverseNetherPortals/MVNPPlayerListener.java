@@ -28,11 +28,9 @@ public class MVNPPlayerListener extends PlayerListener {
 		}
 	}
 	
-
-	
 	private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
 		World tpto = this.plugin.getServer().getWorld(worldstring);
-		if (tpto != null && this.plugin.core.ph.canEnterWorld(event.getPlayer(), tpto)) {
+		if (tpto != null && this.plugin.core.ph.canEnterWorld(event.getPlayer(), tpto) && this.plugin.core.isMVWorld(fromLocation.getWorld().getName())) {
 			// Set the output location to the same XYZ coords but different world
 			// TODO: Add scaling
 			double toScaling = this.plugin.core.getMVWorld(tpto.getName()).getScaling();

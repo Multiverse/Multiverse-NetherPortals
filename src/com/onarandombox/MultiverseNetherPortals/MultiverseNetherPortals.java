@@ -99,7 +99,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	}
 
 	public String getNetherPrefix() {
-		return netherPrefix;
+		return this.netherPrefix;
 	}
 
 	public void setNetherSuffix(String netherSuffix) {
@@ -107,6 +107,6 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	}
 
 	public String getNetherSuffix() {
-		return netherSuffix;
+		return this.netherSuffix;
 	}
 }
