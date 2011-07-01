@@ -20,10 +20,11 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	protected MultiverseCore core;
 	protected MVNPPluginListener pluginListener;
 	protected MVNPPlayerListener playerListener;
+	protected MVRespawnListener respawnListener;
 	protected Configuration MVNPconfig;
 	private static final String DEFAULT_NETHER_SUFFIX = "_nether";
-	protected String netherPrefix = "";
-	protected String netherSuffix = DEFAULT_NETHER_SUFFIX;
+	private String netherPrefix = "";
+	private String netherSuffix = DEFAULT_NETHER_SUFFIX;
 	
 	@Override
 	public void onEnable() {
@@ -39,9 +40,11 @@ public class MultiverseNetherPortals extends JavaPlugin {
         debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
 		this.pluginListener = new MVNPPluginListener(this);
 		this.playerListener = new MVNPPlayerListener(this);
+		this.respawnListener = new MVRespawnListener(this);
 		// Register the PLUGIN_ENABLE Event as we will need to keep an eye out for the Core Enabling if we don't find it initially.
 		this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, this.pluginListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, this.playerListener, Priority.Normal, this);
+		this.getServer().getPluginManager().registerEvent(Type.CUSTOM_EVENT, this.respawnListener, Priority.Normal, this);
 		
 		log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 		
@@ -53,12 +56,12 @@ public class MultiverseNetherPortals extends JavaPlugin {
 		this.MVNPconfig = new Configuration(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
 		this.MVNPconfig.load();
 		
-		this.netherPrefix = this.MVNPconfig.getString("netherportals.name.prefix", this.netherPrefix);
-		this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", this.netherSuffix);
+		this.setNetherPrefix(this.MVNPconfig.getString("netherportals.name.prefix", this.getNetherPrefix()));
+		this.setNetherSuffix(this.MVNPconfig.getString("netherportals.name.suffix", this.getNetherSuffix()));
 		
-		if(this.netherPrefix.length() == 0 && this.netherSuffix.length() == 0) {
+		if(this.getNetherPrefix().length() == 0 && this.getNetherSuffix().length() == 0) {
 			log.warning(logPrefix + "I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
-			this.netherSuffix = this.MVNPconfig.getString("netherportals.name.suffix", this.netherSuffix);
+			this.setNetherSuffix(this.MVNPconfig.getString("netherportals.name.suffix", this.getNetherSuffix()));
 		}
 		
 		this.MVNPconfig.save();
@@ -89,5 +92,21 @@ public class MultiverseNetherPortals extends JavaPlugin {
 			}
 		}
 		return authors.substring(2);
+	}
+
+	public void setNetherPrefix(String netherPrefix) {
+		this.netherPrefix = netherPrefix;
+	}
+
+	public String getNetherPrefix() {
+		return netherPrefix;
+	}
+
+	public void setNetherSuffix(String netherSuffix) {
+		this.netherSuffix = netherSuffix;
+	}
+
+	public String getNetherSuffix() {
+		return netherSuffix;
 	}
 }
