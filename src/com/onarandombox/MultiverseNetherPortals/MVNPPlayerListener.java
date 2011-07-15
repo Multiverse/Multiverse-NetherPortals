@@ -1,10 +1,10 @@
 package com.onarandombox.MultiverseNetherPortals;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
+import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 
 public class MVNPPlayerListener extends PlayerListener {
@@ -29,7 +29,7 @@ public class MVNPPlayerListener extends PlayerListener {
 	}
 	
 	private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
-		World tpto = this.plugin.getServer().getWorld(worldstring);
+	    MVWorld tpto = this.plugin.core.getMVWorld(worldstring);
 		if (tpto != null && this.plugin.core.ph.canEnterWorld(event.getPlayer(), tpto) && this.plugin.core.isMVWorld(fromLocation.getWorld().getName())) {
 			// Set the output location to the same XYZ coords but different world
 			// TODO: Add scaling
@@ -37,7 +37,7 @@ public class MVNPPlayerListener extends PlayerListener {
 			double fromScaling = this.plugin.core.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
 			
 			fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
-			fromLocation.setWorld(tpto);
+			fromLocation.setWorld(tpto.getCBWorld());
 			event.setTo(fromLocation);
 			System.out.print("I will try to take you to: " + worldstring);
 		} else {

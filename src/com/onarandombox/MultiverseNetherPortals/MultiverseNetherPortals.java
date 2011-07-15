@@ -1,6 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals;
 
 import java.io.File;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.bukkit.event.Event.Priority;
@@ -25,6 +26,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	private static final String DEFAULT_NETHER_SUFFIX = "_nether";
 	private String netherPrefix = "";
 	private String netherSuffix = DEFAULT_NETHER_SUFFIX;
+    private Map<String, String> linkMap;
 	
 	@Override
 	public void onEnable() {
@@ -109,4 +111,16 @@ public class MultiverseNetherPortals extends JavaPlugin {
 	public String getNetherSuffix() {
 		return this.netherSuffix;
 	}
+	
+	public void setWorldLinks(Map<String, String> map) {
+	    this.linkMap = map;
+	}
+	
+	public void addWorldLink(String from, String to) {
+        this.linkMap.put(from, to);
+    }
+	
+	public void removeWorldLink(String from, String to) {
+        this.linkMap.put(from, to);
+    }
 }
