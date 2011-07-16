@@ -27,7 +27,8 @@ public class ShowLinkCommand extends Command {
         this.maximumArgLength = 1;
         this.commandKeys.add("mvnp show");
         this.commandKeys.add("mvnps");
-        this.permission = "multiverse.netherportals.showlinks";
+        this.commandKeys.add("mvnpshow");
+        this.permission = "multiverse.netherportals.show";
         this.opRequired = true;
     }
 

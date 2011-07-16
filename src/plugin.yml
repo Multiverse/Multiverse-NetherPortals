@@ -15,3 +15,12 @@ commands:
   mvnps:
     description: Generic Multiverse-NetherPortals Command
     usage: /<command>
+  mvnplink:
+    description: Generic Multiverse-NetherPortals Command
+    usage: /<command>
+  mvnpunlink:
+    description: Generic Multiverse-NetherPortals Command
+    usage: /<command>
+  mvnpshow:
+    description: Generic Multiverse-NetherPortals Command
+    usage: /<command>
