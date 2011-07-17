@@ -5,26 +5,22 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.permissions.PermissionDefault;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.pneumaticraft.commandhandler.Command;
 
-public class UnlinkCommand extends Command {
+public class UnlinkCommand extends NetherPortalCommand {
 
-    public UnlinkCommand(JavaPlugin plugin) {
+    public UnlinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
-        this.commandName = "Remove NP Destination";
-        this.commandDesc = "This will remove a world link that's been set. You do not need to do this before setting a new one.";
-        this.commandUsage = "/mvnp unlink " + ChatColor.GOLD + "[FROM_WORLD]";
-        this.minimumArgLength = 0;
-        this.maximumArgLength = 1;
-        this.commandKeys.add("mvnpunlink");
-        this.commandKeys.add("mvnpu");
-        this.commandKeys.add("mvnp unlink");
-        this.permission = "multiverse.netherportals.unlink";
-        this.opRequired = true;
+        this.setName("Remove NP Destination");
+        this.setCommandUsage("/mvnp unlink " + ChatColor.GOLD + "[FROM_WORLD]");
+        this.setArgRange(0, 1);
+        this.addKey("mvnp unlink");
+        this.addKey("mvnpu");
+        this.addKey("mvnpunlink");
+        this.setPermission("multiverse.netherportals.unlink", "This will remove a world link that's been set. You do not need to do this before setting a new one.", PermissionDefault.OP);
     }
 
     @Override
@@ -46,18 +42,18 @@ public class UnlinkCommand extends Command {
             fromWorldString = args.get(0);
         }
 
-        fromWorld = ((MultiverseNetherPortals) this.plugin).getCore().getMVWorld(fromWorldString);
+        fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
         if (fromWorld == null) {
             sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " Doesn't look like Multiverse knows about '" + fromWorldString + "'");
             return;
         }
 
-        toWorldString = ((MultiverseNetherPortals) this.plugin).getWorldLink(fromWorld.getName());
+        toWorldString = this.plugin.getWorldLink(fromWorld.getName());
         if (toWorldString == null) {
             sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world " + fromWorld.getColoredWorldString() + ChatColor.WHITE + " was never linked.");
             return;
         }
-        toWorld = ((MultiverseNetherPortals) this.plugin).getCore().getMVWorld(toWorldString);
+        toWorld = this.plugin.getCore().getMVWorld(toWorldString);
 
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();

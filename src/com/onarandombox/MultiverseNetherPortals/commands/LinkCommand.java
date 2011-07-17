@@ -5,26 +5,22 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.permissions.PermissionDefault;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.pneumaticraft.commandhandler.Command;
 
-public class LinkCommand extends Command {
+public class LinkCommand extends NetherPortalCommand {
 
-    public LinkCommand(JavaPlugin plugin) {
+    public LinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
-        this.commandName = "Sets NP Destination";
-        this.commandDesc = "Sets which world to link to when a player enters a NetherPortal in this world.";
-        this.commandUsage = "/mvnp link " + ChatColor.GOLD + "[FROM_WORLD] " + ChatColor.GREEN + " {TO_WORLD}";
-        this.minimumArgLength = 1;
-        this.maximumArgLength = 2;
-        this.commandKeys.add("mvnp link");
-        this.commandKeys.add("mvnpl");
-        this.commandKeys.add("mvnplink");
-        this.permission = "multiverse.netherportals.link";
-        this.opRequired = true;
+        this.setName("Sets NP Destination");
+        this.setCommandUsage("/mvnp link " + ChatColor.GOLD + "[FROM_WORLD] " + ChatColor.GREEN + " {TO_WORLD}");
+        this.setArgRange(1, 2);
+        this.addKey("mvnp link");
+        this.addKey("mvnpl");
+        this.addKey("mvnplink");
+        this.setPermission("multiverse.netherportals.link", "Sets which world to link to when a player enters a NetherPortal in this world.", PermissionDefault.OP);
     }
 
     @Override
@@ -48,15 +44,15 @@ public class LinkCommand extends Command {
             toWorldString = args.get(1);
         }
 
-        fromWorld = ((MultiverseNetherPortals) this.plugin).getCore().getMVWorld(fromWorldString);
-        toWorld = ((MultiverseNetherPortals) this.plugin).getCore().getMVWorld(toWorldString);
+        fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
+        toWorld = this.plugin.getCore().getMVWorld(toWorldString);
         
         if(fromWorld == null) {
-            sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " Multiverse doesn't know about: " + ChatColor.DARK_AQUA + fromWorldString);
+            this.plugin.getCore().showNotMVWorldMessage(sender, fromWorldString);
             return;
         }
         if(toWorld == null) {
-            sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " Multiverse doesn't know about: " + ChatColor.DARK_AQUA + toWorldString);
+            this.plugin.getCore().showNotMVWorldMessage(sender, toWorldString);
             return;
         }
 

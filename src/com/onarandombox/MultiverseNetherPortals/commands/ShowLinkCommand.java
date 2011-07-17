@@ -8,33 +8,29 @@ import java.util.Map.Entry;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.permissions.PermissionDefault;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.pneumaticraft.commandhandler.Command;
 
-public class ShowLinkCommand extends Command {
+public class ShowLinkCommand extends NetherPortalCommand {
 
     private static final int CMDS_PER_PAGE = 10;
 
-    public ShowLinkCommand(JavaPlugin plugin) {
+    public ShowLinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
-        this.commandName = "Displays all World Links";
-        this.commandDesc = "Displays a nicly formatted list of links.";
-        this.commandUsage = "/mvnp show " + ChatColor.GOLD + "[PAGE #]";
-        this.minimumArgLength = 0;
-        this.maximumArgLength = 1;
-        this.commandKeys.add("mvnp show");
-        this.commandKeys.add("mvnps");
-        this.commandKeys.add("mvnpshow");
-        this.permission = "multiverse.netherportals.show";
-        this.opRequired = true;
+        this.setName("Displays all World Links");
+        this.setCommandUsage("/mvnp show " + ChatColor.GOLD + "[PAGE #]");
+        this.setArgRange(0, 1);
+        this.addKey("mvnp show");
+        this.addKey("mvnps");
+        this.addKey("mvnpshow");
+        this.setPermission("multiverse.netherportals.show", "Displays a nicly formatted list of links.", PermissionDefault.OP);
     }
 
     @Override
     public void runCommand(CommandSender sender, List<String> args) {
-        Map<String,String> links = ((MultiverseNetherPortals) this.plugin).getWorldLinks();
+        Map<String,String> links = this.plugin.getWorldLinks();
         
         if (!(sender instanceof Player)) {
             for (Map.Entry<String,String> link : links.entrySet()) {
@@ -64,8 +60,8 @@ public class ShowLinkCommand extends Command {
     private void showWorldLink(CommandSender sender, String fromWorldString, String toWorldString) {
         MVWorld fromWorld = null;
         MVWorld toWorld = null;
-        fromWorld = ((MultiverseNetherPortals) this.plugin).getCore().getMVWorld(fromWorldString);
-        toWorld = ((MultiverseNetherPortals) this.plugin).getCore().getMVWorld(toWorldString);
+        fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
+        toWorld = this.plugin.getCore().getMVWorld(toWorldString);
         if(fromWorld == null) {
             fromWorldString = ChatColor.RED + "!!ERROR!!";
         } else {
