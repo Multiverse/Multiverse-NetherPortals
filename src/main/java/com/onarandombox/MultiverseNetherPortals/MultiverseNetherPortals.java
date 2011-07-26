@@ -29,6 +29,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
     protected MultiverseCore core;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
+    protected MVNPConfigReloadListener customListener;
     protected Configuration MVNPconfig;
     private static final String DEFAULT_NETHER_SUFFIX = "_nether";
     private String netherPrefix = "";
@@ -51,9 +52,11 @@ public class MultiverseNetherPortals extends JavaPlugin {
         debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
         this.pluginListener = new MVNPPluginListener(this);
         this.playerListener = new MVNPPlayerListener(this);
+        this.customListener = new MVNPConfigReloadListener(this);
         // Register the PLUGIN_ENABLE Event as we will need to keep an eye out for the Core Enabling if we don't find it initially.
         this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, this.pluginListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, this.playerListener, Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Type.CUSTOM_EVENT, this.customListener, Priority.Normal, this);
 
         log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 
@@ -64,7 +67,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
 
     }
 
-    private void loadConfig() {
+    public void loadConfig() {
         this.MVNPconfig = new Configuration(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
         this.MVNPconfig.load();
         this.linkMap = new HashMap<String, String>();
