@@ -1,5 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals;
 
+import java.util.logging.Level;
+
 import org.bukkit.Location;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
@@ -43,9 +45,9 @@ public class MVNPPlayerListener extends PlayerListener {
             fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
             fromLocation.setWorld(tpto.getCBWorld());
             event.setTo(fromLocation);
-            System.out.print("I will try to take you to: " + worldstring);
         } else {
-            System.out.print("Looks like " + worldstring + " does not exist. Whoops on your part!");
+            this.plugin.log(Level.WARNING, "Looks like " + worldstring + " does not exist. Whoops on your part!");
+            this.plugin.log(Level.WARNING, "You should check your Multiverse-NetherPortals configs!!");
             // Set the event to redirect back to the same portal
             // otherwise they sit in the jelly stuff forever!
             event.setTo(fromLocation);

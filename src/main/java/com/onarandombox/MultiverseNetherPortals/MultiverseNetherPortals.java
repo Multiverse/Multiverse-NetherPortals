@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.command.Command;
@@ -16,14 +17,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
 import com.onarandombox.MultiverseCore.MultiverseCore;
-import com.onarandombox.MultiverseNetherPortals.commands.*;
+import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
 import com.onarandombox.utils.DebugLog;
 import com.pneumaticraft.commandhandler.CommandHandler;
 
 public class MultiverseNetherPortals extends JavaPlugin {
 
-    public static final Logger log = Logger.getLogger("Minecraft");
-    public static final String logPrefix = "[MultiVerse-NetherPortals] ";
+    private static final Logger log = Logger.getLogger("Minecraft");
+    private static final String logPrefix = "[MultiVerse-NetherPortals] ";
     private static final String NETEHR_PORTALS_CONFIG = "config.yml";
     protected static DebugLog debugLog;
     protected MultiverseCore core;
@@ -179,5 +182,15 @@ public class MultiverseNetherPortals extends JavaPlugin {
 
     public MultiverseCore getCore() {
         return this.core;
+    }
+    /**
+     * Print messages to the server Log as well as to our DebugLog. 'debugLog' is used to seperate Heroes information from the Servers Log Output.
+     * 
+     * @param level
+     * @param msg
+     */
+    public void log(Level level, String msg) {
+        log.log(level, logPrefix + " " + msg);
+        debugLog.log(level, logPrefix + " " + msg);
     }
 }
