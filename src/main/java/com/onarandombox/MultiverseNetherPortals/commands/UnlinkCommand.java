@@ -58,6 +58,7 @@ public class UnlinkCommand extends NetherPortalCommand {
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
         sender.sendMessage("The Nether Portals in " + coloredFrom + ChatColor.WHITE + " are now " + ChatColor.RED + "unlinked" + ChatColor.WHITE + " from " + coloredTo + ChatColor.WHITE + ".");
+        this.plugin.removeWorldLink(fromWorld.getName(), toWorld.getName());
     }
 
 }

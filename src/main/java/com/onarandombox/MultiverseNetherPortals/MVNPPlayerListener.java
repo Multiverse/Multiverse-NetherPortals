@@ -24,7 +24,7 @@ public class MVNPPlayerListener extends PlayerListener {
         Location currentLocation = event.getFrom();
         String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(currentWorld);
-        
+
         if (linkedWorld != null) {
             this.getNewTeleportLocation(event, currentLocation, linkedWorld);
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {

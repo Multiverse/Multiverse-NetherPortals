@@ -16,14 +16,16 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
+import com.onarandombox.MultiverseCore.LoggablePlugin;
 import com.onarandombox.MultiverseCore.MultiverseCore;
+import com.onarandombox.MultiverseCore.commands.HelpCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
 import com.onarandombox.utils.DebugLog;
 import com.pneumaticraft.commandhandler.CommandHandler;
 
-public class MultiverseNetherPortals extends JavaPlugin {
+public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugin {
 
     private static final Logger log = Logger.getLogger("Minecraft");
     private static final String logPrefix = "[MultiVerse-NetherPortals] ";
@@ -65,8 +67,6 @@ public class MultiverseNetherPortals extends JavaPlugin {
 
         loadConfig();
         this.registerCommands();
-        
-        
 
     }
 
@@ -101,6 +101,13 @@ public class MultiverseNetherPortals extends JavaPlugin {
         this.commandHandler.registerCommand(new LinkCommand(this));
         this.commandHandler.registerCommand(new UnlinkCommand(this));
         this.commandHandler.registerCommand(new ShowLinkCommand(this));
+        for(com.pneumaticraft.commandhandler.Command c : this.commandHandler.getCommands()) {
+            if(c instanceof HelpCommand) {
+                c.addKey("mvnp");
+                this.commandHandler.registerCommand(c);
+            }
+        }
+
     }
 
     @Override
@@ -158,19 +165,19 @@ public class MultiverseNetherPortals extends JavaPlugin {
     }
 
     public String getWorldLink(String fromWorld) {
-        if(this.linkMap.containsKey(fromWorld)) {
+        if (this.linkMap.containsKey(fromWorld)) {
             return this.linkMap.get(fromWorld);
         }
         return null;
     }
-    
-    public Map<String,String> getWorldLinks() {
+
+    public Map<String, String> getWorldLinks() {
         return this.linkMap;
     }
 
     public void addWorldLink(String from, String to) {
         this.linkMap.put(from, to);
-        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto",to);
+        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto", to);
         this.MVNPconfig.save();
     }
 
@@ -183,6 +190,7 @@ public class MultiverseNetherPortals extends JavaPlugin {
     public MultiverseCore getCore() {
         return this.core;
     }
+
     /**
      * Print messages to the server Log as well as to our DebugLog. 'debugLog' is used to seperate Heroes information from the Servers Log Output.
      * 

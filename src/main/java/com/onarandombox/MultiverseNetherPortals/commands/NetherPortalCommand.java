@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.pneumaticraft.commandhandler.Command;
 
-public class NetherPortalCommand extends Command {
+public abstract class NetherPortalCommand extends Command {
 
     protected MultiverseNetherPortals plugin;
     public NetherPortalCommand(MultiverseNetherPortals plugin) {
@@ -17,9 +17,6 @@ public class NetherPortalCommand extends Command {
     }
 
     @Override
-    public void runCommand(CommandSender arg0, List<String> arg1) {
-        // TODO Auto-generated method stub
-        
-    }
+    public abstract void runCommand(CommandSender arg0, List<String> arg1);
 
 }

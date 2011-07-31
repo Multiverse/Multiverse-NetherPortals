@@ -10,6 +10,12 @@ commands:
   mvnpl:
     description: Generic Multiverse-NetherPortals Command
     usage: /<command>
+  mvnpli:
+    description: Generic Multiverse-NetherPortals Command
+    usage: /<command>
+  mvnplist:
+    description: Generic Multiverse-NetherPortals Command
+    usage: /<command>
   mvnpu:
     description: Generic Multiverse-NetherPortals Command
     usage: /<command>
