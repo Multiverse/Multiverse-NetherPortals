@@ -1,6 +1,12 @@
 package com.onarandombox.MultiverseNetherPortals;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,9 +58,12 @@ public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugi
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
+        this.checkForNetherEnabled();
+
         this.core.incrementPluginCount();
         // As soon as we know MVCore was found, we can use the debug log!
-        debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
+
         this.pluginListener = new MVNPPluginListener(this);
         this.playerListener = new MVNPPlayerListener(this);
         this.customListener = new MVNPConfigReloadListener(this);
@@ -68,6 +77,27 @@ public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugi
         loadConfig();
         this.registerCommands();
 
+    }
+
+    private void checkForNetherEnabled() {
+        File serverFolder = new File(this.getDataFolder().getAbsolutePath()).getParentFile().getParentFile();
+        File serverProperties = new File(serverFolder.getAbsolutePath() + File.separator + "server.properties");
+        try {
+            FileInputStream fileStream = new FileInputStream(serverProperties);
+            DataInputStream in = new DataInputStream(fileStream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String propLine;
+            while ((propLine = br.readLine()) != null) {
+                // Print the content on the console
+                if (propLine.matches("allow-nether.*") && !propLine.matches("allow-nether\\s*=\\s*true")) {
+                    this.log(Level.SEVERE, "Nether is DISABLED, NetherPortals WILL NOT WORK.");
+                    this.log(Level.SEVERE, "Please set 'allow-nether=true' in your server.properties file!");
+                }
+            }
+        } catch (IOException e) {
+            // This should never happen...
+            this.log(Level.SEVERE, e.getMessage());
+        }
     }
 
     public void loadConfig() {
@@ -101,8 +131,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugi
         this.commandHandler.registerCommand(new LinkCommand(this));
         this.commandHandler.registerCommand(new UnlinkCommand(this));
         this.commandHandler.registerCommand(new ShowLinkCommand(this));
-        for(com.pneumaticraft.commandhandler.Command c : this.commandHandler.getCommands()) {
-            if(c instanceof HelpCommand) {
+        for (com.pneumaticraft.commandhandler.Command c : this.commandHandler.getCommands()) {
+            if (c instanceof HelpCommand) {
                 c.addKey("mvnp");
                 this.commandHandler.registerCommand(c);
             }
