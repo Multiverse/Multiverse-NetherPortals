@@ -1,4 +1,4 @@
-package com.onarandombox.MultiverseNetherPortals;
+package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import java.util.logging.Level;
 
@@ -7,6 +7,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
 import com.onarandombox.MultiverseCore.MVWorld;
+import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 
 public class MVNPPlayerListener extends PlayerListener {
@@ -35,12 +36,12 @@ public class MVNPPlayerListener extends PlayerListener {
     }
 
     private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
-        MVWorld tpto = this.plugin.core.getMVWorld(worldstring);
-        if (tpto != null && this.plugin.core.ph.canEnterWorld(event.getPlayer(), tpto) && this.plugin.core.isMVWorld(fromLocation.getWorld().getName())) {
+        MVWorld tpto = this.plugin.getCore().getMVWorld(worldstring);
+        if (tpto != null && this.plugin.getCore().getPermissions().canEnterWorld(event.getPlayer(), tpto) && this.plugin.getCore().isMVWorld(fromLocation.getWorld().getName())) {
             // Set the output location to the same XYZ coords but different world
             // TODO: Add scaling
-            double toScaling = this.plugin.core.getMVWorld(tpto.getName()).getScaling();
-            double fromScaling = this.plugin.core.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
+            double toScaling = this.plugin.getCore().getMVWorld(tpto.getName()).getScaling();
+            double fromScaling = this.plugin.getCore().getMVWorld(event.getFrom().getWorld().getName()).getScaling();
 
             fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
             fromLocation.setWorld(tpto.getCBWorld());

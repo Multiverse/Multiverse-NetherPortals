@@ -86,7 +86,7 @@ public class ShowLinkCommand extends NetherPortalCommand {
             sender.sendMessage("You haven't setup " + ChatColor.AQUA + "ANY" + ChatColor.WHITE + " world " + ChatColor.DARK_AQUA + "Links" + ChatColor.WHITE + ".");
             return;
         }
-        sender.sendMessage(ChatColor.AQUA + "--- NetherPortal Links " + ChatColor.GOLD + "[Page " + page + " of " + totalpages + " ]" + ChatColor.AQUA + "---");
+        sender.sendMessage(ChatColor.AQUA + "--- NetherPortal Links " + ChatColor.LIGHT_PURPLE + "[Page " + page + " of " + totalpages + " ]" + ChatColor.AQUA + "---");
         Iterator<Entry<String, String>> entries = links.entrySet().iterator();
         for (int i = 0; i < end; i++) {
             if (entries.hasNext() && i >= start) {

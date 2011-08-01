@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -22,21 +21,25 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-import com.onarandombox.MultiverseCore.LoggablePlugin;
+import com.onarandombox.MultiverseCore.MVPlugin;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.commands.HelpCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPConfigReloadListener;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
 import com.onarandombox.utils.DebugLog;
 import com.pneumaticraft.commandhandler.CommandHandler;
 
-public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugin {
+public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     private static final Logger log = Logger.getLogger("Minecraft");
     private static final String logPrefix = "[MultiVerse-NetherPortals] ";
     private static final String NETEHR_PORTALS_CONFIG = "config.yml";
     protected static DebugLog debugLog;
+    private static boolean netherDisabled;
     protected MultiverseCore core;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
@@ -92,6 +95,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugi
                 if (propLine.matches("allow-nether.*") && !propLine.matches("allow-nether\\s*=\\s*true")) {
                     this.log(Level.SEVERE, "Nether is DISABLED, NetherPortals WILL NOT WORK.");
                     this.log(Level.SEVERE, "Please set 'allow-nether=true' in your server.properties file!");
+                    MultiverseNetherPortals.netherDisabled = true;
                 }
             }
         } catch (IOException e) {
@@ -229,5 +233,20 @@ public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugi
     public void log(Level level, String msg) {
         log.log(level, logPrefix + " " + msg);
         debugLog.log(level, logPrefix + " " + msg);
+    }
+
+    public void setCore(MultiverseCore core) {
+        this.core = core;
+    }
+
+    @Override
+    public void dumpVersionInfo() {
+        this.log(Level.INFO, "Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
+        this.log(Level.INFO, "Bukkit Version: " + this.getServer().getVersion());
+        this.log(Level.INFO, "server.properties 'allow-nether': " + MultiverseNetherPortals.netherDisabled);
+        this.log(Level.INFO, "World links: " + this.getWorldLinks());
+        this.log(Level.INFO, "Nether Prefix: " + netherPrefix);
+        this.log(Level.INFO, "Nether Suffix: " + netherSuffix);
+        this.log(Level.INFO, "Special Code: FRN001");
     }
 }
