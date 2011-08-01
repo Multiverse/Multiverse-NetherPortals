@@ -131,10 +131,9 @@ public class MultiverseNetherPortals extends JavaPlugin implements LoggablePlugi
         this.commandHandler.registerCommand(new LinkCommand(this));
         this.commandHandler.registerCommand(new UnlinkCommand(this));
         this.commandHandler.registerCommand(new ShowLinkCommand(this));
-        for (com.pneumaticraft.commandhandler.Command c : this.commandHandler.getCommands()) {
+        for (com.pneumaticraft.commandhandler.Command c : this.commandHandler.getAllCommands()) {
             if (c instanceof HelpCommand) {
                 c.addKey("mvnp");
-                this.commandHandler.registerCommand(c);
             }
         }
 
