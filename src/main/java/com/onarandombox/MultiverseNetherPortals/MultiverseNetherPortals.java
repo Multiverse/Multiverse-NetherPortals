@@ -243,7 +243,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     public void dumpVersionInfo() {
         this.log(Level.INFO, "Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
         this.log(Level.INFO, "Bukkit Version: " + this.getServer().getVersion());
-        this.log(Level.INFO, "server.properties 'allow-nether': " + MultiverseNetherPortals.netherDisabled);
+        this.log(Level.INFO, "server.properties 'allow-nether': " + !MultiverseNetherPortals.netherDisabled);
         this.log(Level.INFO, "World links: " + this.getWorldLinks());
         this.log(Level.INFO, "Nether Prefix: " + netherPrefix);
         this.log(Level.INFO, "Nether Suffix: " + netherSuffix);
