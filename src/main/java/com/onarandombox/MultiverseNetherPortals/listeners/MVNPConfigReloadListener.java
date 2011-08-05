@@ -18,7 +18,7 @@ public class MVNPConfigReloadListener extends CustomEventListener {
             plugin.loadConfig();
             ((MVConfigReloadEvent)event).addConfig("Multiverse-NetherPortals - config.yml");
         } else if(event instanceof MVVersionRequestEvent) {
-            plugin.dumpVersionInfo();
+            ((MVVersionRequestEvent)event).setPasteBinBuffer(this.plugin.dumpVersionInfo(((MVVersionRequestEvent)event).getPasteBinBuffer()));
         }
     }
 }

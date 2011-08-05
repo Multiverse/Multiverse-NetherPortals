@@ -240,13 +240,19 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     @Override
-    public void dumpVersionInfo() {
-        this.log(Level.INFO, "Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
-        this.log(Level.INFO, "Bukkit Version: " + this.getServer().getVersion());
-        this.log(Level.INFO, "server.properties 'allow-nether': " + !MultiverseNetherPortals.netherDisabled);
-        this.log(Level.INFO, "World links: " + this.getWorldLinks());
-        this.log(Level.INFO, "Nether Prefix: " + netherPrefix);
-        this.log(Level.INFO, "Nether Suffix: " + netherSuffix);
-        this.log(Level.INFO, "Special Code: FRN001");
+    public String dumpVersionInfo(String buffer) {
+        buffer += logAndAddToPasteBinBuffer("Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
+        buffer += logAndAddToPasteBinBuffer("Bukkit Version: " + this.getServer().getVersion());
+        buffer += logAndAddToPasteBinBuffer("server.properties 'allow-nether': " + !MultiverseNetherPortals.netherDisabled);
+        buffer += logAndAddToPasteBinBuffer("World links: " + this.getWorldLinks());
+        buffer += logAndAddToPasteBinBuffer("Nether Prefix: " + netherPrefix);
+        buffer += logAndAddToPasteBinBuffer("Nether Suffix: " + netherSuffix);
+        buffer += logAndAddToPasteBinBuffer("Special Code: FRN001");
+        return buffer;
+    }
+    
+    private String logAndAddToPasteBinBuffer(String string) {
+        this.log(Level.INFO, string);
+        return "[Multiverse-NetherPortals] " + string + "\n";
     }
 }

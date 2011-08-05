@@ -39,7 +39,6 @@ public class MVNPPlayerListener extends PlayerListener {
         MVWorld tpto = this.plugin.getCore().getMVWorld(worldstring);
         if (tpto != null && this.plugin.getCore().getPermissions().canEnterWorld(event.getPlayer(), tpto) && this.plugin.getCore().isMVWorld(fromLocation.getWorld().getName())) {
             // Set the output location to the same XYZ coords but different world
-            // TODO: Add scaling
             double toScaling = this.plugin.getCore().getMVWorld(tpto.getName()).getScaling();
             double fromScaling = this.plugin.getCore().getMVWorld(event.getFrom().getWorld().getName()).getScaling();
 
