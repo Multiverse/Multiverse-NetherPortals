@@ -14,10 +14,10 @@ public class MVNPConfigReloadListener extends CustomEventListener {
     }
     @Override
     public void onCustomEvent(Event event) {
-        if(event instanceof MVConfigReloadEvent) {
+        if(event.getEventName().equals("MVConfigReload") && event instanceof MVConfigReloadEvent) {
             plugin.loadConfig();
             ((MVConfigReloadEvent)event).addConfig("Multiverse-NetherPortals - config.yml");
-        } else if(event instanceof MVVersionRequestEvent) {
+        } else if(event.getEventName().equals("MVVersion") && event instanceof MVVersionRequestEvent) {
             ((MVVersionRequestEvent)event).setPasteBinBuffer(this.plugin.dumpVersionInfo(((MVVersionRequestEvent)event).getPasteBinBuffer()));
         }
     }
