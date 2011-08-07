@@ -46,24 +46,24 @@ public class LinkCommand extends NetherPortalCommand {
 
         fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
         toWorld = this.plugin.getCore().getMVWorld(toWorldString);
-        
-        if(fromWorld == null) {
+
+        if (fromWorld == null) {
             this.plugin.getCore().showNotMVWorldMessage(sender, fromWorldString);
             return;
         }
-        if(toWorld == null) {
+        if (toWorld == null) {
             this.plugin.getCore().showNotMVWorldMessage(sender, toWorldString);
             return;
         }
 
-        if (fromWorld.getName().equals(toWorld.getName())) {
-            sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " Looks like you tried to link portals in the same world!");
-            return;
-        }
         ((MultiverseNetherPortals) this.plugin).addWorldLink(fromWorld.getName(), toWorld.getName());
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
-        sender.sendMessage("The Nether Portals in " + coloredFrom + ChatColor.WHITE + " are now linked to " + coloredTo + ChatColor.WHITE + ".");
+        if (fromWorld.getName().equals(toWorld.getName())) {
+            sender.sendMessage(ChatColor.RED + "NOTE: " + ChatColor.WHITE + "You have successfully disabled NetherPortals in " + coloredTo);
+        } else {
+            sender.sendMessage("The Nether Portals in " + coloredFrom + ChatColor.WHITE + " are now linked to " + coloredTo);
+        }
 
     }
 

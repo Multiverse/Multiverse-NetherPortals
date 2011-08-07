@@ -36,6 +36,7 @@ public class ShowLinkCommand extends NetherPortalCommand {
         Map<String, String> links = this.plugin.getWorldLinks();
 
         if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.AQUA + "--- NetherPortal Links ---");
             for (Map.Entry<String, String> link : links.entrySet()) {
                 showWorldLink(sender, link.getKey(), link.getValue());
             }
@@ -56,7 +57,7 @@ public class ShowLinkCommand extends NetherPortalCommand {
         if (page > totalPages) {
             page = totalPages;
         }
-        this.showPage(totalPages, sender, links, totalPages);
+        this.showPage(page, sender, links, totalPages);
 
     }
 
