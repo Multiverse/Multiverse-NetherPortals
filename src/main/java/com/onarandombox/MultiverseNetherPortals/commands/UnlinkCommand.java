@@ -9,8 +9,10 @@ import org.bukkit.permissions.PermissionDefault;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.utils.WorldManager;
 
 public class UnlinkCommand extends NetherPortalCommand {
+    private WorldManager worldManager;
 
     public UnlinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
@@ -21,6 +23,7 @@ public class UnlinkCommand extends NetherPortalCommand {
         this.addKey("mvnpu");
         this.addKey("mvnpunlink");
         this.setPermission("multiverse.netherportals.unlink", "This will remove a world link that's been set. You do not need to do this before setting a new one.", PermissionDefault.OP);
+        this.worldManager = this.plugin.getCore().getWorldManager();
     }
 
     @Override
@@ -42,7 +45,7 @@ public class UnlinkCommand extends NetherPortalCommand {
             fromWorldString = args.get(0);
         }
 
-        fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
+        fromWorld = this.worldManager.getMVWorld(fromWorldString);
         if (fromWorld == null) {
             sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " Doesn't look like Multiverse knows about '" + fromWorldString + "'");
             return;
@@ -53,7 +56,7 @@ public class UnlinkCommand extends NetherPortalCommand {
             sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world " + fromWorld.getColoredWorldString() + ChatColor.WHITE + " was never linked.");
             return;
         }
-        toWorld = this.plugin.getCore().getMVWorld(toWorldString);
+        toWorld = this.worldManager.getMVWorld(toWorldString);
 
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();

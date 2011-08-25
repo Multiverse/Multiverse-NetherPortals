@@ -9,15 +9,18 @@ import org.bukkit.event.player.PlayerPortalEvent;
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
+import com.onarandombox.utils.WorldManager;
 
 public class MVNPPlayerListener extends PlayerListener {
 
     private MultiverseNetherPortals plugin;
     private MVNameChecker nameChecker;
+    private WorldManager worldManager;
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
         this.nameChecker = new MVNameChecker(plugin);
+        this.worldManager = this.plugin.getCore().getWorldManager();
     }
 
     @Override
@@ -36,11 +39,11 @@ public class MVNPPlayerListener extends PlayerListener {
     }
 
     private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
-        MVWorld tpto = this.plugin.getCore().getMVWorld(worldstring);
-        if (tpto != null && this.plugin.getCore().getPermissions().canEnterWorld(event.getPlayer(), tpto) && this.plugin.getCore().isMVWorld(fromLocation.getWorld().getName())) {
+        MVWorld tpto = this.worldManager.getMVWorld(worldstring);
+        if (tpto != null && this.plugin.getCore().getPermissions().canEnterWorld(event.getPlayer(), tpto) && this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
             // Set the output location to the same XYZ coords but different world
-            double toScaling = this.plugin.getCore().getMVWorld(tpto.getName()).getScaling();
-            double fromScaling = this.plugin.getCore().getMVWorld(event.getFrom().getWorld().getName()).getScaling();
+            double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();
+            double fromScaling = this.worldManager.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
 
             fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
             fromLocation.setWorld(tpto.getCBWorld());

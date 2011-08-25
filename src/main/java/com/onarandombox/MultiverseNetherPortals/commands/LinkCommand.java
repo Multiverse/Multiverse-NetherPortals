@@ -9,8 +9,10 @@ import org.bukkit.permissions.PermissionDefault;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.utils.WorldManager;
 
 public class LinkCommand extends NetherPortalCommand {
+    private WorldManager worldManager;
 
     public LinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
@@ -21,6 +23,7 @@ public class LinkCommand extends NetherPortalCommand {
         this.addKey("mvnpl");
         this.addKey("mvnplink");
         this.setPermission("multiverse.netherportals.link", "Sets which world to link to when a player enters a NetherPortal in this world.", PermissionDefault.OP);
+        this.worldManager = this.plugin.getCore().getWorldManager();
     }
 
     @Override
@@ -44,8 +47,8 @@ public class LinkCommand extends NetherPortalCommand {
             toWorldString = args.get(1);
         }
 
-        fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
-        toWorld = this.plugin.getCore().getMVWorld(toWorldString);
+        fromWorld = this.worldManager.getMVWorld(fromWorldString);
+        toWorld = this.worldManager.getMVWorld(toWorldString);
 
         if (fromWorld == null) {
             this.plugin.getCore().showNotMVWorldMessage(sender, fromWorldString);

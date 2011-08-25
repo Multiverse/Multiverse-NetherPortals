@@ -12,10 +12,12 @@ import org.bukkit.permissions.PermissionDefault;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.utils.WorldManager;
 
 public class ShowLinkCommand extends NetherPortalCommand {
 
     private static final int CMDS_PER_PAGE = 9;
+    private WorldManager worldManager;
 
     public ShowLinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
@@ -29,6 +31,7 @@ public class ShowLinkCommand extends NetherPortalCommand {
         this.addKey("mvnplist");
         this.addKey("mvnpshow");
         this.setPermission("multiverse.netherportals.show", "Displays a nicly formatted list of links.", PermissionDefault.OP);
+        this.worldManager = this.plugin.getCore().getWorldManager();
     }
 
     @Override
@@ -64,8 +67,8 @@ public class ShowLinkCommand extends NetherPortalCommand {
     private void showWorldLink(CommandSender sender, String fromWorldString, String toWorldString) {
         MVWorld fromWorld = null;
         MVWorld toWorld = null;
-        fromWorld = this.plugin.getCore().getMVWorld(fromWorldString);
-        toWorld = this.plugin.getCore().getMVWorld(toWorldString);
+        fromWorld = this.worldManager.getMVWorld(fromWorldString);
+        toWorld = this.worldManager.getMVWorld(toWorldString);
 
         if (fromWorld == null) {
             fromWorldString = ChatColor.RED + "!!ERROR!!";
