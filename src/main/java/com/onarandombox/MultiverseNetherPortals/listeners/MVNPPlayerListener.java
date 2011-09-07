@@ -25,7 +25,7 @@ public class MVNPPlayerListener extends PlayerListener {
 
     @Override
     public void onPlayerPortal(PlayerPortalEvent event) {
-        Location currentLocation = event.getFrom();
+        Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(currentWorld);
 
