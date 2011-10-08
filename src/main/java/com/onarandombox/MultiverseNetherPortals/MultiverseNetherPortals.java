@@ -1,19 +1,16 @@
 package com.onarandombox.MultiverseNetherPortals;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.onarandombox.MultiverseCore.MultiverseCore;
+import com.onarandombox.MultiverseCore.api.MVPlugin;
+import com.onarandombox.MultiverseCore.commands.HelpCommand;
+import com.onarandombox.MultiverseCore.utils.DebugLog;
+import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPConfigReloadListener;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
+import com.pneumaticraft.commandhandler.CommandHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event.Priority;
@@ -21,17 +18,10 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-import com.onarandombox.MultiverseCore.MVPlugin;
-import com.onarandombox.MultiverseCore.MultiverseCore;
-import com.onarandombox.MultiverseCore.commands.HelpCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPConfigReloadListener;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
-import com.onarandombox.utils.DebugLog;
-import com.pneumaticraft.commandhandler.CommandHandler;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
@@ -50,6 +40,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private String netherSuffix = DEFAULT_NETHER_SUFFIX;
     private Map<String, String> linkMap;
     protected CommandHandler commandHandler;
+    private final static int requiresProtocol = 3;
 
     @Override
     public void onEnable() {
@@ -58,6 +49,15 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         // Test if the Core was found, if not we'll disable this plugin.
         if (this.core == null) {
             log.info(logPrefix + "Multiverse-Core not found, will keep looking.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        if (this.core.getProtocolVersion() < requiresProtocol) {
+            log.severe(logPrefix + "Your Multiverse-Core is OUT OF DATE");
+            log.severe(logPrefix + "This version of SignPortals requires Protocol Level: " + requiresProtocol);
+            log.severe(logPrefix + "Your version of Core is: " + this.core.getProtocolVersion());
+            log.severe(logPrefix + "Grab an updated copy at: ");
+            log.severe(logPrefix + "http://bukkit.onarandombox.com/?dir=multiverse-core");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -127,9 +127,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.MVNPconfig.save();
     }
 
-    /**
-     * Register commands to Multiverse's CommandHandler so we get a super sexy single menu
-     */
+    /** Register commands to Multiverse's CommandHandler so we get a super sexy single menu */
     private void registerCommands() {
         this.commandHandler = this.core.getCommandHandler();
         this.commandHandler.registerCommand(new LinkCommand(this));
@@ -164,11 +162,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         getDataFolder().mkdirs();
     }
 
-    /**
-     * Parse the Authors Array into a readable String with ',' and 'and'.
-     * 
-     * @return
-     */
     private String getAuthors() {
         String authors = "";
         for (int i = 0; i < this.getDescription().getAuthors().size(); i++) {
@@ -224,12 +217,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.core;
     }
 
-    /**
-     * Print messages to the server Log as well as to our DebugLog. 'debugLog' is used to seperate Heroes information from the Servers Log Output.
-     * 
-     * @param level
-     * @param msg
-     */
     public void log(Level level, String msg) {
         log.log(level, logPrefix + " " + msg);
         debugLog.log(level, logPrefix + " " + msg);
@@ -237,6 +224,11 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public void setCore(MultiverseCore core) {
         this.core = core;
+    }
+
+    @Override
+    public int getProtocolVersion() {
+        return 1;
     }
 
     @Override
@@ -250,7 +242,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         buffer += logAndAddToPasteBinBuffer("Special Code: FRN001");
         return buffer;
     }
-    
+
     private String logAndAddToPasteBinBuffer(String string) {
         this.log(Level.INFO, string);
         return "[Multiverse-NetherPortals] " + string + "\n";

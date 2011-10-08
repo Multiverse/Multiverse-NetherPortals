@@ -1,18 +1,17 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import java.util.List;
-
+import com.onarandombox.MultiverseCore.MVWorld;
+import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
 
-import com.onarandombox.MultiverseCore.MVWorld;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.utils.WorldManager;
+import java.util.List;
 
 public class LinkCommand extends NetherPortalCommand {
-    private WorldManager worldManager;
+    private MVWorldManager worldManager;
 
     public LinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
@@ -23,7 +22,7 @@ public class LinkCommand extends NetherPortalCommand {
         this.addKey("mvnpl");
         this.addKey("mvnplink");
         this.setPermission("multiverse.netherportals.link", "Sets which world to link to when a player enters a NetherPortal in this world.", PermissionDefault.OP);
-        this.worldManager = this.plugin.getCore().getWorldManager();
+        this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
     @Override
@@ -33,11 +32,11 @@ public class LinkCommand extends NetherPortalCommand {
             sender.sendMessage("No changes were made...");
             return;
         }
-        MVWorld fromWorld = null;
-        MVWorld toWorld = null;
-        String fromWorldString = null;
-        String toWorldString = null;
-        Player p = null;
+        MVWorld fromWorld;
+        MVWorld toWorld;
+        String fromWorldString;
+        String toWorldString;
+        Player p;
         if (args.size() == 1) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();
@@ -59,7 +58,7 @@ public class LinkCommand extends NetherPortalCommand {
             return;
         }
 
-        ((MultiverseNetherPortals) this.plugin).addWorldLink(fromWorld.getName(), toWorld.getName());
+        this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName());
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
         if (fromWorld.getName().equals(toWorld.getName())) {
