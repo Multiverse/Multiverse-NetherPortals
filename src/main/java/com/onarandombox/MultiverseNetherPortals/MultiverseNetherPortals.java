@@ -40,7 +40,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private String netherSuffix = DEFAULT_NETHER_SUFFIX;
     private Map<String, String> linkMap;
     protected CommandHandler commandHandler;
-    private final static int requiresProtocol = 3;
+    private final static int requiresProtocol = 4;
 
     @Override
     public void onEnable() {
@@ -55,7 +55,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         if (this.core.getProtocolVersion() < requiresProtocol) {
             log.severe(logPrefix + "Your Multiverse-Core is OUT OF DATE");
             log.severe(logPrefix + "This version of SignPortals requires Protocol Level: " + requiresProtocol);
-            log.severe(logPrefix + "Your version of Core is: " + this.core.getProtocolVersion());
+            log.severe(logPrefix + "Your of Core Protocol Level is: " + this.core.getProtocolVersion());
             log.severe(logPrefix + "Grab an updated copy at: ");
             log.severe(logPrefix + "http://bukkit.onarandombox.com/?dir=multiverse-core");
             getServer().getPluginManager().disablePlugin(this);

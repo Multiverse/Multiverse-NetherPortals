@@ -1,23 +1,22 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.onarandombox.MultiverseCore.MVWorld;
+import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
 
-import com.onarandombox.MultiverseCore.MVWorld;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.utils.WorldManager;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ShowLinkCommand extends NetherPortalCommand {
 
     private static final int CMDS_PER_PAGE = 9;
-    private WorldManager worldManager;
+    private MVWorldManager worldManager;
 
     public ShowLinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
@@ -31,7 +30,7 @@ public class ShowLinkCommand extends NetherPortalCommand {
         this.addKey("mvnplist");
         this.addKey("mvnpshow");
         this.setPermission("multiverse.netherportals.show", "Displays a nicly formatted list of links.", PermissionDefault.OP);
-        this.worldManager = this.plugin.getCore().getWorldManager();
+        this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
     @Override

@@ -1,18 +1,17 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import java.util.List;
-
+import com.onarandombox.MultiverseCore.MVWorld;
+import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
 
-import com.onarandombox.MultiverseCore.MVWorld;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.utils.WorldManager;
+import java.util.List;
 
 public class UnlinkCommand extends NetherPortalCommand {
-    private WorldManager worldManager;
+    private MVWorldManager worldManager;
 
     public UnlinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
@@ -23,7 +22,7 @@ public class UnlinkCommand extends NetherPortalCommand {
         this.addKey("mvnpu");
         this.addKey("mvnpunlink");
         this.setPermission("multiverse.netherportals.unlink", "This will remove a world link that's been set. You do not need to do this before setting a new one.", PermissionDefault.OP);
-        this.worldManager = this.plugin.getCore().getWorldManager();
+        this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
     @Override

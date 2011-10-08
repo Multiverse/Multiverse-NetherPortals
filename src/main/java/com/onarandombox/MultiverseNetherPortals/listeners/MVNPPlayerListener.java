@@ -1,26 +1,25 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
-import java.util.logging.Level;
-
+import com.onarandombox.MultiverseCore.MVWorld;
+import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
-import com.onarandombox.MultiverseCore.MVWorld;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
-import com.onarandombox.utils.WorldManager;
+import java.util.logging.Level;
 
 public class MVNPPlayerListener extends PlayerListener {
 
     private MultiverseNetherPortals plugin;
     private MVNameChecker nameChecker;
-    private WorldManager worldManager;
+    private MVWorldManager worldManager;
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
         this.nameChecker = new MVNameChecker(plugin);
-        this.worldManager = this.plugin.getCore().getWorldManager();
+        this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
     @Override
@@ -40,7 +39,7 @@ public class MVNPPlayerListener extends PlayerListener {
 
     private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
         MVWorld tpto = this.worldManager.getMVWorld(worldstring);
-        if (tpto != null && this.plugin.getCore().getPermissions().canEnterWorld(event.getPlayer(), tpto) && this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
+        if (tpto != null && this.plugin.getCore().getMVPerms().canEnterWorld(event.getPlayer(), tpto) && this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
             // Set the output location to the same XYZ coords but different world
             double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();
             double fromScaling = this.worldManager.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
