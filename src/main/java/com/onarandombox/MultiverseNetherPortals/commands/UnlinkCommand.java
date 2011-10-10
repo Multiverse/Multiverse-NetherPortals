@@ -1,7 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -32,8 +32,8 @@ public class UnlinkCommand extends NetherPortalCommand {
             sender.sendMessage("No changes were made...");
             return;
         }
-        MVWorld fromWorld = null;
-        MVWorld toWorld = null;
+        MultiverseWorld fromWorld = null;
+        MultiverseWorld toWorld = null;
         String fromWorldString = null;
         String toWorldString = null;
         Player p = null;

@@ -2,6 +2,7 @@ package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
@@ -38,7 +39,7 @@ public class MVNPPlayerListener extends PlayerListener {
     }
 
     private void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
-        MVWorld tpto = this.worldManager.getMVWorld(worldstring);
+        MultiverseWorld tpto = this.worldManager.getMVWorld(worldstring);
         if (tpto != null && this.plugin.getCore().getMVPerms().canEnterWorld(event.getPlayer(), tpto) && this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
             // Set the output location to the same XYZ coords but different world
             double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();

@@ -1,7 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -64,10 +64,8 @@ public class ShowLinkCommand extends NetherPortalCommand {
     }
 
     private void showWorldLink(CommandSender sender, String fromWorldString, String toWorldString) {
-        MVWorld fromWorld = null;
-        MVWorld toWorld = null;
-        fromWorld = this.worldManager.getMVWorld(fromWorldString);
-        toWorld = this.worldManager.getMVWorld(toWorldString);
+        MultiverseWorld fromWorld = this.worldManager.getMVWorld(fromWorldString);
+        MultiverseWorld toWorld = this.worldManager.getMVWorld(toWorldString);
 
         if (fromWorld == null) {
             fromWorldString = ChatColor.RED + "!!ERROR!!";

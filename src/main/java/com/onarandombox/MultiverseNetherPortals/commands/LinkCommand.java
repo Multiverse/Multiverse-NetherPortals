@@ -1,7 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -32,8 +32,8 @@ public class LinkCommand extends NetherPortalCommand {
             sender.sendMessage("No changes were made...");
             return;
         }
-        MVWorld fromWorld;
-        MVWorld toWorld;
+        MultiverseWorld fromWorld;
+        MultiverseWorld toWorld;
         String fromWorldString;
         String toWorldString;
         Player p;

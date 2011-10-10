@@ -62,7 +62,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             return;
         }
         debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
-        this.checkForNetherEnabled();
 
         this.core.incrementPluginCount();
         // As soon as we know MVCore was found, we can use the debug log!
