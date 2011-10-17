@@ -81,28 +81,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     }
 
-    private void checkForNetherEnabled() {
-        File serverFolder = new File(this.getDataFolder().getAbsolutePath()).getParentFile().getParentFile();
-        File serverProperties = new File(serverFolder.getAbsolutePath() + File.separator + "server.properties");
-        try {
-            FileInputStream fileStream = new FileInputStream(serverProperties);
-            DataInputStream in = new DataInputStream(fileStream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String propLine;
-            while ((propLine = br.readLine()) != null) {
-                // Print the content on the console
-                if (propLine.matches("allow-nether.*") && !propLine.matches("allow-nether\\s*=\\s*true")) {
-                    this.log(Level.SEVERE, "Nether is DISABLED, NetherPortals WILL NOT WORK.");
-                    this.log(Level.SEVERE, "Please set 'allow-nether=true' in your server.properties file!");
-                    MultiverseNetherPortals.netherDisabled = true;
-                }
-            }
-        } catch (IOException e) {
-            // This should never happen...
-            this.log(Level.SEVERE, e.getMessage());
-        }
-    }
-
     public void loadConfig() {
         this.MVNPconfig = new Configuration(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
         this.MVNPconfig.load();
