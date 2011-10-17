@@ -29,7 +29,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private static final String logPrefix = "[MultiVerse-NetherPortals] ";
     private static final String NETEHR_PORTALS_CONFIG = "config.yml";
     protected static DebugLog debugLog;
-    private static boolean netherDisabled;
     protected MultiverseCore core;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
@@ -212,7 +211,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     public String dumpVersionInfo(String buffer) {
         buffer += logAndAddToPasteBinBuffer("Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
         buffer += logAndAddToPasteBinBuffer("Bukkit Version: " + this.getServer().getVersion());
-        buffer += logAndAddToPasteBinBuffer("server.properties 'allow-nether': " + !MultiverseNetherPortals.netherDisabled);
         buffer += logAndAddToPasteBinBuffer("World links: " + this.getWorldLinks());
         buffer += logAndAddToPasteBinBuffer("Nether Prefix: " + netherPrefix);
         buffer += logAndAddToPasteBinBuffer("Nether Suffix: " + netherSuffix);
