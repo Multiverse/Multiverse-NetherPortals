@@ -39,7 +39,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private String netherSuffix = DEFAULT_NETHER_SUFFIX;
     private Map<String, String> linkMap;
     protected CommandHandler commandHandler;
-    private final static int requiresProtocol = 4;
+    private final static int requiresProtocol = 7;
 
     @Override
     public void onEnable() {
