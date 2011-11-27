@@ -33,12 +33,12 @@ public class MVNPPlayerListener extends PlayerListener {
     public void onPlayerPortal(PlayerPortalEvent event) {
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
-        String linkedWorld = this.plugin.getWorldLink(currentWorld);
+        String type = "end";
         if (event.getFrom().getBlock().getType() == Material.PORTAL) {
             System.out.println("Normal!");
-        } else {
-            System.out.println("End!");
+            type = "nether";
         }
+        String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
 
         if (linkedWorld != null) {
             this.getNewTeleportLocation(event, currentLocation, linkedWorld);

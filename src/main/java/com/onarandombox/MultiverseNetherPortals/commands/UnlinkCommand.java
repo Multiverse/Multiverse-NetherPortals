@@ -16,8 +16,8 @@ public class UnlinkCommand extends NetherPortalCommand {
     public UnlinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
         this.setName("Remove NP Destination");
-        this.setCommandUsage("/mvnp unlink " + ChatColor.GOLD + "[FROM_WORLD]");
-        this.setArgRange(0, 1);
+        this.setCommandUsage("/mvnp unlink " + ChatColor.GREEN + "{nether|end}" + ChatColor.GOLD + "[FROM_WORLD]");
+        this.setArgRange(1, 2);
         this.addKey("mvnp unlink");
         this.addKey("mvnpu");
         this.addKey("mvnpunlink");
@@ -27,7 +27,7 @@ public class UnlinkCommand extends NetherPortalCommand {
 
     @Override
     public void runCommand(CommandSender sender, List<String> args) {
-        if (!(sender instanceof Player) && args.size() == 0) {
+        if (!(sender instanceof Player) && args.size() == 1) {
             sender.sendMessage("From the command line, FROM_WORLD is required");
             sender.sendMessage("No changes were made...");
             return;
@@ -36,12 +36,23 @@ public class UnlinkCommand extends NetherPortalCommand {
         MultiverseWorld toWorld = null;
         String fromWorldString = null;
         String toWorldString = null;
+        String type = "";
         Player p = null;
+        type = args.get(0);
         if (args.size() == 1) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();
         } else {
-            fromWorldString = args.get(0);
+            fromWorldString = args.get(1);
+        }
+
+        if(type.equalsIgnoreCase("nether")) {
+            type = "nether";
+        } else if(type.equalsIgnoreCase("end")) {
+            type = "end";
+        } else {
+            this.showHelp(sender);
+            return;
         }
 
         fromWorld = this.worldManager.getMVWorld(fromWorldString);
@@ -50,7 +61,7 @@ public class UnlinkCommand extends NetherPortalCommand {
             return;
         }
 
-        toWorldString = this.plugin.getWorldLink(fromWorld.getName());
+        toWorldString = this.plugin.getWorldLink(fromWorld.getName(), type);
         if (toWorldString == null) {
             sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world " + fromWorld.getColoredWorldString() + ChatColor.WHITE + " was never linked.");
             return;
@@ -59,8 +70,8 @@ public class UnlinkCommand extends NetherPortalCommand {
 
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
-        sender.sendMessage("The Nether Portals in " + coloredFrom + ChatColor.WHITE + " are now " + ChatColor.RED + "unlinked" + ChatColor.WHITE + " from " + coloredTo + ChatColor.WHITE + ".");
-        this.plugin.removeWorldLink(fromWorld.getName(), toWorld.getName());
+        sender.sendMessage("The " + type + " portals in " + coloredFrom + ChatColor.WHITE + " are now " + ChatColor.RED + "unlinked" + ChatColor.WHITE + " from " + coloredTo + ChatColor.WHITE + ".");
+        this.plugin.removeWorldLink(fromWorld.getName(), toWorld.getName(), type);
     }
 
 }

@@ -39,7 +39,7 @@ public class LinkCommand extends NetherPortalCommand {
         String toWorldString;
         String type;
         Player p;
-        if (args.size() == 1) {
+        if (args.size() == 2) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();
             type = args.get(0);
@@ -79,7 +79,7 @@ public class LinkCommand extends NetherPortalCommand {
         if (fromWorld.getName().equals(toWorld.getName())) {
             sender.sendMessage(ChatColor.RED + "NOTE: " + ChatColor.WHITE + "You have successfully disabled NetherPortals in " + coloredTo);
         } else {
-            sender.sendMessage("The Nether Portals in " + coloredFrom + ChatColor.WHITE + " are now linked to " + coloredTo);
+            sender.sendMessage("The " + type + " portals in " + coloredFrom + ChatColor.WHITE + " are now linked to " + coloredTo);
         }
 
     }

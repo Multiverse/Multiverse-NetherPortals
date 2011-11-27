@@ -13,12 +13,15 @@ import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
 import com.pneumaticraft.commandhandler.CommandHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +36,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
     protected MVNPConfigReloadListener customListener;
-    protected Configuration MVNPconfig;
+    protected FileConfiguration MVNPconfiguration;
     private static final String DEFAULT_NETHER_SUFFIX = "_nether";
     private String netherPrefix = "";
     private String netherSuffix = DEFAULT_NETHER_SUFFIX;
@@ -82,26 +85,40 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public void loadConfig() {
-        this.MVNPconfig = new Configuration(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
-        this.MVNPconfig.load();
+        this.MVNPconfiguration = new YamlConfiguration();
+        try {
+            this.MVNPconfiguration.load(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
+        } catch (IOException e) {
+            this.log(Level.SEVERE, "Could not load " + NETEHR_PORTALS_CONFIG);
+        } catch (InvalidConfigurationException e) {
+            this.log(Level.SEVERE, NETEHR_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
+        }
         this.linkMap = new HashMap<String, String>();
+        this.endLinkMap = new HashMap<String, String>();
 
-        this.setNetherPrefix(this.MVNPconfig.getString("netherportals.name.prefix", this.getNetherPrefix()));
-        this.setNetherSuffix(this.MVNPconfig.getString("netherportals.name.suffix", this.getNetherSuffix()));
+        this.setNetherPrefix(this.MVNPconfiguration.getString("netherportals.name.prefix", this.getNetherPrefix()));
+        this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
 
         if (this.getNetherPrefix().length() == 0 && this.getNetherSuffix().length() == 0) {
             log.warning(logPrefix + "I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
-            this.setNetherSuffix(this.MVNPconfig.getString("netherportals.name.suffix", this.getNetherSuffix()));
+            this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
         }
 
-        List<String> worldKeys = this.MVNPconfig.getKeys("worlds");
+        Set<String> worldKeys = this.MVNPconfiguration.getConfigurationSection("worlds").getKeys(false);
         if (worldKeys != null) {
             for (String worldString : worldKeys) {
-                this.linkMap.put(worldString, this.MVNPconfig.getString("worlds." + worldString + ".portalgoesto"));
+                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.nether", null);
+                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.nether", null);
+                if (nether != null) {
+                    this.linkMap.put(worldString, nether);
+                }
+                if (ender != null) {
+                    this.endLinkMap.put(worldString, ender);
+                }
+
             }
         }
-
-        this.MVNPconfig.save();
+        this.saveMVNPConfig();
     }
 
     /** Register commands to Multiverse's CommandHandler so we get a super sexy single menu */
@@ -115,7 +132,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
                 c.addKey("mvnp");
             }
         }
-
     }
 
     @Override
@@ -189,8 +205,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         } else {
             this.endLinkMap.put(from, to);
         }
-        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto." + type, to);
-        this.MVNPconfig.save();
+        this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, to);
+        this.saveMVNPConfig();
     }
 
     public void removeWorldLink(String from, String to, String type) {
@@ -206,8 +222,18 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             this.endLinkMap.remove(from);
         }
 
-        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto." + type, null);
-        this.MVNPconfig.save();
+        this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, null);
+        this.saveMVNPConfig();
+    }
+
+    public boolean saveMVNPConfig() {
+        try {
+            this.MVNPconfiguration.save(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
+            return true;
+        } catch (IOException e) {
+            this.log(Level.SEVERE, "Could not save " + NETEHR_PORTALS_CONFIG);
+        }
+        return false;
     }
 
     public MultiverseCore getCore() {
