@@ -8,6 +8,7 @@ import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPConfigReloadListener;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
 import com.pneumaticraft.commandhandler.CommandHandler;
@@ -44,6 +45,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
     private final static int requiresProtocol = 9;
+    private MVNPEntityListener entityListener;
 
     @Override
     public void onEnable() {
@@ -71,11 +73,13 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
         this.pluginListener = new MVNPPluginListener(this);
         this.playerListener = new MVNPPlayerListener(this);
+        this.entityListener = new MVNPEntityListener(this);
         this.customListener = new MVNPConfigReloadListener(this);
         // Register the PLUGIN_ENABLE Event as we will need to keep an eye out for the Core Enabling if we don't find it initially.
         this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, this.pluginListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, this.playerListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Type.CUSTOM_EVENT, this.customListener, Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Type.ENTITY_PORTAL_ENTER, this.entityListener, Priority.Monitor, this);
 
         log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 
