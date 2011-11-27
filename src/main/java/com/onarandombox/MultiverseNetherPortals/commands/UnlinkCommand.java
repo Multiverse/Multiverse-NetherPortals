@@ -3,6 +3,8 @@ package com.onarandombox.MultiverseNetherPortals.commands;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -36,9 +38,9 @@ public class UnlinkCommand extends NetherPortalCommand {
         MultiverseWorld toWorld = null;
         String fromWorldString = null;
         String toWorldString = null;
-        String type = "";
+        PortalType type;
         Player p = null;
-        type = args.get(0);
+        type = PortalType.parse(args.get(0));
         if (args.size() == 1) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();
@@ -46,11 +48,7 @@ public class UnlinkCommand extends NetherPortalCommand {
             fromWorldString = args.get(1);
         }
 
-        if(type.equalsIgnoreCase("nether")) {
-            type = "nether";
-        } else if(type.equalsIgnoreCase("end")) {
-            type = "end";
-        } else {
+        if (type == null) {
             this.showHelp(sender);
             return;
         }

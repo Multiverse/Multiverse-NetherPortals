@@ -7,6 +7,7 @@ import com.onarandombox.MultiverseCore.utils.DebugLog;
 import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
+import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPConfigReloadListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
@@ -187,15 +188,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.netherSuffix;
     }
 
-    public String getWorldLink(String fromWorld, String type) {
-        if (type.equalsIgnoreCase("nether")) {
-            if (this.linkMap.containsKey(fromWorld)) {
-                return this.linkMap.get(fromWorld);
-            }
+    public String getWorldLink(String fromWorld, PortalType type) {
+        if (type == PortalType.NETHER) {
+            return this.linkMap.get(fromWorld);
         }
-        if (this.endLinkMap.containsKey(fromWorld)) {
+        else if (type == PortalType.END) {
             return this.endLinkMap.get(fromWorld);
         }
+
         return null;
     }
 
@@ -207,27 +207,30 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.linkMap;
     }
 
-    public void addWorldLink(String from, String to, String type) {
-        if (type.equalsIgnoreCase("nether")) {
+    public void addWorldLink(String from, String to, PortalType type) {
+        if (type == PortalType.NETHER) {
             this.linkMap.put(from, to);
-        } else {
+        }
+        else if (type == PortalType.END) {
             this.endLinkMap.put(from, to);
         }
+        else {
+            return;
+        }
+
         this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, to);
         this.saveMVNPConfig();
     }
 
-    public void removeWorldLink(String from, String to, String type) {
-        if (type.equalsIgnoreCase("nether")) {
-            if (!this.linkMap.containsKey(from)) {
-                return;
-            }
+    public void removeWorldLink(String from, String to, PortalType type) {
+        if (type == PortalType.NETHER) {
             this.linkMap.remove(from);
-        } else {
-            if (!this.endLinkMap.containsKey(from)) {
-                return;
-            }
+        }
+        else if (type == PortalType.END) {
             this.endLinkMap.remove(from);
+        }
+        else {
+            return;
         }
 
         this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, null);

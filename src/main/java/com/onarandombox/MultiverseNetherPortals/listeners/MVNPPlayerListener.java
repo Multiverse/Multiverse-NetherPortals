@@ -1,16 +1,15 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
-import com.fernferret.allpay.GenericBank;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
@@ -36,10 +35,12 @@ public class MVNPPlayerListener extends PlayerListener {
     public void onPlayerPortal(PlayerPortalEvent event) {
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
-        String type = "end";
+
+        PortalType type = PortalType.END;
         if (event.getFrom().getBlock().getType() == Material.PORTAL) {
-            type = "nether";
+            type = PortalType.NETHER;
         }
+
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
 
         if (linkedWorld != null) {

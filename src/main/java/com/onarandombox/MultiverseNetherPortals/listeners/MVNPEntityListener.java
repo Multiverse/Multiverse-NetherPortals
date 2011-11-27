@@ -5,6 +5,7 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
@@ -45,7 +46,7 @@ public class MVNPEntityListener extends EntityListener {
         this.playerErrors = new HashMap<String, Date>();
     }
 
-    protected void shootPlayer(Player p, Block block, String type) {
+    protected void shootPlayer(Player p, Block block, PortalType type) {
         this.playerErrors.put(p.getName(), new Date());
         double myconst = 2;
         double newVecX = 0;
@@ -87,11 +88,11 @@ public class MVNPEntityListener extends EntityListener {
             this.playerErrors.remove(p.getName());
         }
 
-        String type = "end";
+        PortalType type = PortalType.END; //we are too lazy to check if it's this one
         if (event.getLocation().getBlock().getType() == Material.PORTAL) {
-            type = "nether";
-
+            type = PortalType.NETHER;
         }
+
         String currentWorld = event.getLocation().getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(event.getLocation().getWorld().getName(), type);
         Location currentLocation = event.getLocation();
