@@ -15,7 +15,7 @@ import java.util.Map.Entry;
 
 public class ShowLinkCommand extends NetherPortalCommand {
 
-    private static final int CMDS_PER_PAGE = 9;
+    private static final int CMDS_PER_PAGE = 10;
     private MVWorldManager worldManager;
 
     public ShowLinkCommand(MultiverseNetherPortals plugin) {
@@ -36,10 +36,15 @@ public class ShowLinkCommand extends NetherPortalCommand {
     @Override
     public void runCommand(CommandSender sender, List<String> args) {
         Map<String, String> links = this.plugin.getWorldLinks();
+        Map<String, String> endlinks = this.plugin.getEndWorldLinks();
 
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.AQUA + "--- NetherPortal Links ---");
             for (Map.Entry<String, String> link : links.entrySet()) {
+                showWorldLink(sender, link.getKey(), link.getValue());
+            }
+            sender.sendMessage(ChatColor.AQUA + "--- EnderPortal Links ---");
+            for (Map.Entry<String, String> link : endlinks.entrySet()) {
                 showWorldLink(sender, link.getKey(), link.getValue());
             }
             return;

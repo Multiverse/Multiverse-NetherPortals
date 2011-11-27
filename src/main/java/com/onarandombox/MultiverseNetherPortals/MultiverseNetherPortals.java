@@ -199,6 +199,10 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.linkMap;
     }
 
+    public Map<String, String> getEndWorldLinks() {
+        return this.linkMap;
+    }
+
     public void addWorldLink(String from, String to, String type) {
         if (type.equalsIgnoreCase("nether")) {
             this.linkMap.put(from, to);
