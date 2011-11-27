@@ -18,7 +18,7 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-import java.io.*;
+import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +38,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private String netherPrefix = "";
     private String netherSuffix = DEFAULT_NETHER_SUFFIX;
     private Map<String, String> linkMap;
+    private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
     private final static int requiresProtocol = 9;
 
@@ -166,9 +167,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.netherSuffix;
     }
 
-    public String getWorldLink(String fromWorld) {
-        if (this.linkMap.containsKey(fromWorld)) {
-            return this.linkMap.get(fromWorld);
+    public String getWorldLink(String fromWorld, String type) {
+        if (type.equalsIgnoreCase("nether")) {
+            if (this.linkMap.containsKey(fromWorld)) {
+                return this.linkMap.get(fromWorld);
+            }
+        }
+        if (this.endLinkMap.containsKey(fromWorld)) {
+            return this.endLinkMap.get(fromWorld);
         }
         return null;
     }
@@ -177,15 +183,30 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.linkMap;
     }
 
-    public void addWorldLink(String from, String to) {
-        this.linkMap.put(from, to);
-        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto", to);
+    public void addWorldLink(String from, String to, String type) {
+        if (type.equalsIgnoreCase("nether")) {
+            this.linkMap.put(from, to);
+        } else {
+            this.endLinkMap.put(from, to);
+        }
+        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto." + type, to);
         this.MVNPconfig.save();
     }
 
-    public void removeWorldLink(String from, String to) {
-        this.linkMap.put(from, to);
-        this.MVNPconfig.removeProperty("worlds." + from);
+    public void removeWorldLink(String from, String to, String type) {
+        if (type.equalsIgnoreCase("nether")) {
+            if (!this.linkMap.containsKey(from)) {
+                return;
+            }
+            this.linkMap.remove(from);
+        } else {
+            if (!this.endLinkMap.containsKey(from)) {
+                return;
+            }
+            this.endLinkMap.remove(from);
+        }
+
+        this.MVNPconfig.setProperty("worlds." + from + ".portalgoesto." + type, null);
         this.MVNPconfig.save();
     }
 

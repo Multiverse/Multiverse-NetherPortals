@@ -16,18 +16,19 @@ public class LinkCommand extends NetherPortalCommand {
     public LinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
         this.setName("Sets NP Destination");
-        this.setCommandUsage("/mvnp link " + ChatColor.GOLD + "[FROM_WORLD] " + ChatColor.GREEN + " {TO_WORLD}");
-        this.setArgRange(1, 2);
+        this.setCommandUsage("/mvnp link " + ChatColor.GREEN + " {end|nether}" + ChatColor.GOLD + "[FROM_WORLD] " + ChatColor.GREEN + " {TO_WORLD}");
+        this.setArgRange(2, 3);
         this.addKey("mvnp link");
         this.addKey("mvnpl");
         this.addKey("mvnplink");
+        this.addCommandExample("/mvnp link end");
         this.setPermission("multiverse.netherportals.link", "Sets which world to link to when a player enters a NetherPortal in this world.", PermissionDefault.OP);
         this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
     @Override
     public void runCommand(CommandSender sender, List<String> args) {
-        if (!(sender instanceof Player) && args.size() == 1) {
+        if (!(sender instanceof Player) && args.size() == 2) {
             sender.sendMessage("From the command line, FROM_WORLD is required");
             sender.sendMessage("No changes were made...");
             return;
@@ -36,15 +37,29 @@ public class LinkCommand extends NetherPortalCommand {
         MultiverseWorld toWorld;
         String fromWorldString;
         String toWorldString;
+        String type;
         Player p;
         if (args.size() == 1) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();
-            toWorldString = args.get(0);
+            type = args.get(0);
+            toWorldString = args.get(1);
         } else {
             fromWorldString = args.get(0);
-            toWorldString = args.get(1);
+            type = args.get(1);
+            toWorldString = args.get(2);
         }
+
+        if(type.equalsIgnoreCase("end")) {
+            type = "end";
+        } else if(type.equalsIgnoreCase("nether")) {
+            type = "nether";
+        } else {
+            this.showHelp(sender);
+            return;
+        }
+
+
 
         fromWorld = this.worldManager.getMVWorld(fromWorldString);
         toWorld = this.worldManager.getMVWorld(toWorldString);
@@ -58,7 +73,7 @@ public class LinkCommand extends NetherPortalCommand {
             return;
         }
 
-        this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName());
+        this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName(), type);
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
         if (fromWorld.getName().equals(toWorld.getName())) {
