@@ -10,11 +10,11 @@ public enum PortalType {
     private static final Map<String, PortalType> lookupNames;
 
     public static PortalType parse(String s) {
-        return lookupNames.get(s.toLowerCase());
+        return lookupNames.get(s.toUpperCase());
     }
 
     public String toString() {
-        return super.toString().toLowerCase();
+        return super.toString().toUpperCase();
     }
 
     static {

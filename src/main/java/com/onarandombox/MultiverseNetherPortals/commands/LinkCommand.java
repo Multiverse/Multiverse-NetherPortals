@@ -4,7 +4,6 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,12 +17,13 @@ public class LinkCommand extends NetherPortalCommand {
     public LinkCommand(MultiverseNetherPortals plugin) {
         super(plugin);
         this.setName("Sets NP Destination");
-        this.setCommandUsage("/mvnp link " + ChatColor.GREEN + " {end|nether}" + ChatColor.GOLD + "[FROM_WORLD] " + ChatColor.GREEN + " {TO_WORLD}");
+        this.setCommandUsage("/mvnp link " + ChatColor.GREEN + "{end|nether} " + ChatColor.GOLD + "[FROM_WORLD] " + ChatColor.GREEN + " {TO_WORLD}");
         this.setArgRange(2, 3);
         this.addKey("mvnp link");
         this.addKey("mvnpl");
         this.addKey("mvnplink");
-        this.addCommandExample("/mvnp link end");
+        this.addCommandExample("/mvnp link end world world_nether");
+        this.addCommandExample("/mvnp link end world_nether");
         this.setPermission("multiverse.netherportals.link", "Sets which world to link to when a player enters a NetherPortal in this world.", PermissionDefault.OP);
         this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
@@ -41,19 +41,18 @@ public class LinkCommand extends NetherPortalCommand {
         String toWorldString;
         PortalType type;
         Player p;
+        type = PortalType.parse(args.get(0).toUpperCase());
         if (args.size() == 2) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();
-            type = PortalType.parse(args.get(0));
             toWorldString = args.get(1);
         } else {
-            fromWorldString = args.get(0);
-            type = PortalType.parse(args.get(1));
+            fromWorldString = args.get(1);
             toWorldString = args.get(2);
         }
 
         if (type == null) {
-            this.showHelp(sender);
+            sender.sendMessage("The type must either be 'end' or 'nether'");
             return;
         }
 
@@ -73,7 +72,7 @@ public class LinkCommand extends NetherPortalCommand {
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
         if (fromWorld.getName().equals(toWorld.getName())) {
-            sender.sendMessage(ChatColor.RED + "NOTE: " + ChatColor.WHITE + "You have successfully disabled NetherPortals in " + coloredTo);
+            sender.sendMessage(ChatColor.RED + "NOTE: " + ChatColor.WHITE + "You have successfully disabled " + type.toString() + " Portals in " + coloredTo);
         } else {
             sender.sendMessage("The " + type + " portals in " + coloredFrom + ChatColor.WHITE + " are now linked to " + coloredTo);
         }

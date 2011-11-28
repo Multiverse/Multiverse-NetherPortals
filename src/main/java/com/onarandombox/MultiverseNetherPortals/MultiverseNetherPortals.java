@@ -108,7 +108,9 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             log.warning(logPrefix + "I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
             this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
         }
-
+        if (this.MVNPconfiguration.getConfigurationSection("worlds") == null) {
+            this.MVNPconfiguration.createSection("worlds");
+        }
         Set<String> worldKeys = this.MVNPconfiguration.getConfigurationSection("worlds").getKeys(false);
         if (worldKeys != null) {
             for (String worldString : worldKeys) {
@@ -191,8 +193,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     public String getWorldLink(String fromWorld, PortalType type) {
         if (type == PortalType.NETHER) {
             return this.linkMap.get(fromWorld);
-        }
-        else if (type == PortalType.END) {
+        } else if (type == PortalType.END) {
             return this.endLinkMap.get(fromWorld);
         }
 
@@ -207,29 +208,26 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.linkMap;
     }
 
-    public void addWorldLink(String from, String to, PortalType type) {
+    public boolean addWorldLink(String from, String to, PortalType type) {
         if (type == PortalType.NETHER) {
             this.linkMap.put(from, to);
-        }
-        else if (type == PortalType.END) {
+        } else if (type == PortalType.END) {
             this.endLinkMap.put(from, to);
-        }
-        else {
-            return;
+        } else {
+            return false;
         }
 
         this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, to);
         this.saveMVNPConfig();
+        return true;
     }
 
     public void removeWorldLink(String from, String to, PortalType type) {
         if (type == PortalType.NETHER) {
             this.linkMap.remove(from);
-        }
-        else if (type == PortalType.END) {
+        } else if (type == PortalType.END) {
             this.endLinkMap.remove(from);
-        }
-        else {
+        } else {
             return;
         }
 
