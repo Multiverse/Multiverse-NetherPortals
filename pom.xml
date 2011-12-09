@@ -14,7 +14,7 @@
     <repositories>
         <repository>
             <id>pneumaticsystem</id>
-            <url>http://pneumaticsystem.com:25578</url>
+            <url>http://pneumaticsystem.com:25578/nexus/content/groups/public</url>
         </repository>
     </repositories>
 
