@@ -114,8 +114,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         Set<String> worldKeys = this.MVNPconfiguration.getConfigurationSection("worlds").getKeys(false);
         if (worldKeys != null) {
             for (String worldString : worldKeys) {
-                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.nether", null);
-                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.nether", null);
+                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.NETHER", null);
+                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
                 if (nether != null) {
                     this.linkMap.put(worldString, nether);
                 }
@@ -205,7 +205,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public Map<String, String> getEndWorldLinks() {
-        return this.linkMap;
+        return this.endLinkMap;
     }
 
     public boolean addWorldLink(String from, String to, PortalType type) {
