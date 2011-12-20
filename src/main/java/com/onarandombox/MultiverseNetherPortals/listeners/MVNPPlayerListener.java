@@ -37,6 +37,7 @@ public class MVNPPlayerListener extends PlayerListener {
         String currentWorld = currentLocation.getWorld().getName();
 
         PortalType type = PortalType.END;
+        System.out.println(event.getFrom() + " => " + event.getFrom().getBlock().getType());
         if (event.getFrom().getBlock().getType() == Material.PORTAL) {
             type = PortalType.NETHER;
         }
@@ -48,7 +49,11 @@ public class MVNPPlayerListener extends PlayerListener {
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld));
         } else {
-            this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(currentWorld));
+            if(type == PortalType.END) {
+                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(currentWorld));
+            } else {
+                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(currentWorld));
+            }
         }
 
         if (event.getTo() == null || event.getFrom() == null) {

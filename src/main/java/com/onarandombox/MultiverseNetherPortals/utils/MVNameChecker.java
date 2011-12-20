@@ -35,6 +35,16 @@ public class MVNameChecker {
 	}
 	
 	/**
+	 * Takes a given normal name and adds the end prefix and suffix onto it!
+	 * 
+	 * @param normalName
+	 * @return
+	 */
+	public String getEndName(String normalName) {
+		return this.plugin.getEndPrefix() + normalName + this.plugin.getEndSuffix();
+	}
+	
+	/**
 	 * Takes a given normal name chops the suffix and prefix off!
 	 * 
 	 * @param normalName

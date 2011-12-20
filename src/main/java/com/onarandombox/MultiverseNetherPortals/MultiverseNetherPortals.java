@@ -40,8 +40,11 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     protected MVNPConfigReloadListener customListener;
     protected FileConfiguration MVNPconfiguration;
     private static final String DEFAULT_NETHER_SUFFIX = "_nether";
+    private static final String DEFAULT_END_SUFFIX = "_the_end";
     private String netherPrefix = "";
     private String netherSuffix = DEFAULT_NETHER_SUFFIX;
+    private String endPrefix = "";
+    private String endSuffix = DEFAULT_END_SUFFIX;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
@@ -188,6 +191,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public String getNetherSuffix() {
         return this.netherSuffix;
+    }
+
+    public String getEndPrefix() {
+        return this.endPrefix;
+    }
+
+    public String getEndSuffix() {
+        return this.endSuffix;
     }
 
     public String getWorldLink(String fromWorld, PortalType type) {
