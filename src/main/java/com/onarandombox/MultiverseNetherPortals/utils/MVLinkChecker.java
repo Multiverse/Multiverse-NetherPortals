@@ -9,11 +9,6 @@ import org.bukkit.event.player.PlayerPortalEvent;
 
 import java.util.logging.Level;
 
-/**
- * Multiverse 2
- *
- * @author fernferret
- */
 public class MVLinkChecker {
     private MultiverseNetherPortals plugin;
     private MVWorldManager worldManager;

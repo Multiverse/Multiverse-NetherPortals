@@ -3,6 +3,8 @@ package com.onarandombox.MultiverseNetherPortals.listeners;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
+import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
+import com.onarandombox.MultiverseCore.utils.LocationManipulation;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
@@ -22,11 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-/**
- * Multiverse 2
- *
- * @author fernferret
- */
 public class MVNPEntityListener extends EntityListener {
 
     private MultiverseNetherPortals plugin;
@@ -36,6 +33,10 @@ public class MVNPEntityListener extends EntityListener {
     private PermissionTools pt;
     private int cooldown = 250;
     private Map<String, Date> playerErrors;
+    private Map<String, Location> eventRecord;
+    // This hash map will track players most recent portal touch.
+    // we can use this cache to avoid a TON of unrequired calls to the
+    // On entity portal touch calculations.
 
     public MVNPEntityListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
@@ -44,6 +45,7 @@ public class MVNPEntityListener extends EntityListener {
         this.worldManager = this.plugin.getCore().getMVWorldManager();
         this.pt = new PermissionTools(this.plugin.getCore());
         this.playerErrors = new HashMap<String, Date>();
+        this.eventRecord = new HashMap<String, Location>();
     }
 
     protected void shootPlayer(Player p, Block block, PortalType type) {
@@ -54,7 +56,7 @@ public class MVNPEntityListener extends EntityListener {
         // Determine portal axis:
         BlockFace face = p.getLocation().getBlock().getFace(block);
         if (block.getRelative(BlockFace.EAST).getType() == Material.PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.PORTAL) {
-            System.out.println("East/West");
+            this.plugin.log(Level.FINER, "Found Portal: East/West");
             if (p.getLocation().getX() < block.getLocation().getX()) {
                 newVecX = -1 * myconst;
             } else {
@@ -62,15 +64,14 @@ public class MVNPEntityListener extends EntityListener {
             }
         } else {
             //NOrth/South
-            System.out.println("N/S");
+            this.plugin.log(Level.FINER, "Found Portal: North/South");
             if (p.getLocation().getZ() < block.getLocation().getZ()) {
                 newVecZ = -1 * myconst;
             } else {
                 newVecZ = 1 * myconst;
             }
         }
-        p.teleport(p.getLocation().clone().add(newVecX,.2,newVecZ));
-        System.out.println(new Vector(newVecX, .6, newVecZ));
+        p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
         p.setVelocity(new Vector(newVecX, .6, newVecZ));
     }
 
@@ -79,7 +80,29 @@ public class MVNPEntityListener extends EntityListener {
         if (!(event.getEntity() instanceof Player)) {
             return;
         }
+
         Player p = (Player) event.getEntity();
+        Location block = LocationManipulation.getBlockLocation(p.getLocation());
+        if(this.eventRecord.containsKey(p.getName())) {
+            // The the eventRecord shows this player was already trying to go somewhere.
+            if (LocationManipulation.getBlockLocation(p.getLocation()).equals(this.eventRecord.get(p.getName()))) {
+                // The player has not moved, and we've already fired one event.
+                return;
+            } else {
+                // The player moved, potentially out of the portal, allow event to re-check.
+                this.eventRecord.put(p.getName(), LocationManipulation.getBlockLocation(p.getLocation()));
+                // We'll need to clear this value...
+            }
+        } else {
+            this.eventRecord.put(p.getName(), LocationManipulation.getBlockLocation(p.getLocation()));
+        }
+        MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(p, event.getLocation());
+        this.plugin.getServer().getPluginManager().callEvent(playerTouchedPortalEvent);
+        if(playerTouchedPortalEvent.isCancelled()) {
+            this.plugin.log(Level.FINEST, "Someone cancelled the enter Event for NetherPortals!");
+            return;
+        }
+
         if (this.playerErrors.containsKey(p.getName())) {
             Date lastTry = this.playerErrors.get(p.getName());
             if (lastTry.getTime() + this.cooldown > new Date().getTime()) {
