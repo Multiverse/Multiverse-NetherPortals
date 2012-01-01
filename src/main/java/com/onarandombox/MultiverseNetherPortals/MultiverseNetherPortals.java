@@ -256,15 +256,35 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return false;
     }
 
+    @Override
     public MultiverseCore getCore() {
         return this.core;
     }
 
+    @Override
     public void log(Level level, String msg) {
+        if (level == Level.FINE && MultiverseCore.GlobalDebug >= 1) {
+            staticDebugLog(Level.INFO, msg);
+        } else if (level == Level.FINER && MultiverseCore.GlobalDebug >= 2) {
+            staticDebugLog(Level.INFO, msg);
+        } else if (level == Level.FINEST && MultiverseCore.GlobalDebug >= 3) {
+            staticDebugLog(Level.INFO, msg);
+        } else if (level != Level.FINE && level != Level.FINER && level != Level.FINEST) {
+            staticLog(level, msg);
+        }
+    }
+
+    private void staticLog(Level level, String msg) {
         log.log(level, logPrefix + " " + msg);
         debugLog.log(level, logPrefix + " " + msg);
     }
 
+    private void staticDebugLog(Level level, String msg) {
+        log.log(level, "[MVNetherPortals-Debug] " + msg);
+        debugLog.log(level, "[MVNetherPortals-Debug] " + msg);
+    }
+
+    @Override
     public void setCore(MultiverseCore core) {
         this.core = core;
     }
