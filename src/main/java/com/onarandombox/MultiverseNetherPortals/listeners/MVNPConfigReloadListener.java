@@ -1,6 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.onarandombox.MultiverseCore.event.MVConfigReloadEvent;
+import com.onarandombox.MultiverseCore.event.MVVersionEvent;
 import com.onarandombox.MultiverseCore.event.MVVersionRequestEvent;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.event.CustomEventListener;
@@ -15,11 +16,8 @@ public class MVNPConfigReloadListener extends CustomEventListener {
 
     @Override
     public void onCustomEvent(Event event) {
-        if (event.getEventName().equals("MVConfigReload") && event instanceof MVConfigReloadEvent) {
-            plugin.loadConfig();
-            ((MVConfigReloadEvent) event).addConfig("Multiverse-NetherPortals - config.yml");
-        } else if (event.getEventName().equals("MVVersion") && event instanceof MVVersionRequestEvent) {
-            ((MVVersionRequestEvent) event).setPasteBinBuffer(this.plugin.dumpVersionInfo(((MVVersionRequestEvent) event).getPasteBinBuffer()));
+         if (event.getEventName().equals("MVVersionEvent") && event instanceof MVVersionEvent) {
+            ((MVVersionEvent) event).appendVersionInfo(this.plugin.getVersionInfo());
         }
     }
 }

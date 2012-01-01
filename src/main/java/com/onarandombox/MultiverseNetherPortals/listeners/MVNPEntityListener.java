@@ -5,6 +5,7 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
 import com.onarandombox.MultiverseCore.utils.LocationManipulation;
+import com.onarandombox.MultiverseCore.utils.MVMessaging;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
@@ -32,6 +33,7 @@ public class MVNPEntityListener extends EntityListener {
     private MVWorldManager worldManager;
     private PermissionTools pt;
     private int cooldown = 250;
+    private MVMessaging messaging;
     private Map<String, Date> playerErrors;
     private Map<String, Location> eventRecord;
     // This hash map will track players most recent portal touch.
@@ -46,6 +48,8 @@ public class MVNPEntityListener extends EntityListener {
         this.pt = new PermissionTools(this.plugin.getCore());
         this.playerErrors = new HashMap<String, Date>();
         this.eventRecord = new HashMap<String, Location>();
+        this.messaging = this.plugin.getCore().getMessaging();
+
     }
 
     protected void shootPlayer(Player p, Block block, PortalType type) {
@@ -132,7 +136,7 @@ public class MVNPEntityListener extends EntityListener {
 
         if (toLocation == null) {
             this.shootPlayer(p, eventLocation.getBlock(), type);
-            p.sendMessage("This portal goes nowhere!");
+            this.messaging.sendMessage(p, "This portal goes nowhere!", false);
             return;
         }
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(p.getLocation().getWorld().getName());

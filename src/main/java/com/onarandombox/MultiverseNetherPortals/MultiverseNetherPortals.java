@@ -24,7 +24,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -308,5 +312,15 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private String logAndAddToPasteBinBuffer(String string) {
         this.log(Level.INFO, string);
         return "[Multiverse-NetherPortals] " + string + "\n";
+    }
+
+    public String getVersionInfo() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("[Multiverse-NetherPortals] Multiverse-NetherPortals Version: ").append(this.getDescription().getVersion()).append('\n');
+        buffer.append("[Multiverse-NetherPortals] World links: ").append(this.getWorldLinks()).append('\n');
+        buffer.append("[Multiverse-NetherPortals] Nether Prefix: ").append(netherPrefix).append('\n');
+        buffer.append("[Multiverse-NetherPortals] Nether Suffix: ").append(netherSuffix).append('\n');
+        buffer.append("[Multiverse-NetherPortals] Special Code: ").append("FRN001").append('\n');
+        return buffer.toString();
     }
 }
