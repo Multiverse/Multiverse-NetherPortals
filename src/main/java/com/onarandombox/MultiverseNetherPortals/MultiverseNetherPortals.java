@@ -8,7 +8,7 @@ import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPConfigReloadListener;
+import com.onarandombox.MultiverseNetherPortals.listeners.MVNPCoreListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
@@ -18,8 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -41,7 +40,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     protected MultiverseCore core;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
-    protected MVNPConfigReloadListener customListener;
+    protected MVNPCoreListener customListener;
     protected FileConfiguration MVNPconfiguration;
     private static final String DEFAULT_NETHER_SUFFIX = "_nether";
     private static final String DEFAULT_END_SUFFIX = "_the_end";
@@ -82,12 +81,12 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.pluginListener = new MVNPPluginListener(this);
         this.playerListener = new MVNPPlayerListener(this);
         this.entityListener = new MVNPEntityListener(this);
-        this.customListener = new MVNPConfigReloadListener(this);
-        // Register the PLUGIN_ENABLE Event as we will need to keep an eye out for the Core Enabling if we don't find it initially.
-        this.getServer().getPluginManager().registerEvent(Type.PLUGIN_ENABLE, this.pluginListener, Priority.Normal, this);
-        this.getServer().getPluginManager().registerEvent(Type.PLAYER_PORTAL, this.playerListener, Priority.Normal, this);
-        this.getServer().getPluginManager().registerEvent(Type.CUSTOM_EVENT, this.customListener, Priority.Normal, this);
-        this.getServer().getPluginManager().registerEvent(Type.ENTITY_PORTAL_ENTER, this.entityListener, Priority.Monitor, this);
+        this.customListener = new MVNPCoreListener(this);
+        PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvents(this.pluginListener, this);
+        pm.registerEvents(this.playerListener, this);
+        pm.registerEvents(this.entityListener, this);
+        pm.registerEvents(this.customListener, this);
 
         log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 

@@ -10,12 +10,14 @@ import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
 import java.util.logging.Level;
 
-public class MVNPPlayerListener extends PlayerListener {
+public class MVNPPlayerListener implements Listener {
 
     private MultiverseNetherPortals plugin;
     private MVNameChecker nameChecker;
@@ -31,7 +33,7 @@ public class MVNPPlayerListener extends PlayerListener {
         this.linkChecker = new MVLinkChecker(this.plugin);
     }
 
-    @Override
+    @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event) {
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();

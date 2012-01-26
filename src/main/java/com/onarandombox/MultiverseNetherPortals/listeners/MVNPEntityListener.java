@@ -16,6 +16,9 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.util.Vector;
@@ -25,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-public class MVNPEntityListener extends EntityListener {
+public class MVNPEntityListener implements Listener {
 
     private MultiverseNetherPortals plugin;
     private MVNameChecker nameChecker;
@@ -79,7 +82,7 @@ public class MVNPEntityListener extends EntityListener {
         p.setVelocity(new Vector(newVecX, .6, newVecZ));
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityPortalEnter(EntityPortalEnterEvent event) {
         if (!(event.getEntity() instanceof Player)) {
             return;
