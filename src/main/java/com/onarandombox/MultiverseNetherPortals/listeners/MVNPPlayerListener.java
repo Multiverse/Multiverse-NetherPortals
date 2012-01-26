@@ -11,6 +11,7 @@ import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerPortalEvent;
@@ -33,13 +34,12 @@ public class MVNPPlayerListener implements Listener {
         this.linkChecker = new MVLinkChecker(this.plugin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerPortal(PlayerPortalEvent event) {
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
 
         PortalType type = PortalType.END;
-        System.out.println(event.getFrom() + " => " + event.getFrom().getBlock().getType());
         if (event.getFrom().getBlock().getType() == Material.PORTAL) {
             type = PortalType.NETHER;
         }

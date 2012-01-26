@@ -22,7 +22,7 @@ public class MVLinkChecker {
         MultiverseWorld tpto = this.worldManager.getMVWorld(worldstring);
 
         if (tpto == null) {
-            this.plugin.log(Level.WARNING, "Can't find world " + worldstring);
+            this.plugin.log(Level.FINE, "Can't find world " + worldstring);
         } else if (!this.plugin.getCore().getMVPerms().canEnterWorld(p, tpto)) {
             this.plugin.log(Level.WARNING, "Player " + p.getName() + " can't enter world " + worldstring);
         } else if (!this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
@@ -45,7 +45,7 @@ public class MVLinkChecker {
         MultiverseWorld tpto = this.worldManager.getMVWorld(worldstring);
 
         if (tpto == null) {
-            this.plugin.log(Level.WARNING, "Can't find world " + worldstring);
+            this.plugin.log(Level.FINE, "Can't find " + worldstring);
         } else if (!this.plugin.getCore().getMVPerms().canEnterWorld(event.getPlayer(), tpto)) {
             this.plugin.log(Level.WARNING, "Player " + event.getPlayer().getName() + " can't enter world " + worldstring);
         } else if (!this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
