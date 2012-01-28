@@ -1,11 +1,11 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.onarandombox.MultiverseCore.MultiverseCore;
+import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
-import com.onarandombox.MultiverseCore.utils.LocationManipulation;
-import com.onarandombox.MultiverseCore.utils.MVMessaging;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
@@ -19,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.util.Vector;
 
@@ -36,9 +35,10 @@ public class MVNPEntityListener implements Listener {
     private MVWorldManager worldManager;
     private PermissionTools pt;
     private int cooldown = 250;
-    private MVMessaging messaging;
+    private MultiverseMessaging messaging;
     private Map<String, Date> playerErrors;
     private Map<String, Location> eventRecord;
+    private LocationManipulation locationManipulation;
     // This hash map will track players most recent portal touch.
     // we can use this cache to avoid a TON of unrequired calls to the
     // On entity portal touch calculations.
@@ -52,6 +52,7 @@ public class MVNPEntityListener implements Listener {
         this.playerErrors = new HashMap<String, Date>();
         this.eventRecord = new HashMap<String, Location>();
         this.messaging = this.plugin.getCore().getMessaging();
+        this.locationManipulation = this.plugin.getCore().getLocationManipulation();
 
     }
 
@@ -89,19 +90,19 @@ public class MVNPEntityListener implements Listener {
         }
 
         Player p = (Player) event.getEntity();
-        Location block = LocationManipulation.getBlockLocation(p.getLocation());
+        Location block = this.locationManipulation.getBlockLocation(p.getLocation());
         if(this.eventRecord.containsKey(p.getName())) {
             // The the eventRecord shows this player was already trying to go somewhere.
-            if (LocationManipulation.getBlockLocation(p.getLocation()).equals(this.eventRecord.get(p.getName()))) {
+            if (this.locationManipulation.getBlockLocation(p.getLocation()).equals(this.eventRecord.get(p.getName()))) {
                 // The player has not moved, and we've already fired one event.
                 return;
             } else {
                 // The player moved, potentially out of the portal, allow event to re-check.
-                this.eventRecord.put(p.getName(), LocationManipulation.getBlockLocation(p.getLocation()));
+                this.eventRecord.put(p.getName(), this.locationManipulation.getBlockLocation(p.getLocation()));
                 // We'll need to clear this value...
             }
         } else {
-            this.eventRecord.put(p.getName(), LocationManipulation.getBlockLocation(p.getLocation()));
+            this.eventRecord.put(p.getName(), this.locationManipulation.getBlockLocation(p.getLocation()));
         }
         MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(p, event.getLocation());
         this.plugin.getServer().getPluginManager().callEvent(playerTouchedPortalEvent);
