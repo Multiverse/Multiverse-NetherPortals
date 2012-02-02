@@ -157,7 +157,7 @@ public class MVNPEntityListener implements Listener {
                     "' because they don't have the FUNDS required to enter.");
             return;
         }
-        if (MultiverseCore.EnforceAccess) {
+        if (MultiverseCore.getStaticConfig().getEnforceAccess()) {
             if (!pt.playerCanGoFromTo(fromWorld, toWorld, p, p)) {
                 this.shootPlayer(p, eventLocation.getBlock(), type);
                 this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +

@@ -12,7 +12,7 @@ import com.onarandombox.MultiverseNetherPortals.listeners.MVNPCoreListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
-import com.pneumaticraft.commandhandler.CommandHandler;
+import com.pneumaticraft.commandhandler.multiverse.CommandHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -140,7 +140,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.commandHandler.registerCommand(new LinkCommand(this));
         this.commandHandler.registerCommand(new UnlinkCommand(this));
         this.commandHandler.registerCommand(new ShowLinkCommand(this));
-        for (com.pneumaticraft.commandhandler.Command c : this.commandHandler.getAllCommands()) {
+        for (com.pneumaticraft.commandhandler.multiverse.Command c : this.commandHandler.getAllCommands()) {
             if (c instanceof HelpCommand) {
                 c.addKey("mvnp");
             }
@@ -266,11 +266,11 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.FINE && MultiverseCore.GlobalDebug >= 1) {
+        if (level == Level.FINE && MultiverseCore.getStaticConfig().getGlobalDebug() >= 1) {
             staticDebugLog(Level.INFO, msg);
-        } else if (level == Level.FINER && MultiverseCore.GlobalDebug >= 2) {
+        } else if (level == Level.FINER && MultiverseCore.getStaticConfig().getGlobalDebug() >= 2) {
             staticDebugLog(Level.INFO, msg);
-        } else if (level == Level.FINEST && MultiverseCore.GlobalDebug >= 3) {
+        } else if (level == Level.FINEST && MultiverseCore.getStaticConfig().getGlobalDebug() >= 3) {
             staticDebugLog(Level.INFO, msg);
         } else if (level != Level.FINE && level != Level.FINER && level != Level.FINEST) {
             staticLog(level, msg);

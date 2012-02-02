@@ -74,7 +74,7 @@ public class MVNPPlayerListener implements Listener {
                     "' because they don't have the FUNDS required to enter.");
             return;
         }
-        if (MultiverseCore.EnforceAccess) {
+        if (MultiverseCore.getStaticConfig().getEnforceAccess()) {
             event.setCancelled(!pt.playerCanGoFromTo(fromWorld, toWorld, event.getPlayer(), event.getPlayer()));
             if (event.isCancelled()) {
                 this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was DENIED ACCESS to '" + event.getTo().getWorld().getName() +

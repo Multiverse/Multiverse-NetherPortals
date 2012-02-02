@@ -1,7 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.pneumaticraft.commandhandler.Command;
+import com.pneumaticraft.commandhandler.multiverse.Command;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
