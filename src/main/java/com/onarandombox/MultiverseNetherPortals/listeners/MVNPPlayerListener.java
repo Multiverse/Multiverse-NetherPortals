@@ -35,6 +35,10 @@ public class MVNPPlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerPortal(PlayerPortalEvent event) {
+        if (event.isCancelled()) {
+            this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
+            return;
+        }
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
 
@@ -74,7 +78,7 @@ public class MVNPPlayerListener implements Listener {
                     "' because they don't have the FUNDS required to enter.");
             return;
         }
-        if (MultiverseCore.getStaticConfig().getEnforceAccess()) {
+        if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
             event.setCancelled(!pt.playerCanGoFromTo(fromWorld, toWorld, event.getPlayer(), event.getPlayer()));
             if (event.isCancelled()) {
                 this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was DENIED ACCESS to '" + event.getTo().getWorld().getName() +

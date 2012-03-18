@@ -106,6 +106,12 @@ public class MVNPEntityListener implements Listener {
         }
         MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(p, event.getLocation());
         this.plugin.getServer().getPluginManager().callEvent(playerTouchedPortalEvent);
+        Location eventLocation = event.getLocation().clone();
+        if (!playerTouchedPortalEvent.canUseThisPortal()) {
+            // Someone else said the player is not allowed to go here.
+            this.shootPlayer(p, eventLocation.getBlock(), PortalType.NETHER);
+            this.plugin.log(Level.FINEST, "Someone request this player be kicked back!!");
+        }
         if(playerTouchedPortalEvent.isCancelled()) {
             this.plugin.log(Level.FINEST, "Someone cancelled the enter Event for NetherPortals!");
             return;
@@ -127,7 +133,7 @@ public class MVNPEntityListener implements Listener {
         String currentWorld = event.getLocation().getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(event.getLocation().getWorld().getName(), type);
         Location currentLocation = event.getLocation();
-        Location eventLocation = event.getLocation().clone();
+
         Location toLocation = null;
 
         if (linkedWorld != null) {
@@ -157,7 +163,7 @@ public class MVNPEntityListener implements Listener {
                     "' because they don't have the FUNDS required to enter.");
             return;
         }
-        if (MultiverseCore.getStaticConfig().getEnforceAccess()) {
+        if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
             if (!pt.playerCanGoFromTo(fromWorld, toWorld, p, p)) {
                 this.shootPlayer(p, eventLocation.getBlock(), type);
                 this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
