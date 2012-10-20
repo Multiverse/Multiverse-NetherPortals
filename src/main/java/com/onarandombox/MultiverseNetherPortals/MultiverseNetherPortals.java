@@ -1,5 +1,6 @@
 package com.onarandombox.MultiverseNetherPortals;
 
+import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVPlugin;
 import com.onarandombox.MultiverseCore.commands.HelpCommand;
@@ -33,10 +34,7 @@ import java.util.logging.Logger;
 
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
-    private static final Logger log = Logger.getLogger("Minecraft");
-    private static final String logPrefix = "[MultiVerse-NetherPortals] ";
     private static final String NETEHR_PORTALS_CONFIG = "config.yml";
-    protected static DebugLog debugLog;
     protected MultiverseCore core;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
@@ -56,24 +54,24 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     @Override
     public void onEnable() {
+        Logging.init(this);
         this.core = (MultiverseCore) getServer().getPluginManager().getPlugin("Multiverse-Core");
 
         // Test if the Core was found, if not we'll disable this plugin.
         if (this.core == null) {
-            log.info(logPrefix + "Multiverse-Core not found, will keep looking.");
+            Logging.info("Multiverse-Core not found, will keep looking.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         if (this.core.getProtocolVersion() < requiresProtocol) {
-            log.severe(logPrefix + "Your Multiverse-Core is OUT OF DATE");
-            log.severe(logPrefix + "This version of NetherPortals requires Protocol Level: " + requiresProtocol);
-            log.severe(logPrefix + "Your of Core Protocol Level is: " + this.core.getProtocolVersion());
-            log.severe(logPrefix + "Grab an updated copy at: ");
-            log.severe(logPrefix + "http://bukkit.onarandombox.com/?dir=multiverse-core");
+            Logging.severe("Your Multiverse-Core is OUT OF DATE");
+            Logging.severe("This version of NetherPortals requires Protocol Level: " + requiresProtocol);
+            Logging.severe("Your of Core Protocol Level is: " + this.core.getProtocolVersion());
+            Logging.severe("Grab an updated copy at: ");
+            Logging.severe("http://bukkit.onarandombox.com/?dir=multiverse-core");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        debugLog = new DebugLog("Multiverse-NetherPortals", getDataFolder() + File.separator + "debug.log");
 
         this.core.incrementPluginCount();
         // As soon as we know MVCore was found, we can use the debug log!
@@ -88,7 +86,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         pm.registerEvents(this.entityListener, this);
         pm.registerEvents(this.customListener, this);
 
-        log.info(logPrefix + "- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
+        Logging.info("- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
 
         loadConfig();
         this.registerCommands();
@@ -111,7 +109,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
 
         if (this.getNetherPrefix().length() == 0 && this.getNetherSuffix().length() == 0) {
-            log.warning(logPrefix + "I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
+            Logging.warning("I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
             this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
         }
         if (this.MVNPconfiguration.getConfigurationSection("worlds") == null) {
@@ -160,7 +158,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     @Override
     public void onDisable() {
-        log.info(logPrefix + "- Disabled");
+        Logging.info("- Disabled");
     }
 
     @Override
@@ -266,25 +264,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.FINE && MultiverseCore.getStaticConfig().getGlobalDebug() >= 1) {
-            staticDebugLog(Level.INFO, msg);
-        } else if (level == Level.FINER && MultiverseCore.getStaticConfig().getGlobalDebug() >= 2) {
-            staticDebugLog(Level.INFO, msg);
-        } else if (level == Level.FINEST && MultiverseCore.getStaticConfig().getGlobalDebug() >= 3) {
-            staticDebugLog(Level.INFO, msg);
-        } else if (level != Level.FINE && level != Level.FINER && level != Level.FINEST) {
-            staticLog(level, msg);
-        }
-    }
-
-    private void staticLog(Level level, String msg) {
-        log.log(level, logPrefix + " " + msg);
-        debugLog.log(level, logPrefix + " " + msg);
-    }
-
-    private void staticDebugLog(Level level, String msg) {
-        log.log(level, "[MVNetherPortals-Debug] " + msg);
-        debugLog.log(level, "[MVNetherPortals-Debug] " + msg);
+        Logging.log(level, msg);
     }
 
     @Override
