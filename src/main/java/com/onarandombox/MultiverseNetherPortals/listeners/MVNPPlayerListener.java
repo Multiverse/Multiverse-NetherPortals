@@ -52,7 +52,17 @@ public class MVNPPlayerListener implements Listener {
         if (linkedWorld != null) {
             this.linkChecker.getNewTeleportLocation(event, currentLocation, linkedWorld);
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
-            this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld));
+            if (type == PortalType.NETHER) {
+                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER));
+            } else {
+                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)));
+            }
+        } else if (this.nameChecker.isValidEndName(currentWorld)) {
+            if (type == PortalType.NETHER) {
+                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.END)));
+            } else {
+                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END));
+            }
         } else {
             if(type == PortalType.END) {
                 this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(currentWorld));
@@ -88,8 +98,16 @@ public class MVNPPlayerListener implements Listener {
             this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was allowed to go to '" + event.getTo().getWorld().getName() + "' because enforceaccess is off.");
         }
         if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+            this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+            event.getPortalTravelAgent().setCanCreatePortal(false);
             event.setTo(toWorld.getSpawnLocation());
         }
     }
 
+    /*
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerPortalMonitor(PlayerPortalEvent event) {
+        System.out.println("Portal is " + event.isCancelled() + " and taking the player to " + event.getTo() + " with agent " + event.getPortalTravelAgent());
+    }
+    */
 }

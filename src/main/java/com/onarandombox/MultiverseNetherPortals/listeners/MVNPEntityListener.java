@@ -139,13 +139,28 @@ public class MVNPEntityListener implements Listener {
         if (linkedWorld != null) {
             toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, p);
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
-            toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld), p);
+            if (type == PortalType.NETHER) {
+                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER), p);
+            } else {
+                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)), p);
+            }
+        } else if (this.nameChecker.isValidEndName(currentWorld)) {
+            if (type == PortalType.NETHER) {
+                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.END)), p);
+            } else {
+                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END), p);
+            }
         } else {
-            toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), p);
+            if(type == PortalType.END) {
+                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), p);
+            } else {
+                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), p);
+            }
         }
 
         if (toLocation == null) {
             this.shootPlayer(p, eventLocation.getBlock(), type);
+            // TODO fix this message to be more descriptive
             this.messaging.sendMessage(p, "This portal goes nowhere!", false);
             return;
         }

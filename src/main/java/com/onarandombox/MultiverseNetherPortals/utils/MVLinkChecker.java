@@ -54,11 +54,13 @@ public class MVLinkChecker {
             this.plugin.log(Level.FINE, "Getting new teleport location for player " + event.getPlayer().getName() + " to world " + worldstring);
 
             // Set the output location to the same XYZ coords but different world
-            double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();
+            double toScaling = tpto.getScaling();
             double fromScaling = this.worldManager.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
 
+            //System.out.println("Old location: " + fromLocation);
             fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
             fromLocation.setWorld(tpto.getCBWorld());
+            //System.out.println("Scaled location: " + fromLocation);
         }
         event.setTo(fromLocation);
     }
