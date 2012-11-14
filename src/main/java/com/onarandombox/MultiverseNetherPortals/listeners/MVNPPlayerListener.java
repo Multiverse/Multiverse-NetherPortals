@@ -39,10 +39,9 @@ public class MVNPPlayerListener implements Listener {
             this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
             return;
         }
-        if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
-            // The player is Portaling to the same world.
-            this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.  Ignoring.");
-            return;
+        Location originalTo = event.getTo();
+        if (originalTo != null) {
+            originalTo = originalTo.clone();
         }
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
@@ -58,6 +57,7 @@ public class MVNPPlayerListener implements Listener {
             this.linkChecker.getNewTeleportLocation(event, currentLocation, linkedWorld);
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             if (type == PortalType.NETHER) {
+                this.plugin.log(Level.FINER, "");
                 this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER));
             } else {
                 this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)));
@@ -75,8 +75,13 @@ public class MVNPPlayerListener implements Listener {
                 this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(currentWorld));
             }
         }
-
         if (event.getTo() == null || event.getFrom() == null) {
+            return;
+        }
+        if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
+            // The player is Portaling to the same world.
+            this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.  Ignoring.");
+            event.setTo(originalTo);
             return;
         }
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
@@ -88,11 +93,4 @@ public class MVNPPlayerListener implements Listener {
             event.setTo(toWorld.getSpawnLocation());
         }
     }
-
-    /*
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerPortalMonitor(PlayerPortalEvent event) {
-        System.out.println("Portal is " + event.isCancelled() + " and taking the player to " + event.getTo() + " with agent " + event.getPortalTravelAgent());
-    }
-    */
 }

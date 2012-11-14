@@ -3,6 +3,8 @@ package com.onarandombox.MultiverseNetherPortals.utils;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 
+import java.util.logging.Level;
+
 public class MVNameChecker {
 	private MultiverseNetherPortals plugin;
 
@@ -48,7 +50,11 @@ public class MVNameChecker {
 	 * @return
 	 */
 	public String getNetherName(String normalName) {
-		return this.plugin.getNetherPrefix() + normalName + this.plugin.getNetherSuffix();
+        final String netherName = this.plugin.getNetherPrefix() + normalName + this.plugin.getNetherSuffix();
+        if (plugin.getCore().getMVWorldManager().isMVWorld(netherName)) {
+            this.plugin.log(Level.FINEST,  "Selected nether world '" + netherName + "' for normal '" + normalName + "'");
+        }
+		return netherName;
 	}
 	
 	/**
@@ -58,7 +64,11 @@ public class MVNameChecker {
 	 * @return
 	 */
 	public String getEndName(String normalName) {
-		return this.plugin.getEndPrefix() + normalName + this.plugin.getEndSuffix();
+        final String endName = this.plugin.getEndPrefix() + normalName + this.plugin.getEndSuffix();
+        if (plugin.getCore().getMVWorldManager().isMVWorld(endName)) {
+            this.plugin.log(Level.FINEST,  "Selected end world '" + endName + "' for normal '" + normalName + "'");
+        }
+		return endName;
 	}
 	
 	/**
@@ -90,6 +100,9 @@ public class MVNameChecker {
                 String[] split = normalName.split(this.plugin.getEndSuffix());
                 normalName = split[0];
             }
+        }
+        if (!normalName.equals(netherName) && plugin.getCore().getMVWorldManager().isMVWorld(normalName)) {
+            this.plugin.log(Level.FINEST,  "Selected normal world '" + normalName + "' for " + type + " '" + netherName + "'");
         }
 		// All we're left with is the normal world. Don't worry if it exists, the method below will handle that!
 		return normalName;
