@@ -33,7 +33,7 @@ public class MVNPPlayerListener implements Listener {
         this.linkChecker = new MVLinkChecker(this.plugin);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerPortal(PlayerPortalEvent event) {
         if (event.isCancelled()) {
             this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
