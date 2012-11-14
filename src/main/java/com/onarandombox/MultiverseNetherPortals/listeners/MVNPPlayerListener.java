@@ -39,6 +39,11 @@ public class MVNPPlayerListener implements Listener {
             this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
             return;
         }
+        if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
+            // The player is Portaling to the same world.
+            this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.  Ignoring.");
+            return;
+        }
         Location currentLocation = event.getFrom().clone();
         String currentWorld = currentLocation.getWorld().getName();
 
@@ -77,26 +82,6 @@ public class MVNPPlayerListener implements Listener {
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
-        if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
-            // The player is Portaling to the same world.
-            this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.");
-            return;
-        }
-        event.setCancelled(!pt.playerHasMoneyToEnter(fromWorld, toWorld, event.getPlayer(), event.getPlayer(), true));
-        if (event.isCancelled()) {
-            this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was DENIED ACCESS to '" + event.getTo().getWorld().getName() +
-                    "' because they don't have the FUNDS required to enter.");
-            return;
-        }
-        if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
-            event.setCancelled(!pt.playerCanGoFromTo(fromWorld, toWorld, event.getPlayer(), event.getPlayer()));
-            if (event.isCancelled()) {
-                this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was DENIED ACCESS to '" + event.getTo().getWorld().getName() +
-                        "' because they don't have: multiverse.access." + event.getTo().getWorld().getName());
-            }
-        } else {
-            this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was allowed to go to '" + event.getTo().getWorld().getName() + "' because enforceaccess is off.");
-        }
         if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
             this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
             event.getPortalTravelAgent().setCanCreatePortal(false);
