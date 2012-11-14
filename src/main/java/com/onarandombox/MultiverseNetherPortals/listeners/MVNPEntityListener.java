@@ -160,8 +160,12 @@ public class MVNPEntityListener implements Listener {
 
         if (toLocation == null) {
             this.shootPlayer(p, eventLocation.getBlock(), type);
-            // TODO fix this message to be more descriptive
             this.messaging.sendMessage(p, "This portal goes nowhere!", false);
+            if (type == PortalType.END) {
+                this.messaging.sendMessage(p, "No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.", false);
+            } else {
+                this.messaging.sendMessage(p, "No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.", false);
+            }
             return;
         }
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(p.getLocation().getWorld().getName());
