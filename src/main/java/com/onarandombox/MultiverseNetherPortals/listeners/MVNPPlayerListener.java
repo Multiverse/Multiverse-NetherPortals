@@ -1,6 +1,5 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
-import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
@@ -10,6 +9,7 @@ import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -86,6 +86,9 @@ public class MVNPPlayerListener implements Listener {
             }
         } else {
             this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was allowed to go to '" + event.getTo().getWorld().getName() + "' because enforceaccess is off.");
+        }
+        if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+            event.setTo(toWorld.getSpawnLocation());
         }
     }
 
