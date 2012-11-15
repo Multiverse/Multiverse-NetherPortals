@@ -1,6 +1,5 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
-import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
@@ -57,6 +56,10 @@ public class MVNPEntityListener implements Listener {
     }
 
     protected void shootPlayer(Player p, Block block, PortalType type) {
+        if (!plugin.isUsingBounceBack()) {
+            this.plugin.log(Level.FINEST, "You said not to use bounce back so the player is free to walk into portal!");
+            return;
+        }
         this.playerErrors.put(p.getName(), new Date());
         double myconst = 2;
         double newVecX = 0;

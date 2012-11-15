@@ -103,6 +103,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.linkMap = new HashMap<String, String>();
         this.endLinkMap = new HashMap<String, String>();
 
+        this.setUsingBounceBack(this.isUsingBounceBack());
+
         this.setNetherPrefix(this.MVNPconfiguration.getString("netherportals.name.prefix", this.getNetherPrefix()));
         this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
 
@@ -253,6 +255,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             this.log(Level.SEVERE, "Could not save " + NETEHR_PORTALS_CONFIG);
         }
         return false;
+    }
+
+    public boolean isUsingBounceBack() {
+        return this.MVNPconfiguration.getBoolean("bounceback", true);
+    }
+
+    public void setUsingBounceBack(boolean useBounceBack) {
+        this.MVNPconfiguration.set("bounceback", useBounceBack);
     }
 
     @Override
