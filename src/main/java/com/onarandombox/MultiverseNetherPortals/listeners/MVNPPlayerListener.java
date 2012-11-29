@@ -90,7 +90,13 @@ public class MVNPPlayerListener implements Listener {
         if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
             this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
             event.getPortalTravelAgent().setCanCreatePortal(false);
-            event.setTo(toWorld.getSpawnLocation());
+            if (toWorld.getBedRespawn()
+                    && event.getPlayer().getBedSpawnLocation() != null
+                    && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
+                event.setTo(event.getPlayer().getBedSpawnLocation());
+            } else {
+                event.setTo(toWorld.getSpawnLocation());
+            }
         }
     }
 }
