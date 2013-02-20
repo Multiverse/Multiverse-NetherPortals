@@ -49,6 +49,7 @@ public class MVNPPlayerListener implements Listener {
         PortalType type = PortalType.END;
         if (event.getFrom().getBlock().getType() == Material.PORTAL) {
             type = PortalType.NETHER;
+            event.useTravelAgent(true);
         }
 
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
