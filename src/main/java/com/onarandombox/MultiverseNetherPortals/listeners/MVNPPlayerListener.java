@@ -99,6 +99,12 @@ public class MVNPPlayerListener implements Listener {
                 } else {
                     event.setTo(toWorld.getSpawnLocation());
                 }
+        		Location loc = event.getTo();
+    			for (int x = loc.getBlockX() - 10; x < loc.getBlockX() + 10; x++) {
+    				for (int z = loc.getBlockZ() - 10; z < loc.getBlockZ() + 10; z++) {
+    					loc.getWorld().getBlockAt(x, loc.getBlockY() - 2, z).setTypeId(49);
+    				}
+    			}
             } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
         		event.getPortalTravelAgent().setCanCreatePortal(true);
     			event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
