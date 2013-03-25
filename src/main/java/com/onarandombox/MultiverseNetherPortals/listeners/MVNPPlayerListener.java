@@ -88,15 +88,20 @@ public class MVNPPlayerListener implements Listener {
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
-        if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
-            this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-            event.getPortalTravelAgent().setCanCreatePortal(false);
-            if (toWorld.getBedRespawn()
-                    && event.getPlayer().getBedSpawnLocation() != null
-                    && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
-                event.setTo(event.getPlayer().getBedSpawnLocation());
-            } else {
-                event.setTo(toWorld.getSpawnLocation());
+        if (!event.isCancelled()) {
+            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+                this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+                event.getPortalTravelAgent().setCanCreatePortal(false);
+                if (toWorld.getBedRespawn()
+                        && event.getPlayer().getBedSpawnLocation() != null
+                        && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
+                    event.setTo(event.getPlayer().getBedSpawnLocation());
+                } else {
+                    event.setTo(toWorld.getSpawnLocation());
+                }
+            } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+        		event.getPortalTravelAgent().setCanCreatePortal(true);
+    			event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
             }
         }
     }
