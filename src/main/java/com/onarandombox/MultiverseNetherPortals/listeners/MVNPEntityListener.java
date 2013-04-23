@@ -94,6 +94,11 @@ public class MVNPEntityListener implements Listener {
 
         Player p = (Player) event.getEntity();
         Location block = this.locationManipulation.getBlockLocation(p.getLocation());
+
+        if (!plugin.isHandledByNetherPortals(block)) {
+            return;
+        }
+
         if(this.eventRecord.containsKey(p.getName())) {
             // The the eventRecord shows this player was already trying to go somewhere.
             if (this.locationManipulation.getBlockLocation(p.getLocation()).equals(this.eventRecord.get(p.getName()))) {

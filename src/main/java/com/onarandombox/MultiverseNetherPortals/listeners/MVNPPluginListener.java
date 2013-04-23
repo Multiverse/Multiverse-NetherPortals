@@ -22,6 +22,9 @@ public class MVNPPluginListener implements Listener {
             this.plugin.setCore(((MultiverseCore) this.plugin.getServer().getPluginManager().getPlugin("Multiverse-Core")));
             this.plugin.getServer().getPluginManager().enablePlugin(this.plugin);
         }
+        if (event.getPlugin().getDescription().getName().equals("Multiverse-Portals")) {
+            this.plugin.setPortals(event.getPlugin());
+        }
     }
 
     @EventHandler
@@ -29,6 +32,9 @@ public class MVNPPluginListener implements Listener {
         if (event.getPlugin().getDescription().getName().equals("Multiverse-Core")) {
             this.plugin.setCore(null);
             this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
+        }
+        if (event.getPlugin().getDescription().getName().equals("Multiverse-Portals")) {
+            this.plugin.setPortals(null);
         }
     }
 }

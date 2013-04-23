@@ -12,6 +12,7 @@ import com.onarandombox.MultiverseNetherPortals.listeners.MVNPCoreListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
+import com.onarandombox.MultiversePortals.MultiversePortals;
 import com.pneumaticraft.commandhandler.multiverse.CommandHandler;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -29,11 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import org.bukkit.Location;
+import org.bukkit.plugin.Plugin;
 
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     private static final String NETEHR_PORTALS_CONFIG = "config.yml";
     protected MultiverseCore core;
+    protected Plugin multiversePortals;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
     protected MVNPCoreListener customListener;
@@ -54,6 +58,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     public void onEnable() {
         Logging.init(this);
         this.core = (MultiverseCore) getServer().getPluginManager().getPlugin("Multiverse-Core");
+        this.multiversePortals = getServer().getPluginManager().getPlugin("Multiverse-Portals");
 
         // Test if the Core was found, if not we'll disable this plugin.
         if (this.core == null) {
@@ -263,6 +268,29 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public void setUsingBounceBack(boolean useBounceBack) {
         this.MVNPconfiguration.set("bounceback", useBounceBack);
+    }
+
+    public boolean isHandledByNetherPortals(Location l) {
+        if (multiversePortals != null) {
+            // Catch errors which could occur if classes aren't present or are missing methods.
+            try {
+                MultiversePortals portals = (MultiversePortals) multiversePortals;
+                if (portals.getPortalManager().isPortal(l)) {
+                    return false;
+                }
+            } catch (Throwable t) {
+                getLogger().log(Level.WARNING, "Error checking if portal is handled by Multiverse-Portals", t);
+            }
+        }
+        return true;
+    }
+
+    public void setPortals(Plugin multiversePortals) {
+        this.multiversePortals = multiversePortals;
+    }
+
+    public Plugin getPortals() {
+        return multiversePortals;
     }
 
     @Override

@@ -151,6 +151,15 @@
             <scope>compile</scope>
         </dependency>
         <!-- End of Multiverse Core Dependency -->
+        <!-- Start of Multiverse Portals Dependency -->
+        <dependency>
+            <groupId>com.onarandombox.multiverseportals</groupId>
+            <artifactId>Multiverse-Portals</artifactId>
+            <version>2.5</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <!-- End of Multiverse Portals Dependency -->
         <!-- Start of Logging Dependency -->
         <dependency>
             <groupId>com.dumptruckman.minecraft</groupId>
