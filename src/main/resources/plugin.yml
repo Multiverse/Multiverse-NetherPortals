@@ -3,6 +3,7 @@ main: com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals
 authors: ['Rigby', 'fernferret']
 version: maven-version-number
 depend: ['Multiverse-Core']
+softdepend: ['Multiverse-Portals']
 commands:
   mvnp:
     description: Generic Multiverse-NetherPortals Command

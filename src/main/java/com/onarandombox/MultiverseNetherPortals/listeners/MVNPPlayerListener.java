@@ -44,6 +44,9 @@ public class MVNPPlayerListener implements Listener {
             originalTo = originalTo.clone();
         }
         Location currentLocation = event.getFrom().clone();
+        if (!plugin.isHandledByNetherPortals(currentLocation)) {
+            return;
+        }
         String currentWorld = currentLocation.getWorld().getName();
 
         PortalType type = PortalType.END;
