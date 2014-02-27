@@ -91,15 +91,30 @@ public class MVNPPlayerListener implements Listener {
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
-        if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
-            this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-            event.getPortalTravelAgent().setCanCreatePortal(false);
-            if (toWorld.getBedRespawn()
-                    && event.getPlayer().getBedSpawnLocation() != null
-                    && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
-                event.setTo(event.getPlayer().getBedSpawnLocation());
-            } else {
-                event.setTo(toWorld.getSpawnLocation());
+        if (!event.isCancelled()) {
+            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+                this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+                event.getPortalTravelAgent().setCanCreatePortal(false);
+                if (toWorld.getBedRespawn()
+                        && event.getPlayer().getBedSpawnLocation() != null
+                        && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
+                    event.setTo(event.getPlayer().getBedSpawnLocation());
+                } else {
+                    event.setTo(toWorld.getSpawnLocation());
+                }
+            } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+                event.getPortalTravelAgent().setCanCreatePortal(true);
+                event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
+            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+                Location loc = event.getTo();
+                for (int x = loc.getBlockX() - 2; x < loc.getBlockX() + 3; x++) {
+                    for (int y = loc.getBlockY() - 1; y < loc.getBlockY() + 3; y++) {
+                        for (int z = loc.getBlockZ() - 2; z < loc.getBlockZ() + 3; z++) {
+                            loc.getWorld().getBlockAt(x, y, z).setType(Material.AIR);
+                            loc.getWorld().getBlockAt(x, loc.getBlockY() - 1, z).setType(Material.OBSIDIAN);
+                        }
+                    }
+                }
             }
         }
     }
