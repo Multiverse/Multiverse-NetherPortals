@@ -10,6 +10,7 @@ import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -91,15 +92,40 @@ public class MVNPPlayerListener implements Listener {
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
-        if (!event.isCancelled() && fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
-            this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-            event.getPortalTravelAgent().setCanCreatePortal(false);
-            if (toWorld.getBedRespawn()
-                    && event.getPlayer().getBedSpawnLocation() != null
-                    && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
-                event.setTo(event.getPlayer().getBedSpawnLocation());
-            } else {
-                event.setTo(toWorld.getSpawnLocation());
+        if (!event.isCancelled()) {
+            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+                this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+                event.getPortalTravelAgent().setCanCreatePortal(false);
+                if (toWorld.getBedRespawn()
+                        && event.getPlayer().getBedSpawnLocation() != null
+                        && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
+                    event.setTo(event.getPlayer().getBedSpawnLocation());
+                } else {
+                    event.setTo(toWorld.getSpawnLocation());
+                }
+            } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+                event.getPortalTravelAgent().setCanCreatePortal(true);
+                event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
+            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+                Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
+                event.setTo(loc);
+                Block block = loc.getBlock();
+                for (int x = block.getX() - 2; x <= block.getX() + 2; x++) {
+                    for (int z = block.getZ() - 2; z <= block.getZ() + 2; z++) {
+                        Block b = loc.getWorld().getBlockAt(x, block.getY(), z);
+                        if (b.getType() != Material.AIR) {
+                            b.setType(Material.AIR);
+                        }
+                        b = loc.getWorld().getBlockAt(x, block.getY() + 1, z);
+                        if (b.getType() != Material.AIR) {
+                            b.setType(Material.AIR);
+                        }
+                        b = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
+                        if (b.getType() != Material.OBSIDIAN) {
+                            b.setType(Material.OBSIDIAN);
+                        }
+                    }
+                }
             }
         }
     }
