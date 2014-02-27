@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -112,17 +113,15 @@ public class MVNPPlayerListener implements Listener {
                 Block block = loc.getBlock();
                 for (int x = block.getX() - 2; x <= block.getX() + 2; x++) {
                     for (int z = block.getZ() - 2; z <= block.getZ() + 2; z++) {
-                        Block b = loc.getWorld().getBlockAt(x, block.getY(), z);
-                        if (b.getType() != Material.AIR) {
-                            b.setType(Material.AIR);
+                        Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
+                        if (platformBlock.getType() != Material.OBSIDIAN) {
+                            platformBlock.setType(Material.OBSIDIAN);
                         }
-                        b = loc.getWorld().getBlockAt(x, block.getY() + 1, z);
-                        if (b.getType() != Material.AIR) {
-                            b.setType(Material.AIR);
-                        }
-                        b = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
-                        if (b.getType() != Material.OBSIDIAN) {
-                            b.setType(Material.OBSIDIAN);
+                        for (int yMod = 1; yMod <= 3; yMod++) {
+                            Block b = platformBlock.getRelative(BlockFace.UP, yMod);
+                            if (b.getType() != Material.AIR) {
+                                b.setType(Material.AIR);
+                            }
                         }
                     }
                 }
