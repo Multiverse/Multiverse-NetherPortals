@@ -263,7 +263,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public boolean isUsingBounceBack() {
-        return this.MVNPconfiguration.getBoolean("bounceback", true);
+        return this.MVNPconfiguration.getBoolean("bounceback", false);
     }
 
     public void setUsingBounceBack(boolean useBounceBack) {
