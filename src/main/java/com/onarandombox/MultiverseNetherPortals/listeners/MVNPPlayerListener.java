@@ -2,7 +2,6 @@ package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
-import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
@@ -25,13 +24,11 @@ public class MVNPPlayerListener implements Listener {
     private MVNameChecker nameChecker;
     private MVLinkChecker linkChecker;
     private MVWorldManager worldManager;
-    private PermissionTools pt;
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
         this.nameChecker = new MVNameChecker(plugin);
         this.worldManager = this.plugin.getCore().getMVWorldManager();
-        this.pt = new PermissionTools(this.plugin.getCore());
         this.linkChecker = new MVLinkChecker(this.plugin);
     }
 
