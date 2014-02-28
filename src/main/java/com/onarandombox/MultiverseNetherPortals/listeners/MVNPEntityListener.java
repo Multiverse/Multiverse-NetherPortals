@@ -64,17 +64,17 @@ public class MVNPEntityListener implements Listener {
         if (block.getRelative(BlockFace.EAST).getType() == Material.PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.PORTAL) {
             this.plugin.log(Level.FINER, "Found Portal: East/West");
             if (p.getLocation().getX() < block.getLocation().getX()) {
-                newVecX = -1 * myconst;
+                newVecZ = -1 * myconst;
             } else {
-                newVecX = 1 * myconst;
+                newVecZ = 1 * myconst;
             }
         } else {
             //NOrth/South
             this.plugin.log(Level.FINER, "Found Portal: North/South");
             if (p.getLocation().getZ() < block.getLocation().getZ()) {
-                newVecZ = -1 * myconst;
+                newVecX = -1 * myconst;
             } else {
-                newVecZ = 1 * myconst;
+                newVecX = 1 * myconst;
             }
         }
         p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
