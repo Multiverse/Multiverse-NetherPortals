@@ -16,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEvent;
-import java.util.logging.Level;
 
 public class MVNPEntityListener implements Listener {
 
@@ -56,7 +55,6 @@ public class MVNPEntityListener implements Listener {
             this.linkChecker.findNewTeleportLocation(event, currentLocation, linkedWorld);
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             if (type == PortalType.NETHER) {
-                this.plugin.log(Level.FINER, "");
                 this.linkChecker.findNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER));
             } else {
                 this.linkChecker.findNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)));
