@@ -1,9 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
-import com.onarandombox.MultiverseCore.event.MVConfigReloadEvent;
 import com.onarandombox.MultiverseCore.event.MVVersionEvent;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
