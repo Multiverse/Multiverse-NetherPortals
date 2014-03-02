@@ -87,8 +87,10 @@ public class MVNPPlayerListener implements Listener {
         }
         String currentWorld = currentLocation.getWorld().getName();
 
-        PortalType type = PortalType.END;
-        if (event.getFrom().getBlock().getType() == Material.PORTAL) {
+        PortalType type = null;
+        if (currentLocation.getWorld().getBlockAt(currentLocation).getType() == Material.ENDER_PORTAL) {
+            type = PortalType.END;
+        } else {
             type = PortalType.NETHER;
             event.useTravelAgent(true);
         }
