@@ -153,6 +153,7 @@ public class MVNPPlayerListener implements Listener {
             this.shootPlayer(event.getPlayer(), currentLocation.getBlock(), type);
             this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                     "' because they don't have the FUNDS required to enter.");
+            event.setCancelled(true);
             return;
         }
         if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
@@ -160,6 +161,7 @@ public class MVNPPlayerListener implements Listener {
                 this.shootPlayer(event.getPlayer(), currentLocation.getBlock(), type);
                 this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                         "' because they don't have: multiverse.access." + toWorld.getCBWorld().getName());
+                event.setCancelled(true);
                 return;
             }
         } else {
