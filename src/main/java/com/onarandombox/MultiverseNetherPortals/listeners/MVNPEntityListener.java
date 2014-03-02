@@ -43,10 +43,11 @@ public class MVNPEntityListener implements Listener {
         }
         String currentWorld = currentLocation.getWorld().getName();
 
-        PortalType type = PortalType.END;
+        PortalType type = PortalType.NETHER;
+        event.useTravelAgent(true);
         if (event.getFrom().getBlock().getType() == Material.PORTAL) {
-            type = PortalType.NETHER;
-            event.useTravelAgent(true);
+            type = PortalType.END;
+            event.useTravelAgent(false);
         }
 
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
