@@ -4,6 +4,7 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerPortalEvent;
 
@@ -32,9 +33,10 @@ public class MVLinkChecker {
 
             // Set the output location to the same XYZ coords but different world
             double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();
-            double fromScaling = this.worldManager.getMVWorld(fromLocation.getWorld().getName()).getScaling();
-
-            fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
+            MultiverseWorld tpfrom = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
+            double fromScaling = tpfrom.getScaling();
+            double yScaling = 1d * tpfrom.getCBWorld().getMaxHeight() / tpto.getCBWorld().getMaxHeight();
+            fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling, yScaling);
             fromLocation.setWorld(tpto.getCBWorld());
             return fromLocation;
         }
@@ -43,7 +45,6 @@ public class MVLinkChecker {
 
     public void getNewTeleportLocation(PlayerPortalEvent event, Location fromLocation, String worldstring) {
         MultiverseWorld tpto = this.worldManager.getMVWorld(worldstring);
-
         if (tpto == null) {
             this.plugin.log(Level.FINE, "Can't find " + worldstring);
         } else if (!this.plugin.getCore().getMVPerms().canEnterWorld(event.getPlayer(), tpto)) {
@@ -55,18 +56,21 @@ public class MVLinkChecker {
 
             // Set the output location to the same XYZ coords but different world
             double toScaling = tpto.getScaling();
-            double fromScaling = this.worldManager.getMVWorld(event.getFrom().getWorld().getName()).getScaling();
+            MultiverseWorld tpfrom = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
+            double fromScaling = tpfrom.getScaling();
+            double yScaling = 1d * tpfrom.getCBWorld().getMaxHeight() / tpto.getCBWorld().getMaxHeight();
+            fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling, yScaling);
 
-            fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling);
             fromLocation.setWorld(tpto.getCBWorld());
         }
         event.setTo(fromLocation);
     }
 
-    private Location getScaledLocation(Location fromLocation, double fromScaling, double toScaling) {
+    private Location getScaledLocation(Location fromLocation, double fromScaling, double toScaling, double yScaling) {
         double scaling = fromScaling / toScaling;
         fromLocation.setX(fromLocation.getX() * scaling);
         fromLocation.setZ(fromLocation.getZ() * scaling);
+        fromLocation.setY(fromLocation.getY() * yScaling);
         return fromLocation;
     }
 }
