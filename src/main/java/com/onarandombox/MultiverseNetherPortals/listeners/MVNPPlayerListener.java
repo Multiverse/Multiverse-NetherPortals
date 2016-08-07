@@ -87,7 +87,7 @@ public class MVNPPlayerListener implements Listener {
         if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
             // The player is Portaling to the same world.
             this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.  Ignoring.");
-            event.setTo(originalTo);
+            event.setCancelled(true);
             return;
         }
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
