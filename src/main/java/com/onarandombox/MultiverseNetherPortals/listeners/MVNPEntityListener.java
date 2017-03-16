@@ -2,7 +2,6 @@ package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
-import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
@@ -34,7 +33,6 @@ public class MVNPEntityListener implements Listener {
     private MVWorldManager worldManager;
     private PermissionTools pt;
     private int cooldown = 250;
-    private MultiverseMessaging messaging;
     private Map<String, Date> playerErrors;
     private Map<String, Location> eventRecord;
     private LocationManipulation locationManipulation;
@@ -50,7 +48,6 @@ public class MVNPEntityListener implements Listener {
         this.pt = new PermissionTools(this.plugin.getCore());
         this.playerErrors = new HashMap<String, Date>();
         this.eventRecord = new HashMap<String, Location>();
-        this.messaging = this.plugin.getCore().getMessaging();
         this.locationManipulation = this.plugin.getCore().getLocationManipulation();
 
     }
@@ -64,22 +61,20 @@ public class MVNPEntityListener implements Listener {
         double myconst = 2;
         double newVecX = 0;
         double newVecZ = 0;
-        // Determine portal axis:
-        BlockFace face = p.getLocation().getBlock().getFace(block);
         if (block.getRelative(BlockFace.EAST).getType() == Material.PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.PORTAL) {
             this.plugin.log(Level.FINER, "Found Portal: East/West");
             if (p.getLocation().getX() < block.getLocation().getX()) {
-                newVecX = -1 * myconst;
+                newVecZ = -1 * myconst;
             } else {
-                newVecX = 1 * myconst;
+                newVecZ = 1 * myconst;
             }
         } else {
             //NOrth/South
             this.plugin.log(Level.FINER, "Found Portal: North/South");
             if (p.getLocation().getZ() < block.getLocation().getZ()) {
-                newVecZ = -1 * myconst;
+                newVecX = -1 * myconst;
             } else {
-                newVecZ = 1 * myconst;
+                newVecX = 1 * myconst;
             }
         }
         p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
@@ -168,12 +163,6 @@ public class MVNPEntityListener implements Listener {
 
         if (toLocation == null) {
             this.shootPlayer(p, eventLocation.getBlock(), type);
-            this.messaging.sendMessage(p, "This portal goes nowhere!", false);
-            if (type == PortalType.END) {
-                this.messaging.sendMessage(p, "No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.", true);
-            } else {
-                this.messaging.sendMessage(p, "No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.", true);
-            }
             return;
         }
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(p.getLocation().getWorld().getName());
