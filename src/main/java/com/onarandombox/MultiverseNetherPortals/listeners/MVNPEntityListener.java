@@ -66,7 +66,7 @@ public class MVNPEntityListener implements Listener {
         double newVecZ = 0;
         // Determine portal axis:
         BlockFace face = p.getLocation().getBlock().getFace(block);
-        if (block.getRelative(BlockFace.EAST).getType() == Material.PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.PORTAL) {
+        if (block.getRelative(BlockFace.EAST).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.NETHER_PORTAL) {
             this.plugin.log(Level.FINER, "Found Portal: East/West");
             if (p.getLocation().getX() < block.getLocation().getX()) {
                 newVecX = -1 * myconst;
@@ -134,7 +134,7 @@ public class MVNPEntityListener implements Listener {
         }
 
         PortalType type = PortalType.END; //we are too lazy to check if it's this one
-        if (event.getLocation().getBlock().getType() == Material.PORTAL) {
+        if (event.getLocation().getBlock().getType() == Material.NETHER_PORTAL) {
             type = PortalType.NETHER;
         }
 
