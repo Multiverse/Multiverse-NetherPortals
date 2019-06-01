@@ -54,7 +54,6 @@ public class MVNPPlayerListener implements Listener {
         PortalType type = PortalType.END;
         if (event.getFrom().getBlock().getType() == Material.NETHER_PORTAL) {
             type = PortalType.NETHER;
-            event.useTravelAgent(true);
         }
 
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
@@ -96,7 +95,6 @@ public class MVNPPlayerListener implements Listener {
         if (!event.isCancelled()) {
             if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
                 this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-                event.getPortalTravelAgent().setCanCreatePortal(false);
                 if (toWorld.getBedRespawn()
                         && event.getPlayer().getBedSpawnLocation() != null
                         && event.getPlayer().getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
@@ -105,8 +103,7 @@ public class MVNPPlayerListener implements Listener {
                     event.setTo(toWorld.getSpawnLocation());
                 }
             } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-                event.getPortalTravelAgent().setCanCreatePortal(true);
-                event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
+                //no more travelagent
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
                 Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
                 event.setTo(loc);
