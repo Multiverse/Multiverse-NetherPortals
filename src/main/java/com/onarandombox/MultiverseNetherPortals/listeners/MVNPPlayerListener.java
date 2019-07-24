@@ -58,7 +58,7 @@ public class MVNPPlayerListener implements Listener {
                 Class.forName("org.bukkit.TravelAgent");
                 event.useTravelAgent(true);
             } catch (ClassNotFoundException ignore) {
-                plugin.log(Level.WARNING, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName());
+                plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName());
             }
         }
 
@@ -105,7 +105,7 @@ public class MVNPPlayerListener implements Listener {
                     Class.forName("org.bukkit.TravelAgent");
                     event.getPortalTravelAgent().setCanCreatePortal(false);
                 } catch (ClassNotFoundException ignore) {
-                    plugin.log(Level.WARNING, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". There may be a portal created at spawn.");
+                    plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". There may be a portal created at spawn.");
                 }
                 if (toWorld.getBedRespawn()
                         && event.getPlayer().getBedSpawnLocation() != null
@@ -120,7 +120,7 @@ public class MVNPPlayerListener implements Listener {
                     event.getPortalTravelAgent().setCanCreatePortal(true);
                     event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
                 } catch (ClassNotFoundException ignore) {
-                    plugin.log(Level.WARNING, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". Their destination may not be correct.");
+                    plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". Their destination may not be correct.");
                     event.setTo(event.getTo());
                 }
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
