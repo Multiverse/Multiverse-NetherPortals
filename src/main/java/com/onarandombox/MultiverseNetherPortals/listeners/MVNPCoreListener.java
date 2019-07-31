@@ -1,6 +1,8 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
+import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.event.MVConfigReloadEvent;
+import com.onarandombox.MultiverseCore.event.MVDebugModeEvent;
 import com.onarandombox.MultiverseCore.event.MVVersionEvent;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.event.Event;
@@ -21,5 +23,10 @@ public class MVNPCoreListener implements Listener {
     @EventHandler
     public void versionEvent(MVVersionEvent event) {
         event.appendVersionInfo(this.plugin.getVersionInfo());
+    }
+
+    @EventHandler
+    public void debugModeChange(MVDebugModeEvent event) {
+        Logging.setDebugLevel(event.getLevel());
     }
 }

@@ -51,7 +51,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
-    private final static int requiresProtocol = 23;
+    private final static int requiresProtocol = 24;
     private MVNPEntityListener entityListener;
 
     @Override
@@ -76,6 +76,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             return;
         }
 
+        Logging.setDebugLevel(core.getMVConfig().getGlobalDebug());
+
         this.core.incrementPluginCount();
         // As soon as we know MVCore was found, we can use the debug log!
 
@@ -89,11 +91,10 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         pm.registerEvents(this.entityListener, this);
         pm.registerEvents(this.customListener, this);
 
-        Logging.info("- Version " + this.getDescription().getVersion() + " Enabled - By " + getAuthors());
-
         loadConfig();
         this.registerCommands();
 
+        Logging.log(true, Level.INFO, " Enabled - By %s", getAuthors());
     }
 
     public void loadConfig() {
