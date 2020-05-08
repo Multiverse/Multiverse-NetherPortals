@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
+import com.onarandombox.MultiverseCore.exceptions.PropertyDoesNotExistException;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
@@ -80,11 +81,21 @@ public class MVNPPlayerListener implements Listener {
                 this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END));
             }
         } else {
-            if(type == PortalType.END) {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(currentWorld));
-            } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(currentWorld));
+            MultiverseWorld toWorld;
+            if (type == PortalType.END) toWorld = this.worldManager.getMVWorld(this.nameChecker.getEndName(currentWorld));
+            else toWorld = this.worldManager.getMVWorld(this.nameChecker.getNetherName(currentWorld));
+
+            try {
+                if (toWorld.getPropertyValue("respawnWorld").isEmpty()) {
+                    toWorld.setRespawnToWorld(currentWorld);
+                    this.worldManager.saveWorldsConfig(); // is this necessary?
+                    this.plugin.log(Level.FINE, "Setting respawnWorld of " + toWorld.getName() + " to " + currentWorld + ".");
+                }
+            } catch (PropertyDoesNotExistException e) {
+                this.plugin.log(Level.WARNING, "Uh oh... your players may not respawn in the correct world. Please let us know about this.");
             }
+
+            this.linkChecker.getNewTeleportLocation(event, currentLocation, toWorld.getName());
         }
         if (event.getTo() == null || event.getFrom() == null) {
             return;
@@ -95,6 +106,7 @@ public class MVNPPlayerListener implements Listener {
             event.setTo(originalTo);
             return;
         }
+
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
