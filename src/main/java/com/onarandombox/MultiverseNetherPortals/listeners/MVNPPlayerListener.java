@@ -35,23 +35,15 @@ public class MVNPPlayerListener implements Listener {
         this.linkChecker = new MVLinkChecker(this.plugin);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerPortal(PlayerPortalEvent event) {
-        if (event.isCancelled()) {
-            this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
-            return;
-        }
-        Location originalTo = event.getTo();
-        if (originalTo != null) {
-            originalTo = originalTo.clone();
-        }
         Location currentLocation = event.getFrom().clone();
         if (!plugin.isHandledByNetherPortals(currentLocation)) {
             return;
         }
-        String currentWorld = currentLocation.getWorld().getName();
 
         PortalType type = PortalType.END;
+        String currentWorld = currentLocation.getWorld().getName();
         if (event.getFrom().getBlock().getType() == Material.NETHER_PORTAL) {
             type = PortalType.NETHER;
             try {
@@ -62,39 +54,33 @@ public class MVNPPlayerListener implements Listener {
             }
         }
 
+        Location newTo;
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
-
         if (linkedWorld != null) {
-            this.linkChecker.getNewTeleportLocation(event, currentLocation, linkedWorld);
+            newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, event.getPlayer());
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             if (type == PortalType.NETHER) {
-                this.plugin.log(Level.FINER, "");
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER), event.getPlayer());
             } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)), event.getPlayer());
             }
         } else if (this.nameChecker.isValidEndName(currentWorld)) {
             if (type == PortalType.NETHER) {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.END)));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.END)), event.getPlayer());
             } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END), event.getPlayer());
             }
         } else {
-            if(type == PortalType.END) {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(currentWorld));
+            if (type == PortalType.END) {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), event.getPlayer());
             } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(currentWorld));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), event.getPlayer());
             }
         }
-        if (event.getTo() == null || event.getFrom() == null) {
-            return;
-        }
-        if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
-            // The player is Portaling to the same world.
-            this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.  Ignoring.");
-            event.setTo(originalTo);
-            return;
-        }
+
+        if (newTo == null) return;
+        else event.setTo(newTo);
+
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
