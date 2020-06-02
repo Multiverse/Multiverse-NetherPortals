@@ -7,7 +7,7 @@ import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
+import com.onarandombox.MultiverseNetherPortals.runnables.PlayerTouchingPortalTask;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
@@ -20,28 +20,32 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityPortalExitEvent;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class MVNPEntityListener implements Listener {
 
-    private MultiverseNetherPortals plugin;
-    private MVNameChecker nameChecker;
-    private MVLinkChecker linkChecker;
-    private MVWorldManager worldManager;
-    private PermissionTools pt;
-    private int cooldown = 250;
-    private MultiverseMessaging messaging;
-    private Map<String, Date> playerErrors;
-    private Map<String, Location> eventRecord;
-    private LocationManipulation locationManipulation;
-    // This hash map will track players most recent portal touch.
-    // we can use this cache to avoid a TON of unrequired calls to the
-    // On entity portal touch calculations.
+    private final MultiverseNetherPortals plugin;
+    private final MVNameChecker nameChecker;
+    private final MVLinkChecker linkChecker;
+    private final MVWorldManager worldManager;
+    private final PermissionTools pt;
+    private final int cooldown = 250;
+    private final MultiverseMessaging messaging;
+    private final Map<String, Date> playerErrors;
+    private final LocationManipulation locationManipulation;
+    private final ConcurrentHashMap<PortalType, Set<Player>> eventRecord;
+    // This map will track whether each player is touching a portal.
+    // We can use this to avoid lots of unnecessary calls to the
+    // on entity portal touch calculations.
 
     public MVNPEntityListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
@@ -50,16 +54,17 @@ public class MVNPEntityListener implements Listener {
         this.worldManager = this.plugin.getCore().getMVWorldManager();
         this.pt = new PermissionTools(this.plugin.getCore());
         this.playerErrors = new HashMap<String, Date>();
-        this.eventRecord = new HashMap<String, Location>();
         this.messaging = this.plugin.getCore().getMessaging();
         this.locationManipulation = this.plugin.getCore().getLocationManipulation();
-
+        this.eventRecord = new ConcurrentHashMap<>();
+        this.eventRecord.put(PortalType.ENDER, ConcurrentHashMap.newKeySet());
+        this.eventRecord.put(PortalType.NETHER, ConcurrentHashMap.newKeySet());
     }
 
-    protected void shootPlayer(Player p, Block block, PortalType type) {
+    protected boolean shootPlayer(Player p, Block block, PortalType type) {
         if (!plugin.isUsingBounceBack()) {
             this.plugin.log(Level.FINEST, "You said not to use bounce back so the player is free to walk into portal!");
-            return;
+            return false;
         }
         this.playerErrors.put(p.getName(), new Date());
         double myconst = 2;
@@ -85,6 +90,7 @@ public class MVNPEntityListener implements Listener {
         }
         p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
         p.setVelocity(new Vector(newVecX, .6, newVecZ));
+        return true;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -100,19 +106,22 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        if(this.eventRecord.containsKey(p.getName())) {
-            // The the eventRecord shows this player was already trying to go somewhere.
-            if (this.locationManipulation.getBlockLocation(p.getLocation()).equals(this.eventRecord.get(p.getName()))) {
-                // The player has not moved, and we've already fired one event.
-                return;
-            } else {
-                // The player moved, potentially out of the portal, allow event to re-check.
-                this.eventRecord.put(p.getName(), this.locationManipulation.getBlockLocation(p.getLocation()));
-                // We'll need to clear this value...
-            }
-        } else {
-            this.eventRecord.put(p.getName(), this.locationManipulation.getBlockLocation(p.getLocation()));
+        PortalType type;
+        // determine what kind of portal the player is using
+        if (block.getBlock().getType() == Material.END_PORTAL) type = PortalType.ENDER;
+        else if (block.getBlock().getType() == Material.NETHER_PORTAL) type = PortalType.NETHER;
+        else return;
+
+        BukkitTask isTouching;
+        if (this.eventRecord.get(type).contains(p)) return;
+        else {
+            this.eventRecord.get(type).add(p);
+
+            // this runnable will check if the player is still standing in the portal
+            // if they aren't, it will remove them from the event record
+            isTouching = new PlayerTouchingPortalTask(eventRecord, type, p).runTaskTimer(this.plugin, 200L, 200L);
         }
+
         MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(p, event.getLocation());
         this.plugin.getServer().getPluginManager().callEvent(playerTouchedPortalEvent);
         Location eventLocation = event.getLocation().clone();
@@ -121,7 +130,7 @@ public class MVNPEntityListener implements Listener {
             this.shootPlayer(p, eventLocation.getBlock(), PortalType.NETHER);
             this.plugin.log(Level.FINEST, "Someone request this player be kicked back!!");
         }
-        if(playerTouchedPortalEvent.isCancelled()) {
+        if (playerTouchedPortalEvent.isCancelled()) {
             this.plugin.log(Level.FINEST, "Someone cancelled the enter Event for NetherPortals!");
             return;
         }
@@ -134,16 +143,11 @@ public class MVNPEntityListener implements Listener {
             this.playerErrors.remove(p.getName());
         }
 
-        PortalType type = PortalType.END; //we are too lazy to check if it's this one
-        if (event.getLocation().getBlock().getType() == Material.NETHER_PORTAL) {
-            type = PortalType.NETHER;
-        }
-
         String currentWorld = event.getLocation().getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(event.getLocation().getWorld().getName(), type);
         Location currentLocation = event.getLocation();
 
-        Location toLocation = null;
+        Location toLocation;
 
         if (linkedWorld != null) {
             toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, p);
@@ -168,7 +172,10 @@ public class MVNPEntityListener implements Listener {
         }
 
         if (toLocation == null) {
-            this.shootPlayer(p, eventLocation.getBlock(), type);
+            if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
+                isTouching.cancel();
+                this.eventRecord.get(type).remove(p);
+            }
             if (this.plugin.isSendingNoDestinationMessage()) {
                 this.messaging.sendMessage(p, "This portal goes nowhere!", false);
                 if (type == PortalType.ENDER) {
@@ -201,6 +208,14 @@ public class MVNPEntityListener implements Listener {
             }
         } else {
             this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was allowed to go to '" + toWorld.getCBWorld().getName() + "' because enforceaccess is off.");
+        }
+    }
+
+    public void onEntityPortalExit(EntityPortalExitEvent event) {
+        if (event.getEntity() instanceof Player) {
+            Player p = (Player) event.getEntity();
+            this.eventRecord.get(PortalType.ENDER).remove(p);
+            this.eventRecord.get(PortalType.NETHER).remove(p);
         }
     }
 }

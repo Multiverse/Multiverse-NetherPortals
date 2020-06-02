@@ -21,11 +21,11 @@ import org.bukkit.event.player.PlayerPortalEvent;
 
 public class MVNPPlayerListener implements Listener {
 
-    private MultiverseNetherPortals plugin;
-    private MVNameChecker nameChecker;
-    private MVLinkChecker linkChecker;
-    private MVWorldManager worldManager;
-    private PermissionTools pt;
+    private final MultiverseNetherPortals plugin;
+    private final MVNameChecker nameChecker;
+    private final MVLinkChecker linkChecker;
+    private final MVWorldManager worldManager;
+    private final PermissionTools pt;
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
