@@ -78,8 +78,11 @@ public class MVNPPlayerListener implements Listener {
             }
         }
 
-        if (newTo == null) return;
-        else event.setTo(newTo);
+        if (newTo != null) event.setTo(newTo);
+        else {
+            event.setCancelled(true);
+            return;
+        }
 
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
