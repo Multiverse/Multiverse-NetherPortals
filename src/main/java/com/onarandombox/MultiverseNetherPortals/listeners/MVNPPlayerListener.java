@@ -6,11 +6,11 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.PortalType;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -42,7 +42,7 @@ public class MVNPPlayerListener implements Listener {
             return;
         }
 
-        PortalType type = PortalType.END;
+        PortalType type = PortalType.ENDER;
         String currentWorld = currentLocation.getWorld().getName();
         if (event.getFrom().getBlock().getType() == Material.NETHER_PORTAL) {
             type = PortalType.NETHER;
@@ -66,12 +66,12 @@ public class MVNPPlayerListener implements Listener {
             }
         } else if (this.nameChecker.isValidEndName(currentWorld)) {
             if (type == PortalType.NETHER) {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.END)), event.getPlayer());
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.ENDER)), event.getPlayer());
             } else {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END), event.getPlayer());
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.ENDER), event.getPlayer());
             }
         } else {
-            if (type == PortalType.END) {
+            if (type == PortalType.ENDER) {
                 newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), event.getPlayer());
             } else {
                 newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), event.getPlayer());
@@ -88,7 +88,7 @@ public class MVNPPlayerListener implements Listener {
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
         if (!event.isCancelled()) {
-            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
                 try {
                     Class.forName("org.bukkit.TravelAgent");
@@ -112,7 +112,7 @@ public class MVNPPlayerListener implements Listener {
                     plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". Their destination may not be correct.");
                     event.setTo(event.getTo());
                 }
-            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
                 event.setTo(loc);
                 Block block = loc.getBlock();
