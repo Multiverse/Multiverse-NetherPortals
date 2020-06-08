@@ -63,34 +63,49 @@ public class MVNPEntityListener implements Listener {
 
     protected boolean shootPlayer(Player p, Block block, PortalType type) {
         if (!plugin.isUsingBounceBack()) {
-            this.plugin.log(Level.FINEST, "You said not to use bounce back so the player is free to walk into portal!");
+            this.plugin.log(Level.FINEST, "Bounceback is disabled, so the player is free to walk into portals!");
             return false;
         }
+
         this.playerErrors.put(p.getName(), new Date());
-        double myconst = 2;
         double newVecX = 0;
         double newVecZ = 0;
-        // Determine portal axis:
-        BlockFace face = p.getLocation().getBlock().getFace(block);
-        if (block.getRelative(BlockFace.EAST).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.NETHER_PORTAL) {
-            this.plugin.log(Level.FINER, "Found Portal: East/West");
-            if (p.getLocation().getX() < block.getLocation().getX()) {
-                newVecX = -1 * myconst;
+        double strength = 2;
+        boolean playerBounced = false;
+
+        StringBuilder debugMessage = new StringBuilder().append("Player: ").append(p.getName());
+        if (type == PortalType.ENDER) {
+            debugMessage.append(" entered an End Portal. There is currently no bounceback implementation for End Portals.");
+        } else if (type == PortalType.NETHER) {
+            // Determine portal axis:
+            if (block.getRelative(BlockFace.EAST).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.NETHER_PORTAL) {
+                // we add 0.5 to the location of the block to get the center
+                if (p.getLocation().getZ() < block.getLocation().getZ() + 0.5) {
+                    debugMessage.append(" entered Nether Portal from the North");
+                    newVecZ = -1 * strength;
+                } else {
+                    debugMessage.append(" entered Nether Portal from the South");
+                    newVecZ = 1 * strength;
+                }
             } else {
-                newVecX = 1 * myconst;
+                // we add 0.5 to the location of the block to get the center
+                if (p.getLocation().getX() < block.getLocation().getX() + 0.5) {
+                    debugMessage.append(" entered Nether Portal from the West");
+                    newVecX = -1 * strength;
+                } else {
+                    debugMessage.append(" entered Nether Portal from the East");
+                    newVecX = 1 * strength;
+                }
             }
-        } else {
-            //NOrth/South
-            this.plugin.log(Level.FINER, "Found Portal: North/South");
-            if (p.getLocation().getZ() < block.getLocation().getZ()) {
-                newVecZ = -1 * myconst;
-            } else {
-                newVecZ = 1 * myconst;
-            }
+
+            debugMessage.append(". They will be bounced back!");
+            p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
+            p.setVelocity(new Vector(newVecX, .6, newVecZ));
+            playerBounced = true;
         }
-        p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
-        p.setVelocity(new Vector(newVecX, .6, newVecZ));
-        return true;
+
+        this.plugin.log(Level.FINER, debugMessage.toString());
+        return playerBounced;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -127,8 +142,8 @@ public class MVNPEntityListener implements Listener {
         Location eventLocation = event.getLocation().clone();
         if (!playerTouchedPortalEvent.canUseThisPortal()) {
             // Someone else said the player is not allowed to go here.
-            this.shootPlayer(p, eventLocation.getBlock(), PortalType.NETHER);
-            this.plugin.log(Level.FINEST, "Someone request this player be kicked back!!");
+            this.shootPlayer(p, eventLocation.getBlock(), type);
+            this.plugin.log(Level.FINEST, "Someone requested that this player be bounced back!");
         }
         if (playerTouchedPortalEvent.isCancelled()) {
             this.plugin.log(Level.FINEST, "Someone cancelled the enter Event for NetherPortals!");
@@ -186,20 +201,22 @@ public class MVNPEntityListener implements Listener {
             }
             return;
         }
+
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(p.getLocation().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(toLocation.getWorld().getName());
+
         if (fromWorld.getCBWorld().equals(toWorld.getCBWorld())) {
             // The player is Portaling to the same world.
             this.plugin.log(Level.FINER, "Player '" + p.getName() + "' is portaling to the same world.");
             return;
         }
         if (!pt.playerHasMoneyToEnter(fromWorld, toWorld, p, p, false)) {
-            System.out.println("BOOM");
             this.shootPlayer(p, eventLocation.getBlock(), type);
             this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                     "' because they don't have the FUNDS required to enter.");
             return;
         }
+
         if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
             if (!pt.playerCanGoFromTo(fromWorld, toWorld, p, p)) {
                 this.shootPlayer(p, eventLocation.getBlock(), type);
