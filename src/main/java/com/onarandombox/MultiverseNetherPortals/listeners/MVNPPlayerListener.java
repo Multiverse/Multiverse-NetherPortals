@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class MVNPPlayerListener implements Listener {
 
@@ -42,10 +43,12 @@ public class MVNPPlayerListener implements Listener {
             return;
         }
 
-        PortalType type = PortalType.ENDER;
-        String currentWorld = currentLocation.getWorld().getName();
-        if (event.getFrom().getBlock().getType() == Material.NETHER_PORTAL) {
-            type = PortalType.NETHER;
+        PortalType type;
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) type = PortalType.ENDER;
+        else if (event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) type = PortalType.NETHER;
+        else return;
+
+        if (type == PortalType.NETHER) {
             try {
                 Class.forName("org.bukkit.TravelAgent");
                 event.useTravelAgent(true);
@@ -55,6 +58,7 @@ public class MVNPPlayerListener implements Listener {
         }
 
         Location newTo;
+        String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
         if (linkedWorld != null) {
             newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, event.getPlayer());
