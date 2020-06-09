@@ -5,15 +5,15 @@ import org.bukkit.PortalType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerTouchingPortalTask extends BukkitRunnable {
-    private final ConcurrentHashMap<PortalType, Set<Player>> eventRecord;
+    private final Map<PortalType, Set<Player>> eventRecord;
     private final PortalType portalType;
     private final Player player;
 
-    public PlayerTouchingPortalTask(ConcurrentHashMap<PortalType, Set<Player>> eventRecord, PortalType portalType, Player player) {
+    public PlayerTouchingPortalTask(Map<PortalType, Set<Player>> eventRecord, PortalType portalType, Player player) {
         this.eventRecord = eventRecord;
         this.portalType = portalType;
         this.player = player;

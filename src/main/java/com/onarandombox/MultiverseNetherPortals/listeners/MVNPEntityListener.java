@@ -26,9 +26,9 @@ import org.bukkit.util.Vector;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class MVNPEntityListener implements Listener {
@@ -42,7 +42,7 @@ public class MVNPEntityListener implements Listener {
     private final MultiverseMessaging messaging;
     private final Map<String, Date> playerErrors;
     private final LocationManipulation locationManipulation;
-    private final ConcurrentHashMap<PortalType, Set<Player>> eventRecord;
+    private final Map<PortalType, Set<Player>> eventRecord;
     // This map will track whether each player is touching a portal.
     // We can use this to avoid lots of unnecessary calls to the
     // on entity portal touch calculations.
@@ -56,9 +56,9 @@ public class MVNPEntityListener implements Listener {
         this.playerErrors = new HashMap<String, Date>();
         this.messaging = this.plugin.getCore().getMessaging();
         this.locationManipulation = this.plugin.getCore().getLocationManipulation();
-        this.eventRecord = new ConcurrentHashMap<>();
-        this.eventRecord.put(PortalType.ENDER, ConcurrentHashMap.newKeySet());
-        this.eventRecord.put(PortalType.NETHER, ConcurrentHashMap.newKeySet());
+        this.eventRecord = new HashMap<>();
+        this.eventRecord.put(PortalType.ENDER, new HashSet<>());
+        this.eventRecord.put(PortalType.NETHER, new HashSet<>());
     }
 
     protected boolean shootPlayer(Player p, Block block, PortalType type) {
