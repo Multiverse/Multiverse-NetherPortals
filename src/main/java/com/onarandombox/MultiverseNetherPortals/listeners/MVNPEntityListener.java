@@ -164,7 +164,9 @@ public class MVNPEntityListener implements Listener {
 
         Location toLocation;
 
-        if (linkedWorld != null) {
+        if (currentWorld.equalsIgnoreCase(linkedWorld)) {
+            toLocation = null;
+        } else if (linkedWorld != null) {
             toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, p);
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             if (type == PortalType.NETHER) {

@@ -60,7 +60,9 @@ public class MVNPPlayerListener implements Listener {
         Location newTo;
         String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
-        if (linkedWorld != null) {
+        if (currentWorld.equalsIgnoreCase(linkedWorld)) {
+            newTo = null;
+        } else if (linkedWorld != null) {
             newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, event.getPlayer());
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             if (type == PortalType.NETHER) {
