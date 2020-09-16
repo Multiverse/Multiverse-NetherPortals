@@ -230,6 +230,7 @@ public class MVNPEntityListener implements Listener {
         }
     }
 
+    @EventHandler
     public void onEntityPortalExit(EntityPortalExitEvent event) {
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
