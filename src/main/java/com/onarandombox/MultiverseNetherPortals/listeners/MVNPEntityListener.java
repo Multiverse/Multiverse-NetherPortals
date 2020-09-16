@@ -64,7 +64,7 @@ public class MVNPEntityListener implements Listener {
 
     protected boolean shootPlayer(Player p, Block block, PortalType type) {
         if (!plugin.isUsingBounceBack()) {
-            this.plugin.log(Level.FINEST, "Bounceback is disabled, so the player is free to walk into portals!");
+            this.plugin.log(Level.FINEST, "Bounceback is disabled. The player is free to walk into the portal!");
             return false;
         }
 
