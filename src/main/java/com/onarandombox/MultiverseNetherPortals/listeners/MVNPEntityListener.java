@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class MVNPEntityListener implements Listener {
@@ -42,7 +43,7 @@ public class MVNPEntityListener implements Listener {
     private final MultiverseMessaging messaging;
     private final Map<String, Date> playerErrors;
     private final LocationManipulation locationManipulation;
-    private final Map<PortalType, Set<Player>> eventRecord;
+    private final Map<PortalType, Set<UUID>> eventRecord;
     // This map will track whether each player is touching a portal.
     // We can use this to avoid lots of unnecessary calls to the
     // on entity portal touch calculations.
@@ -128,13 +129,15 @@ public class MVNPEntityListener implements Listener {
         else return;
 
         BukkitTask isTouching;
-        if (this.eventRecord.get(type).contains(p)) return;
-        else {
-            this.eventRecord.get(type).add(p);
+        if (this.eventRecord.get(type).contains(p.getUniqueId())) {
+            // no need to carry on, the player is already in the event record
+            return;
+        } else {
+            this.eventRecord.get(type).add(p.getUniqueId());
 
             // this runnable will check if the player is still standing in the portal
             // if they aren't, it will remove them from the event record
-            isTouching = new PlayerTouchingPortalTask(eventRecord, type, p).runTaskTimer(this.plugin, 200L, 200L);
+            isTouching = new PlayerTouchingPortalTask(eventRecord, type, p.getUniqueId()).runTaskTimer(this.plugin, 200L, 200L);
         }
 
         MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(p, event.getLocation());
@@ -191,7 +194,7 @@ public class MVNPEntityListener implements Listener {
         if (toLocation == null) {
             if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
                 isTouching.cancel();
-                this.eventRecord.get(type).remove(p);
+                this.eventRecord.get(type).remove(p.getUniqueId());
             }
             if (this.plugin.isSendingNoDestinationMessage()) {
                 this.messaging.sendMessage(p, "This portal goes nowhere!", false);
@@ -234,8 +237,8 @@ public class MVNPEntityListener implements Listener {
     public void onEntityPortalExit(EntityPortalExitEvent event) {
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
-            this.eventRecord.get(PortalType.ENDER).remove(p);
-            this.eventRecord.get(PortalType.NETHER).remove(p);
+            this.eventRecord.get(PortalType.ENDER).remove(p.getUniqueId());
+            this.eventRecord.get(PortalType.NETHER).remove(p.getUniqueId());
         }
     }
 }
