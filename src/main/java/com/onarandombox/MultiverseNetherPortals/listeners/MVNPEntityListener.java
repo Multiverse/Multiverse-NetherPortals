@@ -119,9 +119,13 @@ public class MVNPEntityListener implements Listener {
 
         PortalType type;
         // determine what kind of portal the player is using
-        if (block.getBlock().getType() == Material.END_PORTAL) type = PortalType.ENDER;
-        else if (block.getBlock().getType() == Material.NETHER_PORTAL) type = PortalType.NETHER;
-        else return;
+        if (block.getBlock().getType() == Material.END_PORTAL) {
+            type = PortalType.ENDER;
+        } else if (block.getBlock().getType() == Material.NETHER_PORTAL) {
+            type = PortalType.NETHER;
+        } else {
+            return;
+        }
 
         BukkitTask isTouching;
         if (eventRecord.isInRecord(type, p.getUniqueId())) {
