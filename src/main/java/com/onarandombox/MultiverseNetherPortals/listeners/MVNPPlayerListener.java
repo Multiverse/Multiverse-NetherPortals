@@ -44,9 +44,13 @@ public class MVNPPlayerListener implements Listener {
         }
 
         PortalType type;
-        if (event.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) type = PortalType.ENDER;
-        else if (event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) type = PortalType.NETHER;
-        else return;
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) {
+            type = PortalType.ENDER;
+        } else if (event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
+            type = PortalType.NETHER;
+        } else {
+            return;
+        }
 
         if (type == PortalType.NETHER) {
             try {
@@ -84,8 +88,9 @@ public class MVNPPlayerListener implements Listener {
             }
         }
 
-        if (newTo != null) event.setTo(newTo);
-        else {
+        if (newTo != null) {
+            event.setTo(newTo);
+        } else {
             event.setCancelled(true);
             return;
         }

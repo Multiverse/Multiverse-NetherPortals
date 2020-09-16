@@ -34,6 +34,7 @@ public class UnlinkCommand extends NetherPortalCommand {
             sender.sendMessage("No changes were made...");
             return;
         }
+
         MultiverseWorld fromWorld;
         MultiverseWorld toWorld;
         String fromWorldString;
@@ -41,9 +42,13 @@ public class UnlinkCommand extends NetherPortalCommand {
         PortalType type;
         Player p;
 
-        if (args.get(0).equalsIgnoreCase("END")) type = PortalType.ENDER;
-        else if (args.get(0).equalsIgnoreCase("NETHER")) type = PortalType.NETHER;
-        else type = null;
+        if (args.get(0).equalsIgnoreCase("END")) {
+            type = PortalType.ENDER;
+        } else if (args.get(0).equalsIgnoreCase("NETHER")) {
+            type = PortalType.NETHER;
+        } else {
+            type = null;
+        }
 
         if (args.size() == 1) {
             p = (Player) sender;
