@@ -57,24 +57,39 @@ public class MVNPEntityListener implements Listener {
         this.eventRecord = new MVEventRecord(this.plugin);
     }
 
+    /**
+     * Shoot a player back from a portal. Returns true iff bounceback is
+     * enabled and the PortalType is supported (see below), otherwise
+     * returns false.
+     *
+     * Currently, only PortalType.NETHER is supported.
+     *
+     * @param p     The Player to shoot back.
+     * @param block The Block the player will be shot back from.
+     * @param type  The type of portal the Player is trying to enter.
+     * @return      {@code true} iff the player was bounced back.
+     */
     protected boolean shootPlayer(Player p, Block block, PortalType type) {
         if (!plugin.isUsingBounceBack()) {
             this.plugin.log(Level.FINEST, "Bounceback is disabled. The player is free to walk into the portal!");
             return false;
         }
 
+        // add player and time to the error map
+        // this prevents positive feedback loops
         this.playerErrors.put(p.getName(), new Date());
+
         double newVecX = 0;
         double newVecZ = 0;
-        double strength = 2;
+        double strength = 1;
         boolean playerBounced = false;
 
         StringBuilder debugMessage = new StringBuilder().append("Player: ").append(p.getName());
         if (type == PortalType.ENDER) {
             debugMessage.append(" entered an End Portal. There is currently no bounceback implementation for End Portals.");
         } else if (type == PortalType.NETHER) {
-            // Determine portal axis:
-            if (block.getRelative(BlockFace.EAST).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.WEST).getType() == Material.NETHER_PORTAL) {
+            // determine portal orientation by checking if the block to the west/east is also a nether portal block
+            if (block.getRelative(BlockFace.WEST).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.EAST).getType() == Material.NETHER_PORTAL) {
                 // we add 0.5 to the location of the block to get the center
                 if (p.getLocation().getZ() < block.getLocation().getZ() + 0.5) {
                     debugMessage.append(" entered Nether Portal from the North");
@@ -98,6 +113,8 @@ public class MVNPEntityListener implements Listener {
             p.teleport(p.getLocation().clone().add(newVecX, .2, newVecZ));
             p.setVelocity(new Vector(newVecX, .6, newVecZ));
             playerBounced = true;
+        } else {
+            debugMessage.append(" entered an Unsupported Portal Type (").append(type).append(").");
         }
 
         this.plugin.log(Level.FINER, debugMessage.toString());
