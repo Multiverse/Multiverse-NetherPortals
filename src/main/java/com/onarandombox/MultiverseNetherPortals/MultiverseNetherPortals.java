@@ -111,6 +111,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
         this.setUsingBounceBack(this.isUsingBounceBack());
         this.setSendingNoDestinationMessage(this.isSendingNoDestinationMessage());
+        this.setSendingDisabledPortalMessage(this.isSendingDisabledPortalMessage());
         this.setNetherPrefix(this.MVNPconfiguration.getString("netherportals.name.prefix", this.getNetherPrefix()));
         this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
 
@@ -277,6 +278,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public void setSendingNoDestinationMessage(boolean useBounceBack) {
         this.MVNPconfiguration.set("send_no_destination_message", useBounceBack);
+    }
+
+    public boolean isSendingDisabledPortalMessage() {
+        return this.MVNPconfiguration.getBoolean("send_portal_disabled_message", true);
+    }
+
+    public void setSendingDisabledPortalMessage(boolean useBounceBack) {
+        this.MVNPconfiguration.set("send_portal_disabled_message", useBounceBack);
     }
 
     public boolean isHandledByNetherPortals(Location l) {

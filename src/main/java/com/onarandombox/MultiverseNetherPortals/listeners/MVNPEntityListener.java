@@ -209,14 +209,26 @@ public class MVNPEntityListener implements Listener {
             if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
                 eventRecord.removeFromRecord(type, p.getUniqueId());
             }
-            if (this.plugin.isSendingNoDestinationMessage()) {
-                this.messaging.sendMessage(p, "This portal goes nowhere!", false);
-                if (type == PortalType.ENDER) {
-                    this.messaging.sendMessage(p, "No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.", true);
-                } else {
-                    this.messaging.sendMessage(p, "No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.", true);
+
+            if (currentWorld.equalsIgnoreCase(linkedWorld)) {
+                if (this.plugin.isSendingDisabledPortalMessage()) {
+                    if (type == PortalType.ENDER) {
+                        this.messaging.sendMessage(p, "End Portals have been disabled in this world!", false);
+                    } else {
+                        this.messaging.sendMessage(p, "Nether Portals have been disabled in this world!", false);
+                    }
+                }
+            } else {
+                if (this.plugin.isSendingNoDestinationMessage()) {
+                    this.messaging.sendMessage(p, "This portal goes nowhere!", false);
+                    if (type == PortalType.ENDER) {
+                        this.messaging.sendMessage(p, "No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.", true);
+                    } else {
+                        this.messaging.sendMessage(p, "No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.", true);
+                    }
                 }
             }
+
             return;
         }
 
