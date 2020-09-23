@@ -159,7 +159,10 @@ public class MVNPEntityListener implements Listener {
         Location eventLocation = event.getLocation().clone();
         if (!playerTouchedPortalEvent.canUseThisPortal()) {
             // Someone else said the player is not allowed to go here.
-            this.shootPlayer(p, eventLocation.getBlock(), type);
+            if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
+                eventRecord.removeFromRecord(type, p.getUniqueId());
+            }
+
             this.plugin.log(Level.FINEST, "Someone requested that this player be bounced back!");
         }
         if (playerTouchedPortalEvent.isCancelled()) {
@@ -241,7 +244,10 @@ public class MVNPEntityListener implements Listener {
             return;
         }
         if (!pt.playerHasMoneyToEnter(fromWorld, toWorld, p, p, false)) {
-            this.shootPlayer(p, eventLocation.getBlock(), type);
+            if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
+                eventRecord.removeFromRecord(type, p.getUniqueId());
+            }
+
             this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                     "' because they don't have the FUNDS required to enter.");
             return;
@@ -249,7 +255,10 @@ public class MVNPEntityListener implements Listener {
 
         if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
             if (!pt.playerCanGoFromTo(fromWorld, toWorld, p, p)) {
-                this.shootPlayer(p, eventLocation.getBlock(), type);
+                if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
+                    eventRecord.removeFromRecord(type, p.getUniqueId());
+                }
+
                 this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                         "' because they don't have: multiverse.access." + toWorld.getCBWorld().getName());
             }
