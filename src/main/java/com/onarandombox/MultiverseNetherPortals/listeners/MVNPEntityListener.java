@@ -93,7 +93,7 @@ public class MVNPEntityListener implements Listener {
         }
 
         Player p = (Player) event.getEntity();
-        Location block = this.locationManipulation.getBlockLocation(p.getLocation());
+        Location block = this.locationManipulation.getBlockLocation(event.getLocation());
 
         if (!plugin.isHandledByNetherPortals(block)) {
             return;
