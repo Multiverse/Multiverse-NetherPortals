@@ -88,8 +88,10 @@ public class MVNPPlayerListener implements Listener {
             try {
                 if (toWorld.getPropertyValue("respawnWorld").isEmpty()) {
                     toWorld.setRespawnToWorld(currentWorld);
-                    this.worldManager.saveWorldsConfig(); // is this necessary?
-                    this.plugin.log(Level.FINE, "Setting respawnWorld of " + toWorld.getName() + " to " + currentWorld + ".");
+                    this.plugin.log(Level.INFO, "Setting respawnWorld of " + toWorld.getName() + " to " + currentWorld + ".");
+                    if (!this.worldManager.saveWorldsConfig()) {
+                        this.plugin.log(Level.WARNING, "There was an issue saving the worlds.yml file! Players may not respawn in the correct world.");
+                    }
                 }
             } catch (PropertyDoesNotExistException e) {
                 this.plugin.log(Level.WARNING, "Uh oh... your players may not respawn in the correct world. Please let us know about this.");
