@@ -41,9 +41,10 @@ public class MVNPEntityListener implements Listener {
     private final Map<String, Date> playerErrors;
     private final LocationManipulation locationManipulation;
     private final MVEventRecord eventRecord;
-    // This map will track whether each player is touching a portal.
-    // We can use this to avoid lots of unnecessary calls to the
-    // on entity portal touch calculations.
+    // the event record is used to track players that are currently standing
+    // inside portals. it's used so that we don't need to run the the onEntityPortalEnter
+    // listener more than once for a given player. that also means players are
+    // only messaged once about why they can't go through a given portal.
 
     public MVNPEntityListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
@@ -144,13 +145,12 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        BukkitTask isTouching;
         if (eventRecord.isInRecord(type, p.getUniqueId())) {
             // no need to carry on, the player is already in the event record
             return;
         } else {
-            // this runnable will check if the player is still standing in the portal
-            // if they aren't, it will remove them from the event record
+            // we'll add the player to the event record since they're standing
+            // in a portal. they'll automatically be removed when they leave
             eventRecord.addToRecord(type, p.getUniqueId());
         }
 
