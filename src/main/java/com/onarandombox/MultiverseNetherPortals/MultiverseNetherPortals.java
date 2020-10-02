@@ -276,16 +276,16 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return this.MVNPconfiguration.getBoolean("send_no_destination_message", true);
     }
 
-    public void setSendingNoDestinationMessage(boolean useBounceBack) {
-        this.MVNPconfiguration.set("send_no_destination_message", useBounceBack);
+    public void setSendingNoDestinationMessage(boolean sendNoDestinationMessage) {
+        this.MVNPconfiguration.set("send_no_destination_message", sendNoDestinationMessage);
     }
 
     public boolean isSendingDisabledPortalMessage() {
         return this.MVNPconfiguration.getBoolean("send_portal_disabled_message", true);
     }
 
-    public void setSendingDisabledPortalMessage(boolean useBounceBack) {
-        this.MVNPconfiguration.set("send_portal_disabled_message", useBounceBack);
+    public void setSendingDisabledPortalMessage(boolean sendDisabledPortalMessage) {
+        this.MVNPconfiguration.set("send_portal_disabled_message", sendDisabledPortalMessage);
     }
 
     public boolean isHandledByNetherPortals(Location l) {
