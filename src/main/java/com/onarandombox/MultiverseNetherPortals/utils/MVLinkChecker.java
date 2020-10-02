@@ -4,6 +4,7 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.logging.Level;
@@ -17,17 +18,17 @@ public class MVLinkChecker {
         this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
-    public Location findNewTeleportLocation(Location fromLocation, String worldstring, Player p) {
+    public Location findNewTeleportLocation(Location fromLocation, String worldstring, Entity e) {
         MultiverseWorld tpto = this.worldManager.getMVWorld(worldstring);
 
         if (tpto == null) {
             this.plugin.log(Level.FINE, "Can't find world " + worldstring);
-        } else if (!this.plugin.getCore().getMVPerms().canEnterWorld(p, tpto)) {
-            this.plugin.log(Level.WARNING, "Player " + p.getName() + " can't enter world " + worldstring);
+        } else if (e instanceof Player && !this.plugin.getCore().getMVPerms().canEnterWorld((Player) e, tpto)) {
+            this.plugin.log(Level.WARNING, "Player " + e.getName() + " can't enter world " + worldstring);
         } else if (!this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
             this.plugin.log(Level.WARNING, "World " + fromLocation.getWorld().getName() + " is not a Multiverse world");
         } else {
-            this.plugin.log(Level.FINE, "Finding new teleport location for player " + p.getName() + " to world " + worldstring);
+            this.plugin.log(Level.FINE, "Finding new teleport location for entity " + e.getName() + " to world " + worldstring);
 
             // Set the output location to the same XYZ coords but different world
             double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();

@@ -13,16 +13,19 @@ import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.PortalType;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityPortalExitEvent;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -122,6 +125,36 @@ public class MVNPEntityListener implements Listener {
         return playerBounced;
     }
 
+    @Nullable
+    private Location getLocation(Entity e, Location currentLocation, PortalType type, String currentWorld, String linkedWorld) {
+        Location newTo;
+        if (currentWorld.equalsIgnoreCase(linkedWorld)) {
+            newTo = null;
+        } else if (linkedWorld != null) {
+            newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, e);
+        } else if (this.nameChecker.isValidNetherName(currentWorld)) {
+            if (type == PortalType.NETHER) {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER), e);
+            } else {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)), e);
+            }
+        } else if (this.nameChecker.isValidEndName(currentWorld)) {
+            if (type == PortalType.NETHER) {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.ENDER)), e);
+            } else {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.ENDER), e);
+            }
+        } else {
+            if (type == PortalType.ENDER) {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), e);
+            } else {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), e);
+            }
+        }
+
+        return newTo;
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityPortalEnter(EntityPortalEnterEvent event) {
         if (!(event.getEntity() instanceof Player)) {
@@ -129,17 +162,17 @@ public class MVNPEntityListener implements Listener {
         }
 
         Player p = (Player) event.getEntity();
-        Location block = this.locationManipulation.getBlockLocation(p.getLocation());
+        Location currentLocation = this.locationManipulation.getBlockLocation(p.getLocation());
 
-        if (!plugin.isHandledByNetherPortals(block)) {
+        if (!plugin.isHandledByNetherPortals(currentLocation)) {
             return;
         }
 
         PortalType type;
         // determine what kind of portal the player is using
-        if (block.getBlock().getType() == Material.END_PORTAL) {
+        if (currentLocation.getBlock().getType() == Material.END_PORTAL) {
             type = PortalType.ENDER;
-        } else if (block.getBlock().getType() == Material.NETHER_PORTAL) {
+        } else if (currentLocation.getBlock().getType() == Material.NETHER_PORTAL) {
             type = PortalType.NETHER;
         } else {
             return;
@@ -178,35 +211,9 @@ public class MVNPEntityListener implements Listener {
             this.playerErrors.remove(p.getName());
         }
 
-        String currentWorld = event.getLocation().getWorld().getName();
-        String linkedWorld = this.plugin.getWorldLink(event.getLocation().getWorld().getName(), type);
-        Location currentLocation = event.getLocation();
-
-        Location toLocation;
-
-        if (currentWorld.equalsIgnoreCase(linkedWorld)) {
-            toLocation = null;
-        } else if (linkedWorld != null) {
-            toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, p);
-        } else if (this.nameChecker.isValidNetherName(currentWorld)) {
-            if (type == PortalType.NETHER) {
-                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER), p);
-            } else {
-                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)), p);
-            }
-        } else if (this.nameChecker.isValidEndName(currentWorld)) {
-            if (type == PortalType.NETHER) {
-                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.ENDER)), p);
-            } else {
-                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.ENDER), p);
-            }
-        } else {
-            if (type == PortalType.ENDER) {
-                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), p);
-            } else {
-                toLocation = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), p);
-            }
-        }
+        String currentWorld = currentLocation.getWorld().getName();
+        String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
+        Location toLocation = getLocation(p, currentLocation, type, currentWorld, linkedWorld);
 
         if (toLocation == null) {
             if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
@@ -264,6 +271,102 @@ public class MVNPEntityListener implements Listener {
             }
         } else {
             this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was allowed to go to '" + toWorld.getCBWorld().getName() + "' because enforceaccess is off.");
+        }
+    }
+
+    @EventHandler
+    public void onEntityPortal(EntityPortalEvent event) {
+        if (event.isCancelled()) {
+            this.plugin.log(Level.FINEST, "EntityPortalEvent was cancelled! NOT teleporting!");
+            return;
+        }
+
+        if (!this.plugin.isTeleportingEntities()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Entity e = event.getEntity();
+        Location originalTo = this.locationManipulation.getBlockLocation(event.getFrom());
+        Location currentLocation = this.locationManipulation.getBlockLocation(event.getFrom());
+
+        if (!plugin.isHandledByNetherPortals(currentLocation)) {
+            return;
+        }
+
+        PortalType type = PortalType.ENDER;
+        if (this.nameChecker.isValidNetherName(originalTo.getWorld().getName())
+                || (currentLocation.getWorld().getEnvironment() == World.Environment.NETHER && originalTo.getWorld().getEnvironment() == World.Environment.NORMAL)) {
+            type = PortalType.NETHER;
+        } else if (this.nameChecker.isValidEndName(originalTo.getWorld().getName())
+                || (currentLocation.getWorld().getEnvironment() == World.Environment.THE_END && originalTo.getWorld().getEnvironment() == World.Environment.NORMAL)) {
+            type = PortalType.ENDER;
+        } else {
+            return;
+        }
+
+        if (type == PortalType.NETHER) {
+            try {
+                Class.forName("org.bukkit.TravelAgent");
+                event.useTravelAgent(true);
+            } catch (ClassNotFoundException ignore) {
+                plugin.log(Level.FINE, "TravelAgent not available for EntityPortalEvent for " + e.getName());
+            }
+        }
+
+        String currentWorld = currentLocation.getWorld().getName();
+        String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
+        Location newTo = getLocation(e, currentLocation, type, currentWorld, linkedWorld);
+
+        if (newTo != null) {
+            event.setTo(newTo);
+        } else {
+            event.setCancelled(true);
+            return;
+        }
+
+        MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
+        MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
+
+        if (!event.isCancelled()) {
+            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+                this.plugin.log(Level.FINE, "Entity '" + e.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+                try {
+                    Class.forName("org.bukkit.TravelAgent");
+                    event.getPortalTravelAgent().setCanCreatePortal(false);
+                } catch (ClassNotFoundException ignore) {
+                    plugin.log(Level.FINE, "TravelAgent not available for EntityPortalEvent for " + e.getName() + ". There may be a portal created at spawn.");
+                }
+
+                event.setTo(toWorld.getSpawnLocation());
+            } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+                try {
+                    Class.forName("org.bukkit.TravelAgent");
+                    event.getPortalTravelAgent().setCanCreatePortal(true);
+                    event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
+                } catch (ClassNotFoundException ignore) {
+                    plugin.log(Level.FINE, "TravelAgent not available for EntityPortalEvent for " + e.getName() + ". Their destination may not be correct.");
+                    event.setTo(event.getTo());
+                }
+            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+                Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
+                event.setTo(loc);
+                Block block = loc.getBlock();
+                for (int x = block.getX() - 2; x <= block.getX() + 2; x++) {
+                    for (int z = block.getZ() - 2; z <= block.getZ() + 2; z++) {
+                        Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
+                        if (platformBlock.getType() != Material.OBSIDIAN) {
+                            platformBlock.setType(Material.OBSIDIAN);
+                        }
+                        for (int yMod = 1; yMod <= 3; yMod++) {
+                            Block b = platformBlock.getRelative(BlockFace.UP, yMod);
+                            if (b.getType() != Material.AIR) {
+                                b.setType(Material.AIR);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
