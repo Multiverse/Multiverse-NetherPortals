@@ -2,6 +2,7 @@
 /.classpath
 /.project
 /.settings
+/.checkstyle
 
 # netbeans
 /nbproject
@@ -11,6 +12,7 @@
 
 # maven
 /target
+dependency-reduced-pom.xml
 
 # vim
 .*.sw[a-p]
@@ -24,10 +26,20 @@
 /world
 
 # Mac filesystem dust
-.DS_Store
+*.DS_Store
 
 # intellij
 *.iml
 *.ipr
 *.iws
 .idea/
+
+# Fern's utils
+uploadtoserver.sh
+
+# Testing files:
+debug.log
+
+# Doxygen
+/docs/html
+debug.txt
