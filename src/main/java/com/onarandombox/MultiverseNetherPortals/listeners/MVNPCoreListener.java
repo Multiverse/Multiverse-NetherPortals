@@ -1,13 +1,13 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
-import com.onarandombox.MultiverseCore.event.MVConfigReloadEvent;
 import com.onarandombox.MultiverseCore.event.MVDebugModeEvent;
 import com.onarandombox.MultiverseCore.event.MVVersionEvent;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+
+import java.io.File;
 
 public class MVNPCoreListener implements Listener {
     private MultiverseNetherPortals plugin;
@@ -23,6 +23,8 @@ public class MVNPCoreListener implements Listener {
     @EventHandler
     public void versionEvent(MVVersionEvent event) {
         event.appendVersionInfo(this.plugin.getVersionInfo());
+        File configFile = new File(this.plugin.getDataFolder(), "config.yml");
+        event.putDetailedVersionInfo("multiverse-netherportals/config.yml", configFile);
     }
 
     @EventHandler
