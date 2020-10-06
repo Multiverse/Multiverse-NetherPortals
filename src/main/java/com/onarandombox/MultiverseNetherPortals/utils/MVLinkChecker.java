@@ -4,6 +4,7 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.logging.Level;
@@ -17,35 +18,37 @@ public class MVLinkChecker {
         this.worldManager = this.plugin.getCore().getMVWorldManager();
     }
 
-    public Location findNewTeleportLocation(Location fromLocation, String worldstring, Player p) {
-        MultiverseWorld tpto = this.worldManager.getMVWorld(worldstring);
+    public Location findNewTeleportLocation(Location fromLocation, String worldString, Entity e) {
+        MultiverseWorld tpTo = this.worldManager.getMVWorld(worldString);
 
-        if (tpto == null) {
-            this.plugin.log(Level.FINE, "Can't find world " + worldstring);
-        } else if (!this.plugin.getCore().getMVPerms().canEnterWorld(p, tpto)) {
-            this.plugin.log(Level.WARNING, "Player " + p.getName() + " can't enter world " + worldstring);
+        if (tpTo == null) {
+            this.plugin.log(Level.FINE, "Can't find world " + worldString);
+        } else if (e instanceof Player && !this.plugin.getCore().getMVPerms().canEnterWorld((Player) e, tpTo)) {
+            this.plugin.log(Level.WARNING, "Player " + e.getName() + " can't enter world " + worldString);
         } else if (!this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
             this.plugin.log(Level.WARNING, "World " + fromLocation.getWorld().getName() + " is not a Multiverse world");
         } else {
-            this.plugin.log(Level.FINE, "Finding new teleport location for player " + p.getName() + " to world " + worldstring);
+            String entityType = (e instanceof Player) ? " player " : " entity ";
+            this.plugin.log(Level.FINE, "Finding new teleport location for" + entityType + e.getName() + " to world " + worldString);
 
             // Set the output location to the same XYZ coords but different world
-            double toScaling = this.worldManager.getMVWorld(tpto.getName()).getScaling();
-            MultiverseWorld tpfrom = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
-            double fromScaling = tpfrom.getScaling();
-            double yScaling = 1d * tpfrom.getCBWorld().getMaxHeight() / tpto.getCBWorld().getMaxHeight();
-            fromLocation = this.getScaledLocation(fromLocation, fromScaling, toScaling, yScaling);
-            fromLocation.setWorld(tpto.getCBWorld());
+            MultiverseWorld tpFrom = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
+
+            double fromScaling = tpFrom.getScaling();
+            double toScaling = this.worldManager.getMVWorld(tpTo.getName()).getScaling();
+            double yScaling = 1d * tpFrom.getCBWorld().getMaxHeight() / tpTo.getCBWorld().getMaxHeight();
+
+            this.scaleLocation(fromLocation, fromScaling / toScaling, yScaling);
+            fromLocation.setWorld(tpTo.getCBWorld());
             return fromLocation;
         }
+
         return null;
     }
 
-    private Location getScaledLocation(Location fromLocation, double fromScaling, double toScaling, double yScaling) {
-        double scaling = fromScaling / toScaling;
+    private void scaleLocation(Location fromLocation, double scaling, double yScaling) {
         fromLocation.setX(fromLocation.getX() * scaling);
         fromLocation.setZ(fromLocation.getZ() * scaling);
         fromLocation.setY(fromLocation.getY() * yScaling);
-        return fromLocation;
     }
 }
