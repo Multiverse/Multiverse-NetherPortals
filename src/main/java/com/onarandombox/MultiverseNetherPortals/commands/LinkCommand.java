@@ -3,8 +3,8 @@ package com.onarandombox.MultiverseNetherPortals.commands;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import org.bukkit.ChatColor;
+import org.bukkit.PortalType;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
@@ -35,13 +35,22 @@ public class LinkCommand extends NetherPortalCommand {
             sender.sendMessage("No changes were made...");
             return;
         }
+
         MultiverseWorld fromWorld;
         MultiverseWorld toWorld;
         String fromWorldString;
         String toWorldString;
         PortalType type;
         Player p;
-        type = PortalType.parse(args.get(0).toUpperCase());
+
+        if (args.get(0).equalsIgnoreCase("END")) {
+            type = PortalType.ENDER;
+        } else if (args.get(0).equalsIgnoreCase("NETHER")) {
+            type = PortalType.NETHER;
+        } else {
+            type = null;
+        }
+
         if (args.size() == 2) {
             p = (Player) sender;
             fromWorldString = p.getWorld().getName();

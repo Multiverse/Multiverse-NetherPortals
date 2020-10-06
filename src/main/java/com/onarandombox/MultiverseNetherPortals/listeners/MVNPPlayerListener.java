@@ -6,11 +6,11 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.PortalType;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -18,14 +18,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class MVNPPlayerListener implements Listener {
 
-    private MultiverseNetherPortals plugin;
-    private MVNameChecker nameChecker;
-    private MVLinkChecker linkChecker;
-    private MVWorldManager worldManager;
-    private PermissionTools pt;
+    private final MultiverseNetherPortals plugin;
+    private final MVNameChecker nameChecker;
+    private final MVLinkChecker linkChecker;
+    private final MVWorldManager worldManager;
+    private final PermissionTools pt;
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
@@ -35,25 +36,28 @@ public class MVNPPlayerListener implements Listener {
         this.linkChecker = new MVLinkChecker(this.plugin);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event) {
         if (event.isCancelled()) {
             this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
             return;
         }
-        Location originalTo = event.getTo();
-        if (originalTo != null) {
-            originalTo = originalTo.clone();
-        }
+
         Location currentLocation = event.getFrom().clone();
         if (!plugin.isHandledByNetherPortals(currentLocation)) {
             return;
         }
-        String currentWorld = currentLocation.getWorld().getName();
 
-        PortalType type = PortalType.END;
-        if (event.getFrom().getBlock().getType() == Material.NETHER_PORTAL) {
+        PortalType type;
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) {
+            type = PortalType.ENDER;
+        } else if (event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
             type = PortalType.NETHER;
+        } else {
+            return;
+        }
+
+        if (type == PortalType.NETHER) {
             try {
                 Class.forName("org.bukkit.TravelAgent");
                 event.useTravelAgent(true);
@@ -62,44 +66,45 @@ public class MVNPPlayerListener implements Listener {
             }
         }
 
+        Location newTo;
+        String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
-
-        if (linkedWorld != null) {
-            this.linkChecker.getNewTeleportLocation(event, currentLocation, linkedWorld);
+        if (currentWorld.equalsIgnoreCase(linkedWorld)) {
+            newTo = null;
+        } else if (linkedWorld != null) {
+            newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, event.getPlayer());
         } else if (this.nameChecker.isValidNetherName(currentWorld)) {
             if (type == PortalType.NETHER) {
-                this.plugin.log(Level.FINER, "");
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER), event.getPlayer());
             } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)), event.getPlayer());
             }
         } else if (this.nameChecker.isValidEndName(currentWorld)) {
             if (type == PortalType.NETHER) {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.END)));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.ENDER)), event.getPlayer());
             } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.END));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.ENDER), event.getPlayer());
             }
         } else {
-            if(type == PortalType.END) {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getEndName(currentWorld));
+            if (type == PortalType.ENDER) {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), event.getPlayer());
             } else {
-                this.linkChecker.getNewTeleportLocation(event, currentLocation, this.nameChecker.getNetherName(currentWorld));
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), event.getPlayer());
             }
         }
-        if (event.getTo() == null || event.getFrom() == null) {
+
+        if (newTo != null) {
+            event.setTo(newTo);
+        } else {
+            event.setCancelled(true);
             return;
         }
-        if (event.getFrom().getWorld().equals(event.getTo().getWorld())) {
-            // The player is Portaling to the same world.
-            this.plugin.log(Level.FINER, "Player '" + event.getPlayer().getName() + "' is portaling to the same world.  Ignoring.");
-            event.setTo(originalTo);
-            return;
-        }
+
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
 
         if (!event.isCancelled()) {
-            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
                 try {
                     Class.forName("org.bukkit.TravelAgent");
@@ -123,7 +128,7 @@ public class MVNPPlayerListener implements Listener {
                     plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". Their destination may not be correct.");
                     event.setTo(event.getTo());
                 }
-            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.END) {
+            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
                 event.setTo(loc);
                 Block block = loc.getBlock();

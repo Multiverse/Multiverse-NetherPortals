@@ -1,7 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.utils;
 
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.enums.PortalType;
+import org.bukkit.PortalType;
 
 import java.util.logging.Level;
 
@@ -90,7 +90,7 @@ public class MVNameChecker {
                 String[] split = normalName.split(this.plugin.getNetherSuffix());
                 normalName = split[0];
             }
-        } else if (type == PortalType.END) {
+        } else if (type == PortalType.ENDER) {
             if (this.plugin.getNetherPrefix().length() > 0) {
                 String[] split = normalName.split(this.plugin.getEndPrefix());
                 normalName = split[1];
