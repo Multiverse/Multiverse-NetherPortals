@@ -110,6 +110,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.endLinkMap = new HashMap<String, String>();
 
         this.setUsingBounceBack(this.isUsingBounceBack());
+        this.setTeleportingEntities(this.isTeleportingEntities());
         this.setSendingNoDestinationMessage(this.isSendingNoDestinationMessage());
         this.setSendingDisabledPortalMessage(this.isSendingDisabledPortalMessage());
         this.setNetherPrefix(this.MVNPconfiguration.getString("netherportals.name.prefix", this.getNetherPrefix()));
@@ -270,6 +271,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public void setUsingBounceBack(boolean useBounceBack) {
         this.MVNPconfiguration.set("bounceback", useBounceBack);
+    }
+
+    public boolean isTeleportingEntities() {
+        return this.MVNPconfiguration.getBoolean("send_no_destination_message", true);
+    }
+
+    public void setTeleportingEntities(boolean teleportingEntities) {
+        this.MVNPconfiguration.set("send_no_destination_message", teleportingEntities);
     }
 
     public boolean isSendingNoDestinationMessage() {
