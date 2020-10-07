@@ -1,6 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import com.onarandombox.MultiverseCore.event.MVConfigReloadEvent;
 import com.onarandombox.MultiverseCore.event.MVDebugModeEvent;
 import com.onarandombox.MultiverseCore.event.MVVersionEvent;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
@@ -17,7 +18,19 @@ public class MVNPCoreListener implements Listener {
     }
 
     /**
-     * This method is called when Multiverse-Core wants to know what version we are.
+     * This method is called when Multiverse-Core wants to reload config files.
+     *
+     * @param event The Config Reload event.
+     */
+    @EventHandler
+    public void configReloadEvent(MVConfigReloadEvent event) {
+        this.plugin.reloadConfig();
+        event.addConfig("Multiverse-NetherPortals - config.yml");
+    }
+
+    /**
+     * This method is called when Multiverse-Core wants version info.
+     *
      * @param event The Version event.
      */
     @EventHandler
@@ -27,6 +40,11 @@ public class MVNPCoreListener implements Listener {
         event.putDetailedVersionInfo("multiverse-netherportals/config.yml", configFile);
     }
 
+    /**
+     * This method is called when Multiverse-Core changes the debug mode.
+     *
+     * @param event The Debug Mode event.
+     */
     @EventHandler
     public void debugModeChange(MVDebugModeEvent event) {
         Logging.setDebugLevel(event.getLevel());
