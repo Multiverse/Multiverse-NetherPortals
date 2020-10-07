@@ -25,7 +25,7 @@ public class PlayerTouchingPortalTask extends BukkitRunnable {
         PortalType type = null;
         Player p = Bukkit.getPlayer(this.uuid);
 
-        if (p != null && !p.isOnline()) {
+        if (p != null && p.isOnline()) {
             if (p.getLocation().getBlock().getType() == Material.END_PORTAL) {
                 type = PortalType.ENDER;
             } else if (p.getLocation().getBlock().getType() == Material.NETHER_PORTAL) {
