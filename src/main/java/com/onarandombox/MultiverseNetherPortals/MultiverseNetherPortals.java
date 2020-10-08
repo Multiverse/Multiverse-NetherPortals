@@ -274,11 +274,19 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public boolean isTeleportingEntities() {
-        return this.MVNPconfiguration.getBoolean("send_no_destination_message", true);
+        return this.MVNPconfiguration.getBoolean("teleport_entities", true);
     }
 
     public void setTeleportingEntities(boolean teleportingEntities) {
-        this.MVNPconfiguration.set("send_no_destination_message", teleportingEntities);
+        this.MVNPconfiguration.set("teleport_entities", teleportingEntities);
+    }
+
+    public boolean isSendingDisabledPortalMessage() {
+        return this.MVNPconfiguration.getBoolean("send_disabled_portal_message", true);
+    }
+
+    public void setSendingDisabledPortalMessage(boolean sendDisabledPortalMessage) {
+        this.MVNPconfiguration.set("send_disabled_portal_message", sendDisabledPortalMessage);
     }
 
     public boolean isSendingNoDestinationMessage() {
@@ -287,14 +295,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public void setSendingNoDestinationMessage(boolean sendNoDestinationMessage) {
         this.MVNPconfiguration.set("send_no_destination_message", sendNoDestinationMessage);
-    }
-
-    public boolean isSendingDisabledPortalMessage() {
-        return this.MVNPconfiguration.getBoolean("send_portal_disabled_message", true);
-    }
-
-    public void setSendingDisabledPortalMessage(boolean sendDisabledPortalMessage) {
-        this.MVNPconfiguration.set("send_portal_disabled_message", sendDisabledPortalMessage);
     }
 
     public boolean isHandledByNetherPortals(Location l) {
@@ -343,26 +343,37 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     @Override
     public String dumpVersionInfo(String buffer) {
         buffer += logAndAddToPasteBinBuffer("Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
-        buffer += logAndAddToPasteBinBuffer("Bukkit Version: " + this.getServer().getVersion());
-        buffer += logAndAddToPasteBinBuffer("World links: " + this.getWorldLinks());
-        buffer += logAndAddToPasteBinBuffer("Nether Prefix: " + netherPrefix);
-        buffer += logAndAddToPasteBinBuffer("Nether Suffix: " + netherSuffix);
+        buffer += logAndAddToPasteBinBuffer("Nether Prefix: " + this.getNetherPrefix());
+        buffer += logAndAddToPasteBinBuffer("Nether Suffix: " + this.getNetherSuffix());
+        buffer += logAndAddToPasteBinBuffer("End Prefix: " + this.getEndPrefix());
+        buffer += logAndAddToPasteBinBuffer("End Suffix: " + this.getEndSuffix());
+        buffer += logAndAddToPasteBinBuffer("Nether Links: " + this.getWorldLinks());
+        buffer += logAndAddToPasteBinBuffer("End Links: " + this.getEndWorldLinks());
+        buffer += logAndAddToPasteBinBuffer("Bounceback: " + this.isUsingBounceBack());
+        buffer += logAndAddToPasteBinBuffer("Teleport Entities: " + this.isTeleportingEntities());
+        buffer += logAndAddToPasteBinBuffer("Send Disabled Portal Message: " + this.isSendingDisabledPortalMessage());
+        buffer += logAndAddToPasteBinBuffer("Send No Destination Message: " + this.isSendingNoDestinationMessage());
         buffer += logAndAddToPasteBinBuffer("Special Code: FRN001");
         return buffer;
     }
 
     private String logAndAddToPasteBinBuffer(String string) {
         this.log(Level.INFO, string);
-        return "[Multiverse-NetherPortals] " + string + "\n";
+        return "[Multiverse-NetherPortals] " + string + System.lineSeparator();
     }
 
     public String getVersionInfo() {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("[Multiverse-NetherPortals] Multiverse-NetherPortals Version: ").append(this.getDescription().getVersion()).append('\n');
-        buffer.append("[Multiverse-NetherPortals] World links: ").append(this.getWorldLinks()).append('\n');
-        buffer.append("[Multiverse-NetherPortals] Nether Prefix: ").append(netherPrefix).append('\n');
-        buffer.append("[Multiverse-NetherPortals] Nether Suffix: ").append(netherSuffix).append('\n');
-        buffer.append("[Multiverse-NetherPortals] Special Code: ").append("FRN001").append('\n');
-        return buffer.toString();
+        return "[Multiverse-NetherPortals] Multiverse-NetherPortals Version: " + this.getDescription().getVersion() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Nether Prefix: " + this.getNetherPrefix() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Nether Suffix: " + this.getNetherSuffix() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] End Prefix: " + this.getEndPrefix() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] End Suffix: " + this.getEndSuffix() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Nether Links: " + this.getWorldLinks() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] End Links: " + this.getEndWorldLinks() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Bounceback: " + this.isUsingBounceBack() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Teleport Entities: " + this.isTeleportingEntities() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Send Disabled Portal Message: " + this.isSendingDisabledPortalMessage() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Send No Destination Message: " + this.isSendingNoDestinationMessage() + System.lineSeparator()
+                + "[Multiverse-NetherPortals] Special Code: " + "FRN001" + System.lineSeparator();
     }
 }
