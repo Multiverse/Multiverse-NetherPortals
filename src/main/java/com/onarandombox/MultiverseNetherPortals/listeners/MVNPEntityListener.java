@@ -140,29 +140,33 @@ public class MVNPEntityListener implements Listener {
         Location newTo = null;
 
         if (!currentWorld.equalsIgnoreCase(linkedWorld)) {
-            String destinationWorld = "";
-
-            if (this.nameChecker.isValidEndName(currentWorld)) {
-                if (type == PortalType.ENDER) {
-                    destinationWorld = this.nameChecker.getNormalName(currentWorld, type);
-                } else if (type == PortalType.NETHER) {
-                    destinationWorld = this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, type));
-                }
-            } else if (this.nameChecker.isValidNetherName(currentWorld)) {
-                if (type == PortalType.ENDER) {
-                    destinationWorld = this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, type));
-                } else if (type == PortalType.NETHER) {
-                    destinationWorld = this.nameChecker.getNormalName(currentWorld, type);
-                }
+            if (linkedWorld != null) {
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, e);
             } else {
-                if (type == PortalType.ENDER) {
-                    destinationWorld = this.nameChecker.getEndName(currentWorld);
-                } else if (type == PortalType.NETHER) {
-                    destinationWorld = this.nameChecker.getNetherName(currentWorld);
-                }
-            }
+                String destinationWorld = "";
 
-            newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
+                if (this.nameChecker.isValidEndName(currentWorld)) {
+                    if (type == PortalType.ENDER) {
+                        destinationWorld = this.nameChecker.getNormalName(currentWorld, type);
+                    } else if (type == PortalType.NETHER) {
+                        destinationWorld = this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, type));
+                    }
+                } else if (this.nameChecker.isValidNetherName(currentWorld)) {
+                    if (type == PortalType.ENDER) {
+                        destinationWorld = this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, type));
+                    } else if (type == PortalType.NETHER) {
+                        destinationWorld = this.nameChecker.getNormalName(currentWorld, type);
+                    }
+                } else {
+                    if (type == PortalType.ENDER) {
+                        destinationWorld = this.nameChecker.getEndName(currentWorld);
+                    } else if (type == PortalType.NETHER) {
+                        destinationWorld = this.nameChecker.getNetherName(currentWorld);
+                    }
+                }
+
+                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
+            }
         }
 
         return newTo;
