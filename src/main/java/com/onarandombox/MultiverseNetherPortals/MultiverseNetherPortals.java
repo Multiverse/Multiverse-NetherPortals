@@ -94,6 +94,13 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         loadConfig();
         this.registerCommands();
 
+        if (!this.getServer().getAllowNether()) {
+            Logging.warning("allow-nether is set to false in server.properties! All nether portals may not work!");
+        }
+        if (!this.getServer().getAllowEnd()) {
+            Logging.warning("allow-end is set to false in bukkit.yml! All end portals may not work!");
+        }
+
         Logging.log(true, Level.INFO, " Enabled - By %s", getAuthors());
     }
 
