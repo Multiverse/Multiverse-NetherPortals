@@ -126,13 +126,24 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         Set<String> worldKeys = this.MVNPconfiguration.getConfigurationSection("worlds").getKeys(false);
         if (worldKeys != null) {
             for (String worldString : worldKeys) {
-                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.NETHER", null);
-                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
+                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.NETHER, null);
+                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.ENDER, null);
                 if (nether != null) {
                     this.linkMap.put(worldString, nether);
                 }
                 if (ender != null) {
                     this.endLinkMap.put(worldString, ender);
+                }
+
+                // Convert from old version enum which used END not ENDER
+                String oldEnder = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
+                if (oldEnder != null) {
+                    if (this.addWorldLink(worldString, oldEnder, PortalType.ENDER)) {
+                        this.MVNPconfiguration.set("worlds." + worldString + ".portalgoesto.END", null);
+                    }
+                    else {
+                        Logging.warning("Error converting old end link of '%s' to '%s'", worldString, oldEnder);
+                    }
                 }
 
             }
