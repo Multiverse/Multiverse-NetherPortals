@@ -36,23 +36,17 @@ public class LinkCommand extends NetherPortalCommand {
             return;
         }
 
-        MultiverseWorld fromWorld;
-        MultiverseWorld toWorld;
-        String fromWorldString;
-        String toWorldString;
-        PortalType type;
-        Player p;
-
-        if (args.get(0).equalsIgnoreCase("END")) {
-            type = PortalType.ENDER;
-        } else if (args.get(0).equalsIgnoreCase("NETHER")) {
-            type = PortalType.NETHER;
-        } else {
-            type = null;
+        PortalType type = parseType(args.get(0));
+        if (type == null) {
+            sender.sendMessage("The type must either be 'end' or 'nether'");
+            return;
         }
 
+        String fromWorldString;
+        String toWorldString;
+
         if (args.size() == 2) {
-            p = (Player) sender;
+            Player p = (Player) sender;
             fromWorldString = p.getWorld().getName();
             toWorldString = args.get(1);
         } else {
@@ -60,13 +54,8 @@ public class LinkCommand extends NetherPortalCommand {
             toWorldString = args.get(2);
         }
 
-        if (type == null) {
-            sender.sendMessage("The type must either be 'end' or 'nether'");
-            return;
-        }
-
-        fromWorld = this.worldManager.getMVWorld(fromWorldString);
-        toWorld = this.worldManager.getMVWorld(toWorldString);
+        MultiverseWorld fromWorld = this.worldManager.getMVWorld(fromWorldString);
+        MultiverseWorld toWorld = this.worldManager.getMVWorld(toWorldString);
 
         if (fromWorld == null) {
             this.plugin.getCore().showNotMVWorldMessage(sender, fromWorldString);

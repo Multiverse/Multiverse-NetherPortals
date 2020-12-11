@@ -39,27 +39,18 @@ public class UnlinkCommand extends NetherPortalCommand {
         MultiverseWorld toWorld;
         String fromWorldString;
         String toWorldString;
-        PortalType type;
-        Player p;
 
-        if (args.get(0).equalsIgnoreCase("END")) {
-            type = PortalType.ENDER;
-        } else if (args.get(0).equalsIgnoreCase("NETHER")) {
-            type = PortalType.NETHER;
-        } else {
-            type = null;
-        }
-
-        if (args.size() == 1) {
-            p = (Player) sender;
-            fromWorldString = p.getWorld().getName();
-        } else {
-            fromWorldString = args.get(1);
-        }
-
+        PortalType type = parseType(args.get(0));
         if (type == null) {
             this.showHelp(sender);
             return;
+        }
+
+        if (args.size() == 1) {
+            Player p = (Player) sender;
+            fromWorldString = p.getWorld().getName();
+        } else {
+            fromWorldString = args.get(1);
         }
 
         fromWorld = this.worldManager.getMVWorld(fromWorldString);
