@@ -374,6 +374,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
                 + "[Multiverse-NetherPortals] Teleport Entities: " + this.isTeleportingEntities() + '\n'
                 + "[Multiverse-NetherPortals] Send Disabled Portal Message: " + this.isSendingDisabledPortalMessage() + '\n'
                 + "[Multiverse-NetherPortals] Send No Destination Message: " + this.isSendingNoDestinationMessage() + '\n'
+                + "[Multiverse-NetherPortals] Server Allow Nether: " + this.getServer().getAllowNether() + '\n'
+                + "[Multiverse-NetherPortals] Server Allow End: " + this.getServer().getAllowEnd() + '\n'
                 + "[Multiverse-NetherPortals] Special Code: " + "FRN001" + '\n';
     }
 }
