@@ -35,23 +35,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
-    private static final String NETEHR_PORTALS_CONFIG = "config.yml";
+    private static final String NETHER_PORTALS_CONFIG = "config.yml";
+    private static final String DEFAULT_NETHER_PREFIX = "";
+    private static final String DEFAULT_NETHER_SUFFIX = "_nether";
+    private static final String DEFAULT_END_PREFIX = "";
+    private static final String DEFAULT_END_SUFFIX = "_the_end";
+    private final static int requiresProtocol = 24;
+
     protected MultiverseCore core;
     protected Plugin multiversePortals;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
     protected MVNPCoreListener customListener;
-    protected FileConfiguration MVNPconfiguration;
-    private static final String DEFAULT_NETHER_SUFFIX = "_nether";
-    private static final String DEFAULT_END_SUFFIX = "_the_end";
-    private String netherPrefix = "";
-    private String netherSuffix = DEFAULT_NETHER_SUFFIX;
-    private String endPrefix = "";
-    private String endSuffix = DEFAULT_END_SUFFIX;
+    protected FileConfiguration MVNPConfiguration;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
-    private final static int requiresProtocol = 24;
     private MVNPEntityListener entityListener;
 
     @Override
@@ -98,13 +97,13 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public void loadConfig() {
-        this.MVNPconfiguration = new YamlConfiguration();
+        this.MVNPConfiguration = new YamlConfiguration();
         try {
-            this.MVNPconfiguration.load(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
+            this.MVNPConfiguration.load(new File(this.getDataFolder(), NETHER_PORTALS_CONFIG));
         } catch (IOException e) {
-            this.log(Level.SEVERE, "Could not load " + NETEHR_PORTALS_CONFIG);
+            this.log(Level.SEVERE, "Could not load " + NETHER_PORTALS_CONFIG);
         } catch (InvalidConfigurationException e) {
-            this.log(Level.SEVERE, NETEHR_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
+            this.log(Level.SEVERE, NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
         }
         this.linkMap = new HashMap<String, String>();
         this.endLinkMap = new HashMap<String, String>();
@@ -113,21 +112,20 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.setTeleportingEntities(this.isTeleportingEntities());
         this.setSendingNoDestinationMessage(this.isSendingNoDestinationMessage());
         this.setSendingDisabledPortalMessage(this.isSendingDisabledPortalMessage());
-        this.setNetherPrefix(this.MVNPconfiguration.getString("netherportals.name.prefix", this.getNetherPrefix()));
-        this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
 
-        if (this.getNetherPrefix().length() == 0 && this.getNetherSuffix().length() == 0) {
-            Logging.warning("I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
-            this.setNetherSuffix(this.MVNPconfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
+        this.setNetherPrefix(this.getNetherPrefix());
+        this.setNetherSuffix(this.getNetherSuffix());
+        this.setEndPrefix(this.getEndPrefix());
+        this.setEndSuffix(this.getEndSuffix());
+
+        if (this.MVNPConfiguration.getConfigurationSection("worlds") == null) {
+            this.MVNPConfiguration.createSection("worlds");
         }
-        if (this.MVNPconfiguration.getConfigurationSection("worlds") == null) {
-            this.MVNPconfiguration.createSection("worlds");
-        }
-        Set<String> worldKeys = this.MVNPconfiguration.getConfigurationSection("worlds").getKeys(false);
+        Set<String> worldKeys = this.MVNPConfiguration.getConfigurationSection("worlds").getKeys(false);
         if (worldKeys != null) {
             for (String worldString : worldKeys) {
-                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.NETHER", null);
-                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
+                String nether = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto.NETHER", null);
+                String ender = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
                 if (nether != null) {
                     this.linkMap.put(worldString, nether);
                 }
@@ -187,27 +185,35 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public void setNetherPrefix(String netherPrefix) {
-        this.netherPrefix = netherPrefix;
+        this.MVNPConfiguration.set("portal-auto-link-when.nether.prefix", netherPrefix);
     }
 
     public String getNetherPrefix() {
-        return this.netherPrefix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.nether.prefix", DEFAULT_NETHER_PREFIX);
     }
 
     public void setNetherSuffix(String netherSuffix) {
-        this.netherSuffix = netherSuffix;
+        this.MVNPConfiguration.set("portal-auto-link-when.nether.suffix", netherSuffix);
     }
 
     public String getNetherSuffix() {
-        return this.netherSuffix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.nether.suffix", DEFAULT_NETHER_SUFFIX);
+    }
+
+    public void setEndPrefix(String endPrefix) {
+        this.MVNPConfiguration.set("portal-auto-link-when.end.prefix", endPrefix);
     }
 
     public String getEndPrefix() {
-        return this.endPrefix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.end.prefix", DEFAULT_END_PREFIX);
+    }
+
+    public void setEndSuffix(String endSuffix) {
+        this.MVNPConfiguration.set("portal-auto-link-when.end.suffix", endSuffix);
     }
 
     public String getEndSuffix() {
-        return this.endSuffix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.end.suffix", DEFAULT_END_SUFFIX);
     }
 
     public String getWorldLink(String fromWorld, PortalType type) {
@@ -237,7 +243,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             return false;
         }
 
-        this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, to);
+        this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, to);
         this.saveMVNPConfig();
         return true;
     }
@@ -251,50 +257,50 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             return;
         }
 
-        this.MVNPconfiguration.set("worlds." + from + ".portalgoesto." + type, null);
+        this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, null);
         this.saveMVNPConfig();
     }
 
     public boolean saveMVNPConfig() {
         try {
-            this.MVNPconfiguration.save(new File(this.getDataFolder(), NETEHR_PORTALS_CONFIG));
+            this.MVNPConfiguration.save(new File(this.getDataFolder(), NETHER_PORTALS_CONFIG));
             return true;
         } catch (IOException e) {
-            this.log(Level.SEVERE, "Could not save " + NETEHR_PORTALS_CONFIG);
+            this.log(Level.SEVERE, "Could not save " + NETHER_PORTALS_CONFIG);
         }
         return false;
     }
 
     public boolean isUsingBounceBack() {
-        return this.MVNPconfiguration.getBoolean("bounceback", true);
+        return this.MVNPConfiguration.getBoolean("bounceback", true);
     }
 
     public void setUsingBounceBack(boolean useBounceBack) {
-        this.MVNPconfiguration.set("bounceback", useBounceBack);
+        this.MVNPConfiguration.set("bounceback", useBounceBack);
     }
 
     public boolean isTeleportingEntities() {
-        return this.MVNPconfiguration.getBoolean("teleport_entities", true);
+        return this.MVNPConfiguration.getBoolean("teleport_entities", true);
     }
 
     public void setTeleportingEntities(boolean teleportingEntities) {
-        this.MVNPconfiguration.set("teleport_entities", teleportingEntities);
+        this.MVNPConfiguration.set("teleport_entities", teleportingEntities);
     }
 
     public boolean isSendingDisabledPortalMessage() {
-        return this.MVNPconfiguration.getBoolean("send_disabled_portal_message", true);
+        return this.MVNPConfiguration.getBoolean("send_disabled_portal_message", true);
     }
 
     public void setSendingDisabledPortalMessage(boolean sendDisabledPortalMessage) {
-        this.MVNPconfiguration.set("send_disabled_portal_message", sendDisabledPortalMessage);
+        this.MVNPConfiguration.set("send_disabled_portal_message", sendDisabledPortalMessage);
     }
 
     public boolean isSendingNoDestinationMessage() {
-        return this.MVNPconfiguration.getBoolean("send_no_destination_message", true);
+        return this.MVNPConfiguration.getBoolean("send_no_destination_message", true);
     }
 
     public void setSendingNoDestinationMessage(boolean sendNoDestinationMessage) {
-        this.MVNPconfiguration.set("send_no_destination_message", sendNoDestinationMessage);
+        this.MVNPConfiguration.set("send_no_destination_message", sendNoDestinationMessage);
     }
 
     public boolean isHandledByNetherPortals(Location l) {
