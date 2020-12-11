@@ -41,7 +41,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private static final String DEFAULT_END_PREFIX = "";
     private static final String DEFAULT_END_SUFFIX = "_the_end";
     private final static int requiresProtocol = 24;
-
+  
     protected MultiverseCore core;
     protected Plugin multiversePortals;
     protected MVNPPluginListener pluginListener;
@@ -117,16 +117,16 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.setNetherSuffix(this.getNetherSuffix());
         this.setEndPrefix(this.getEndPrefix());
         this.setEndSuffix(this.getEndSuffix());
-
+      
         if (this.MVNPConfiguration.getConfigurationSection("worlds") == null) {
             this.MVNPConfiguration.createSection("worlds");
         }
         Set<String> worldKeys = this.MVNPConfiguration.getConfigurationSection("worlds").getKeys(false);
         if (worldKeys != null) {
             for (String worldString : worldKeys) {
-                String nether = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.NETHER, null);
-                String ender = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.ENDER, null);
-
+                String nether = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.NETHER, null);
+                String ender = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.ENDER, null);
+              
                 if (nether != null) {
                     this.linkMap.put(worldString, nether);
                 }
@@ -135,10 +135,10 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
                 }
 
                 // Convert from old version enum which used END not ENDER
-                String oldEnder = this.MVNPconfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
+                String oldEnder = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
                 if (oldEnder != null) {
                     if (this.addWorldLink(worldString, oldEnder, PortalType.ENDER)) {
-                        this.MVNPconfiguration.set("worlds." + worldString + ".portalgoesto.END", null);
+                        this.MVNPConfiguration.set("worlds." + worldString + ".portalgoesto.END", null);
                     }
                     else {
                         Logging.warning("Error converting old end link of '%s' to '%s'", worldString, oldEnder);
