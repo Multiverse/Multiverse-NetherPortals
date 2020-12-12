@@ -98,14 +98,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public void loadConfig() {
-        this.MVNPConfiguration = new YamlConfiguration();
-        try {
-            this.MVNPConfiguration.load(new File(this.getDataFolder(), NETHER_PORTALS_CONFIG));
-        } catch (IOException e) {
-            this.log(Level.SEVERE, "Could not load " + NETHER_PORTALS_CONFIG);
-        } catch (InvalidConfigurationException e) {
-            this.log(Level.SEVERE, NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
-        }
+        initMVNPConfig();
+
         this.linkMap = new HashMap<String, String>();
         this.endLinkMap = new HashMap<String, String>();
 
@@ -150,6 +144,24 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             }
         }
         this.saveMVNPConfig();
+    }
+
+    private void initMVNPConfig() {
+        this.MVNPConfiguration = new YamlConfiguration();
+        try {
+            File configFile = new File(this.getDataFolder(), NETHER_PORTALS_CONFIG);
+            if (!configFile.isFile()) {
+                Logging.info("Creating new %s", NETHER_PORTALS_CONFIG);
+                configFile.createNewFile();
+            }
+            this.MVNPConfiguration.load(configFile);
+        }
+        catch (IOException e) {
+            this.log(Level.SEVERE, "Could not load " + NETHER_PORTALS_CONFIG);
+        }
+        catch (InvalidConfigurationException e) {
+            this.log(Level.SEVERE, NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
+        }
     }
 
     /** Register commands to Multiverse's CommandHandler so we get a super sexy single menu */
