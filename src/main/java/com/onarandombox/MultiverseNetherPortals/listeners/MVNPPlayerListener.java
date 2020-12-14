@@ -2,6 +2,7 @@ package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import java.util.logging.Level;
 
+import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
@@ -39,7 +40,7 @@ public class MVNPPlayerListener implements Listener {
     @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event) {
         if (event.isCancelled()) {
-            this.plugin.log(Level.FINEST, "PlayerPortalEvent was cancelled! NOT teleporting!");
+            Logging.finest("PlayerPortalEvent was cancelled! NOT teleporting!");
             return;
         }
 
@@ -62,7 +63,7 @@ public class MVNPPlayerListener implements Listener {
                 Class.forName("org.bukkit.TravelAgent");
                 event.useTravelAgent(true);
             } catch (ClassNotFoundException ignore) {
-                plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName());
+                Logging.fine("TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName());
             }
         }
 
@@ -105,12 +106,12 @@ public class MVNPPlayerListener implements Listener {
 
         if (!event.isCancelled()) {
             if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                this.plugin.log(Level.FINE, "Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+                Logging.fine("Player '" + event.getPlayer().getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
                 try {
                     Class.forName("org.bukkit.TravelAgent");
                     event.getPortalTravelAgent().setCanCreatePortal(false);
                 } catch (ClassNotFoundException ignore) {
-                    plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". There may be a portal created at spawn.");
+                    Logging.fine("TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". There may be a portal created at spawn.");
                 }
                 if (toWorld.getBedRespawn()
                         && event.getPlayer().getBedSpawnLocation() != null
@@ -125,7 +126,7 @@ public class MVNPPlayerListener implements Listener {
                     event.getPortalTravelAgent().setCanCreatePortal(true);
                     event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
                 } catch (ClassNotFoundException ignore) {
-                    plugin.log(Level.FINE, "TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". Their destination may not be correct.");
+                    Logging.fine("TravelAgent not available for PlayerPortalEvent for " + event.getPlayer().getName() + ". Their destination may not be correct.");
                     event.setTo(event.getTo());
                 }
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {

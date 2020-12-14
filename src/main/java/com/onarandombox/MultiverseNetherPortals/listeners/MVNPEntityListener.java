@@ -1,5 +1,6 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
+import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
@@ -75,7 +76,7 @@ public class MVNPEntityListener implements Listener {
      */
     protected boolean shootPlayer(Player p, Block block, PortalType type) {
         if (!plugin.isUsingBounceBack()) {
-            this.plugin.log(Level.FINEST, "Bounceback is disabled. The player is free to walk into the portal!");
+            Logging.finest("Bounceback is disabled. The player is free to walk into the portal!");
             return false;
         }
 
@@ -121,7 +122,7 @@ public class MVNPEntityListener implements Listener {
             debugMessage.append(" entered an Unsupported Portal Type (").append(type).append(").");
         }
 
-        this.plugin.log(Level.FINER, debugMessage.toString());
+        Logging.finer(debugMessage.toString());
         return playerBounced;
     }
 
@@ -213,10 +214,10 @@ public class MVNPEntityListener implements Listener {
                 eventRecord.removeFromRecord(type, p.getUniqueId());
             }
 
-            this.plugin.log(Level.FINEST, "Someone requested that this player be bounced back!");
+            Logging.finest("Someone requested that this player be bounced back!");
         }
         if (playerTouchedPortalEvent.isCancelled()) {
-            this.plugin.log(Level.FINEST, "Someone cancelled the enter Event for NetherPortals!");
+            Logging.finest("Someone cancelled the enter Event for NetherPortals!");
             return;
         }
 
@@ -264,7 +265,7 @@ public class MVNPEntityListener implements Listener {
 
         if (fromWorld.getCBWorld().equals(toWorld.getCBWorld())) {
             // The player is Portaling to the same world.
-            this.plugin.log(Level.FINER, "Player '" + p.getName() + "' is portaling to the same world.");
+            Logging.finer("Player '" + p.getName() + "' is portaling to the same world.");
             return;
         }
         if (!pt.playerHasMoneyToEnter(fromWorld, toWorld, p, p, false)) {
@@ -272,7 +273,7 @@ public class MVNPEntityListener implements Listener {
                 eventRecord.removeFromRecord(type, p.getUniqueId());
             }
 
-            this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
+            Logging.fine("Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                     "' because they don't have the FUNDS required to enter.");
             return;
         }
@@ -283,18 +284,18 @@ public class MVNPEntityListener implements Listener {
                     eventRecord.removeFromRecord(type, p.getUniqueId());
                 }
 
-                this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
+                Logging.fine("Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
                         "' because they don't have: multiverse.access." + toWorld.getCBWorld().getName());
             }
         } else {
-            this.plugin.log(Level.FINE, "Player '" + p.getName() + "' was allowed to go to '" + toWorld.getCBWorld().getName() + "' because enforceaccess is off.");
+            Logging.fine("Player '" + p.getName() + "' was allowed to go to '" + toWorld.getCBWorld().getName() + "' because enforceaccess is off.");
         }
     }
 
     @EventHandler
     public void onEntityPortal(EntityPortalEvent event) {
         if (event.isCancelled()) {
-            this.plugin.log(Level.FINEST, "EntityPortalEvent was cancelled! NOT teleporting!");
+            Logging.finest("EntityPortalEvent was cancelled! NOT teleporting!");
             return;
         }
 
@@ -327,7 +328,7 @@ public class MVNPEntityListener implements Listener {
                 Class.forName("org.bukkit.TravelAgent");
                 event.useTravelAgent(true);
             } catch (ClassNotFoundException ignore) {
-                plugin.log(Level.FINE, "TravelAgent not available for EntityPortalEvent for " + e.getName());
+                Logging.fine("TravelAgent not available for EntityPortalEvent for " + e.getName());
             }
         }
 
@@ -347,12 +348,12 @@ public class MVNPEntityListener implements Listener {
 
         if (!event.isCancelled()) {
             if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                this.plugin.log(Level.FINE, "Entity '" + e.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+                Logging.fine("Entity '" + e.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
                 try {
                     Class.forName("org.bukkit.TravelAgent");
                     event.getPortalTravelAgent().setCanCreatePortal(false);
                 } catch (ClassNotFoundException ignore) {
-                    plugin.log(Level.FINE, "TravelAgent not available for EntityPortalEvent for " + e.getName() + ". There may be a portal created at spawn.");
+                    Logging.fine("TravelAgent not available for EntityPortalEvent for " + e.getName() + ". There may be a portal created at spawn.");
                 }
 
                 event.setTo(toWorld.getSpawnLocation());
@@ -362,7 +363,7 @@ public class MVNPEntityListener implements Listener {
                     event.getPortalTravelAgent().setCanCreatePortal(true);
                     event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
                 } catch (ClassNotFoundException ignore) {
-                    plugin.log(Level.FINE, "TravelAgent not available for EntityPortalEvent for " + e.getName() + ". Their destination may not be correct.");
+                    Logging.fine("TravelAgent not available for EntityPortalEvent for " + e.getName() + ". Their destination may not be correct.");
                     event.setTo(event.getTo());
                 }
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {

@@ -1,5 +1,6 @@
 package com.onarandombox.MultiverseNetherPortals.utils;
 
+import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
@@ -22,14 +23,14 @@ public class MVLinkChecker {
         MultiverseWorld tpTo = this.worldManager.getMVWorld(worldString);
 
         if (tpTo == null) {
-            this.plugin.log(Level.FINE, "Can't find world " + worldString);
+            Logging.fine("Can't find world " + worldString);
         } else if (e instanceof Player && !this.plugin.getCore().getMVPerms().canEnterWorld((Player) e, tpTo)) {
-            this.plugin.log(Level.WARNING, "Player " + e.getName() + " can't enter world " + worldString);
+            Logging.warning("Player " + e.getName() + " can't enter world " + worldString);
         } else if (!this.worldManager.isMVWorld(fromLocation.getWorld().getName())) {
-            this.plugin.log(Level.WARNING, "World " + fromLocation.getWorld().getName() + " is not a Multiverse world");
+            Logging.warning("World " + fromLocation.getWorld().getName() + " is not a Multiverse world");
         } else {
             String entityType = (e instanceof Player) ? " player " : " entity ";
-            this.plugin.log(Level.FINE, "Finding new teleport location for" + entityType + e.getName() + " to world " + worldString);
+            Logging.fine("Finding new teleport location for" + entityType + e.getName() + " to world " + worldString);
 
             // Set the output location to the same XYZ coords but different world
             MultiverseWorld tpFrom = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
