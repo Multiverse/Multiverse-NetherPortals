@@ -157,10 +157,10 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             this.MVNPConfiguration.load(configFile);
         }
         catch (IOException e) {
-            this.log(Level.SEVERE, "Could not load " + NETHER_PORTALS_CONFIG);
+            Logging.severe("Could not load " + NETHER_PORTALS_CONFIG);
         }
         catch (InvalidConfigurationException e) {
-            this.log(Level.SEVERE, NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
+            Logging.severe(NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
         }
     }
 

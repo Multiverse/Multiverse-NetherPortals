@@ -1,5 +1,6 @@
 package com.onarandombox.MultiverseNetherPortals.utils;
 
+import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.PortalType;
 
@@ -100,7 +101,7 @@ public class MVNameChecker {
             }
         }
         if (!normalName.equals(netherName) && plugin.getCore().getMVWorldManager().isMVWorld(normalName)) {
-            this.plugin.log(Level.FINEST,  "Selected normal world '" + normalName + "' for " + type + " '" + netherName + "'");
+            Logging.finest("Selected normal world '" + normalName + "' for " + type + " '" + netherName + "'");
         }
 		// All we're left with is the normal world. Don't worry if it exists, the method below will handle that!
         return normalName;
