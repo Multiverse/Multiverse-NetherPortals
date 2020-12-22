@@ -1,37 +1,29 @@
 package com.onarandombox.MultiverseNetherPortals;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
 import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVPlugin;
-import com.onarandombox.MultiverseCore.commands.HelpCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPCoreListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
+import com.onarandombox.MultiverseNetherPortals.utils.CommandTools;
 import com.onarandombox.MultiversePortals.MultiversePortals;
-import com.onarandombox.commandhandler.CommandHandler;
 import org.bukkit.Location;
 import org.bukkit.PortalType;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
@@ -50,7 +42,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private String endSuffix = DEFAULT_END_SUFFIX;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
-    protected CommandHandler commandHandler;
     private final static int requiresProtocol = 24;
     private MVNPEntityListener entityListener;
 
@@ -92,7 +83,9 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         pm.registerEvents(this.customListener, this);
 
         loadConfig();
-        this.registerCommands();
+
+        // Setup commands
+        new CommandTools(this);
 
         Logging.log(true, Level.INFO, " Enabled - By %s", getAuthors());
     }
@@ -162,30 +155,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         catch (InvalidConfigurationException e) {
             Logging.severe(NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
         }
-    }
-
-    /** Register commands to Multiverse's CommandHandler so we get a super sexy single menu */
-    private void registerCommands() {
-        this.commandHandler = this.core.getCommandHandler();
-        this.commandHandler.registerCommand(new LinkCommand(this));
-        this.commandHandler.registerCommand(new UnlinkCommand(this));
-        this.commandHandler.registerCommand(new ShowLinkCommand(this));
-        for (com.onarandombox.commandhandler.Command c : this.commandHandler.getAllCommands()) {
-            if (c instanceof HelpCommand) {
-                c.addKey("mvnp");
-            }
-        }
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        if (!this.isEnabled()) {
-            sender.sendMessage("This plugin is Disabled!");
-            return true;
-        }
-        ArrayList<String> allArgs = new ArrayList<String>(Arrays.asList(args));
-        allArgs.add(0, command.getName());
-        return this.commandHandler.locateAndRunCommand(sender, allArgs);
     }
 
     @Override
