@@ -27,7 +27,7 @@ public class LinkCommand extends NetherPortalCommand {
     @Subcommand("link")
     @CommandPermission("multiverse.netherportals.link")
     @Syntax("<nether|end> [fromWorld] <toWorld>")
-    @CommandCompletion("nether|end @MVWorlds @MVWorlds")
+    @CommandCompletion("@linkTypes @MVWorlds @MVWorlds")
     @Description("Sets which world to link to when a player enters a NetherPortal in this world.")
     public void onLinkCommand(@NotNull CommandSender sender,
                               @NotNull PortalType linkType,

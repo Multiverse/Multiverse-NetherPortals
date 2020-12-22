@@ -3,12 +3,15 @@ package com.onarandombox.MultiverseNetherPortals.utils;
 import com.onarandombox.MultiverseCore.commandTools.MVCommandManager;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.MultiverseNetherPortals.commands_acf.LinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands_acf.ShowLinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands_acf.ListCommand;
 import com.onarandombox.MultiverseNetherPortals.commands_acf.UnlinkCommand;
 import com.onarandombox.acf.BukkitCommandExecutionContext;
 import com.onarandombox.acf.InvalidCommandArgument;
 import org.bukkit.PortalType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 public class CommandTools {
 
@@ -20,6 +23,7 @@ public class CommandTools {
         this.manager = plugin.getCore().getMVCommandManager();
 
         // Completions
+        this.manager.getCommandCompletions().registerStaticCompletion("linkTypes", this::suggestLinkTypes);
 
         // Contexts
         this.manager.getCommandContexts().registerContext(PortalType.class, this::derivePortalType);
@@ -29,6 +33,10 @@ public class CommandTools {
         // Commands
         this.manager.registerCommand(new LinkCommand(this.plugin));
         this.manager.registerCommand(new UnlinkCommand(this.plugin));
+    }
+
+    private Collection<String> suggestLinkTypes() {
+        return Arrays.asList("nether", "end");
     }
 
     private PortalType derivePortalType(BukkitCommandExecutionContext context) {
