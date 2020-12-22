@@ -33,6 +33,7 @@ public class CommandTools {
         // Commands
         this.manager.registerCommand(new LinkCommand(this.plugin));
         this.manager.registerCommand(new UnlinkCommand(this.plugin));
+        this.manager.registerCommand(new ListCommand(this.plugin));
     }
 
     private Collection<String> suggestLinkTypes() {
