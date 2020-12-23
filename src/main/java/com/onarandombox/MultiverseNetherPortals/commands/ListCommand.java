@@ -26,16 +26,37 @@ public class ListCommand extends NetherPortalCommand {
         super(plugin);
     }
 
-    //TODO: List all command.
+    @Subcommand("listall")
+    @CommandPermission("multiverse.netherportals.list.all")
+    @Syntax("[filter] [page]")
+    @Description("Displays a nicely formatted list of all portal links.")
+    public void onListAllCommand(@NotNull CommandSender sender,
+                                 @NotNull PageFilter pageFilter) {
+
+        List<String> contents = buildLinkContent(PortalType.NETHER,
+                ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] ");
+
+        contents.addAll(buildLinkContent(PortalType.ENDER,
+                ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "));
+
+        PageDisplay pageDisplay = new PageDisplay(
+                sender,
+                ChatColor.DARK_PURPLE + "==== [ All Portal Links ] ====",
+                contents,
+                pageFilter
+        );
+
+        pageDisplay.showPageAsync(this.plugin);
+    }
 
     @Subcommand("list")
     @CommandPermission("multiverse.netherportals.list")
     @Syntax("<nether|end> [filter] [page]")
     @CommandCompletion("@linkTypes")
     @Description("Displays a nicely formatted list of nether or end links.")
-    public void onShowLinkCommand(@NotNull CommandSender sender,
-                                  @NotNull PortalType linkType,
-                                  @NotNull PageFilter pageFilter) {
+    public void onListCommand(@NotNull CommandSender sender,
+                              @NotNull PortalType linkType,
+                              @NotNull PageFilter pageFilter) {
 
         PageDisplay pageDisplay = new PageDisplay(
                 sender,
@@ -54,19 +75,25 @@ public class ListCommand extends NetherPortalCommand {
     }
 
     private List<String> buildLinkContent(@NotNull PortalType linkType) {
+        return buildLinkContent(linkType, "");
+    }
+
+    private List<String> buildLinkContent(@NotNull PortalType linkType,
+                                          @NotNull String prefix) {
         Map<String, String> links = (linkType == PortalType.NETHER)
                 ? this.plugin.getWorldLinks()
                 : this.plugin.getEndWorldLinks();
 
         return links.entrySet().stream()
-                .map(link -> parseSingleLink(link.getKey(), link.getValue()))
+                .map(link -> parseSingleLink(link.getKey(), link.getValue(), prefix))
                 .collect(Collectors.toList());
     }
 
     private String parseSingleLink(@NotNull String fromWorldString,
-                                   @NotNull String toWorldString) {
+                                   @NotNull String toWorldString,
+                                   @NotNull String prefix) {
 
-        return ParseWorldString(fromWorldString) + ChatColor.WHITE + " -> " + ParseWorldString(toWorldString);
+        return prefix + ParseWorldString(fromWorldString) + ChatColor.WHITE + " -> " + ParseWorldString(toWorldString);
     }
 
     private String ParseWorldString(@NotNull String worldName) {
