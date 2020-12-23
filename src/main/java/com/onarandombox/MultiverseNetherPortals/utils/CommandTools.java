@@ -2,9 +2,9 @@ package com.onarandombox.MultiverseNetherPortals.utils;
 
 import com.onarandombox.MultiverseCore.commandTools.MVCommandManager;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.commands_acf.LinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands_acf.ListCommand;
-import com.onarandombox.MultiverseNetherPortals.commands_acf.UnlinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.ListCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
 import com.onarandombox.acf.BukkitCommandExecutionContext;
 import com.onarandombox.acf.InvalidCommandArgument;
 import org.bukkit.PortalType;

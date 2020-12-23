@@ -1,4 +1,4 @@
-package com.onarandombox.MultiverseNetherPortals.commands_acf;
+package com.onarandombox.MultiverseNetherPortals.commands;
 
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.commandTools.PageDisplay;
