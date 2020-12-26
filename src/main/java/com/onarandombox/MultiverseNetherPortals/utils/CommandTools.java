@@ -6,6 +6,7 @@ import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.ListCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.RootCommand;
 import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
+import com.onarandombox.MultiverseNetherPortals.commands.UsageCommand;
 import com.onarandombox.acf.BukkitCommandExecutionContext;
 import com.onarandombox.acf.InvalidCommandArgument;
 import org.bukkit.PortalType;
@@ -36,6 +37,7 @@ public class CommandTools {
         this.manager.registerCommand(new UnlinkCommand(this.plugin));
         this.manager.registerCommand(new ListCommand(this.plugin));
         this.manager.registerCommand(new RootCommand(this.plugin));
+        this.manager.registerCommand(new UsageCommand(this.plugin));
     }
 
     private Collection<String> suggestLinkTypes() {
