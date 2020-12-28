@@ -27,8 +27,6 @@ public class UsageCommand extends NetherPortalCommand {
     public void onUsageCommand(@NotNull CommandSender sender,
                                @NotNull CommandHelp help) {
 
-        //TODO ACF: Proper formatting and paging.
-        help.setPerPage(6);
-        help.showHelp();
+        this.plugin.getCore().getMVCommandManager().showUsage(help);
     }
 }
