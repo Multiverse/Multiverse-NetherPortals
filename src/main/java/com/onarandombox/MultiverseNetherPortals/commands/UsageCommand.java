@@ -21,7 +21,7 @@ public class UsageCommand extends NetherPortalCommand {
 
     @HelpCommand
     @Subcommand("help")
-    @CommandPermission("multiverse.core.help")
+    @CommandPermission("multiverse.netherportals.help")
     @Syntax("[filter] [page]")
     @Description("Show Multiverse Command usage.")
     public void onUsageCommand(@NotNull CommandSender sender,
