@@ -33,10 +33,10 @@ public class CommandTools {
         // Conditions
 
         // Commands
+        this.manager.registerSubModule("mvnp", new RootCommand(this.plugin));
         this.manager.registerCommand(new LinkCommand(this.plugin));
         this.manager.registerCommand(new UnlinkCommand(this.plugin));
         this.manager.registerCommand(new ListCommand(this.plugin));
-        this.manager.registerCommand(new RootCommand(this.plugin));
         this.manager.registerCommand(new UsageCommand(this.plugin));
     }
 
