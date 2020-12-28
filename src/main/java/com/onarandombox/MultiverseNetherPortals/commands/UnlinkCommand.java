@@ -30,7 +30,13 @@ public class UnlinkCommand extends NetherPortalCommand {
     @CommandCompletion("@linkTypes @MVWorlds|@unloadedWorlds")
     @Description("Sets which world to link to when a player enters a NetherPortal in this world.")
     public void onLinkCommand(@NotNull CommandSender sender,
+
+                              @Syntax("<nether|end>")
+                              @Description("Portal type to unlink.")
                               @NotNull PortalType linkType,
+
+                              @Syntax("[fromWorld]")
+                              @Description("World the portals are at.")
                               @Nullable @Optional MultiverseWorld fromWorld,
                               @Nullable @Optional @Flags("trim") String fromWorldString) {
 

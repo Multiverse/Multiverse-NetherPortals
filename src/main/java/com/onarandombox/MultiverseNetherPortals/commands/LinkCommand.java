@@ -30,9 +30,19 @@ public class LinkCommand extends NetherPortalCommand {
     @CommandCompletion("@linkTypes @MVWorlds @MVWorlds")
     @Description("Sets which world to link to when a player enters a NetherPortal in this world.")
     public void onLinkCommand(@NotNull CommandSender sender,
+
+                              @Syntax("<nether|end>")
+                              @Description("Portal type to link.")
                               @NotNull PortalType linkType,
+
                               @Nullable @Optional MultiverseWorld playerWorld,
+
+                              @Syntax("[fromWorld]")
+                              @Description("World the portals are at.")
                               @NotNull @Flags("other") MultiverseWorld fromWorld,
+
+                              @Syntax("<toWorld>")
+                              @Description("World the portals should teleport to.")
                               @Nullable @Optional @Flags("other") MultiverseWorld toWorld) {
 
         if (toWorld == null && playerWorld == null) {

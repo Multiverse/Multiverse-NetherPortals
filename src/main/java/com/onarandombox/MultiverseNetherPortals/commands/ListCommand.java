@@ -55,7 +55,11 @@ public class ListCommand extends NetherPortalCommand {
     @CommandCompletion("@linkTypes")
     @Description("Displays a nicely formatted list of nether or end links.")
     public void onListCommand(@NotNull CommandSender sender,
+
+                              @Syntax("<nether|end>")
+                              @Description("Portal link type to display.")
                               @NotNull PortalType linkType,
+
                               @NotNull PageFilter pageFilter) {
 
         PageDisplay pageDisplay = new PageDisplay(

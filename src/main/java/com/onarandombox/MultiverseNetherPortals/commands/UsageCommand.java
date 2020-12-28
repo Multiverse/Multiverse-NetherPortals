@@ -1,6 +1,5 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.acf.CommandHelp;
 import com.onarandombox.acf.annotation.CommandAlias;
