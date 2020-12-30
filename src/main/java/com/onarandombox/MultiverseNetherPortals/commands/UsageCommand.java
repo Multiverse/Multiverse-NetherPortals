@@ -3,6 +3,7 @@ package com.onarandombox.MultiverseNetherPortals.commands;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.acf.CommandHelp;
 import com.onarandombox.acf.annotation.CommandAlias;
+import com.onarandombox.acf.annotation.CommandCompletion;
 import com.onarandombox.acf.annotation.CommandPermission;
 import com.onarandombox.acf.annotation.Description;
 import com.onarandombox.acf.annotation.HelpCommand;
@@ -22,6 +23,7 @@ public class UsageCommand extends NetherPortalCommand {
     @Subcommand("help")
     @CommandPermission("multiverse.netherportals.help")
     @Syntax("[filter] [page]")
+    @CommandCompletion("@subCommands:mvnp")
     @Description("Show Multiverse Command usage.")
     public void onUsageCommand(@NotNull CommandSender sender,
                                @NotNull CommandHelp help) {
