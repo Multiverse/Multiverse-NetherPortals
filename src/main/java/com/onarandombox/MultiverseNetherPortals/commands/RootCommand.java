@@ -1,6 +1,6 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import com.onarandombox.MultiverseCore.commandTools.ColourAlternator;
+import com.onarandombox.MultiverseCore.commandTools.display.ColourAlternator;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.acf.annotation.CommandAlias;
 import com.onarandombox.acf.annotation.Description;
