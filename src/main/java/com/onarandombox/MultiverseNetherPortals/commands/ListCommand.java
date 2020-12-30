@@ -35,12 +35,6 @@ public class ListCommand extends NetherPortalCommand {
     public void onListAllCommand(@NotNull CommandSender sender,
                                  @NotNull PageFilter pageFilter) {
 
-        List<String> contents = buildLinkContent(PortalType.NETHER,
-                ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] ");
-
-        contents.addAll(buildLinkContent(PortalType.ENDER,
-                ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "));
-
         PageDisplay display = new PageDisplay(
                 this.plugin,
                 sender,
@@ -57,11 +51,15 @@ public class ListCommand extends NetherPortalCommand {
 
     private ContentCreator<List<String>> getAllLinks() {
         return () -> {
-            List<String> contents = buildLinkContent(PortalType.NETHER,
-                    ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] ");
+            List<String> contents = buildLinkContent(
+                    PortalType.NETHER,
+                    ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] "
+            );
 
-            contents.addAll(buildLinkContent(PortalType.ENDER,
-                    ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "));
+            contents.addAll(buildLinkContent(
+                    PortalType.ENDER,
+                    ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "
+            ));
 
             return contents;
         };

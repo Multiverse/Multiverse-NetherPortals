@@ -30,12 +30,11 @@ public class LinkCommand extends NetherPortalCommand {
     @CommandCompletion("@linkTypes @MVWorlds @MVWorlds")
     @Description("Sets which world to link to when a player enters a NetherPortal in this world.")
     public void onLinkCommand(@NotNull CommandSender sender,
+                              @Nullable @Optional MultiverseWorld playerWorld,
 
                               @Syntax("<nether|end>")
                               @Description("Portal type to link.")
                               @NotNull PortalType linkType,
-
-                              @Nullable @Optional MultiverseWorld playerWorld,
 
                               @Syntax("[fromWorld]")
                               @Description("World the portals are at.")
@@ -55,14 +54,18 @@ public class LinkCommand extends NetherPortalCommand {
         }
 
         if (!this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName(), linkType)) {
-            sender.sendMessage("There was an error creating the link! See console for more details.");
+             throw new InvalidCommandArgument("There was an error creating the link! See console for more details.");
         }
 
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
 
         sender.sendMessage((fromWorld.getName().equals(toWorld.getName()))
-                ? ChatColor.RED + "NOTE: " + ChatColor.WHITE + "You have " + ChatColor.GREEN + "successfully disabled " + ChatColor.WHITE + linkType + " Portals in " + coloredTo + "."
-                : "The " + linkType + " portals in " + coloredFrom + ChatColor.WHITE + " are now linked to " + coloredTo + ".");
+
+                ? String.format("%sNOTE: %sYou have %ssuccessfully disabled %s%s Portals in %s.",
+                ChatColor.RED, ChatColor.WHITE, ChatColor.GREEN, ChatColor.WHITE, linkType, coloredTo)
+
+                : String.format("The %s portals in %s%s are now linked to %s.",
+                linkType, coloredFrom, ChatColor.WHITE, coloredTo));
     }
 }

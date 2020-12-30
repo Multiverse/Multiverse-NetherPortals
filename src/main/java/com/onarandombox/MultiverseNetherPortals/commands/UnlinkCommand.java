@@ -38,10 +38,12 @@ public class UnlinkCommand extends NetherPortalCommand {
                               @Syntax("[fromWorld]")
                               @Description("World the portals are at.")
                               @Nullable @Optional MultiverseWorld fromWorld,
+
+                              // Possible to be unloaded/deleted, so we dont use MultiverseWorld.
                               @Nullable @Optional @Flags("trim") String fromWorldString) {
 
         if (fromWorld == null && fromWorldString == null) {
-            throw new InvalidCommandArgument("You need to specify a fromWorld.");
+            throw new InvalidCommandArgument("You need to specify a fromWorld in console.");
         }
 
         fromWorldString = (fromWorldString == null)
@@ -62,20 +64,19 @@ public class UnlinkCommand extends NetherPortalCommand {
         }
 
         if (!this.plugin.removeWorldLink(fromWorldString, toWorldString, linkType)) {
-            sender.sendMessage(ChatColor.RED + "There was an error unlinking the portals! Please check console for errors.");
-            return;
+            throw new InvalidCommandArgument("There was an issue unlinking the portals! Please check console for errors.");
         }
 
         MultiverseWorld toWorld = this.plugin.getCore().getMVWorldManager().getMVWorld(toWorldString);
         String coloredTo = (toWorld == null) ? toWorldString : toWorld.getColoredWorldString();
 
         if (fromWorldString.equals(toWorldString)) {
-            sender.sendMessage("You have " + ChatColor.GREEN + "successfully enabled " + ChatColor.WHITE
-                    + linkType + " portals for world " + coloredFrom + ".");
+            sender.sendMessage(String.format("You have %ssuccessfully enabled %s%s portals for world %s.",
+                    ChatColor.GREEN, ChatColor.WHITE, linkType, coloredFrom));
             return;
         }
 
-        sender.sendMessage("The " + linkType + " portals in " + coloredFrom + ChatColor.WHITE + " are now "
-                + ChatColor.RED + "unlinked" + ChatColor.WHITE + " from " + coloredTo + ChatColor.WHITE + ".");
+        sender.sendMessage(String.format("The %s portals in %s%s are now %sunlinked %sfrom %s%s.",
+                linkType, coloredFrom, ChatColor.WHITE, ChatColor.RED, ChatColor.WHITE, coloredTo, ChatColor.WHITE));
     }
 }
