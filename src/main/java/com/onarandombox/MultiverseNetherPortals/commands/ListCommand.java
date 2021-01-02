@@ -1,8 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
-import com.onarandombox.MultiverseCore.commandTools.PageFilter;
-import com.onarandombox.MultiverseCore.commandTools.display.ColourAlternator;
+import com.onarandombox.MultiverseCore.commandTools.contexts.PageFilter;
 import com.onarandombox.MultiverseCore.commandTools.display.ContentCreator;
 import com.onarandombox.MultiverseCore.commandTools.display.page.PageDisplay;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
@@ -35,32 +34,25 @@ public class ListCommand extends NetherPortalCommand {
     public void onListAllCommand(@NotNull CommandSender sender,
                                  @NotNull PageFilter pageFilter) {
 
-        PageDisplay display = new PageDisplay(
-                this.plugin,
-                sender,
-                ChatColor.DARK_PURPLE + "==== [ All Portal Links ] ====",
-                getAllLinks(),
-                pageFilter.getFilter(),
-                new ColourAlternator(ChatColor.WHITE, ChatColor.WHITE),
-                pageFilter.getPage(),
-                8
-        );
-
-        display.showContentAsync();
+        new PageDisplay().withSender(sender)
+                .withHeader(String.format("%s==== [ All Portal Links ] ====", ChatColor.DARK_PURPLE))
+                .withCreator(getAllLinksContent())
+                .withPageFilter(pageFilter)
+                .withEmptyMessage("No portal links found.")
+                .build()
+                .runTaskAsynchronously(this.plugin);
     }
 
-    private ContentCreator<List<String>> getAllLinks() {
+    private ContentCreator<List<String>> getAllLinksContent() {
         return () -> {
             List<String> contents = buildLinkContent(
                     PortalType.NETHER,
                     ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] "
             );
-
             contents.addAll(buildLinkContent(
                     PortalType.ENDER,
                     ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "
             ));
-
             return contents;
         };
     }
@@ -78,21 +70,18 @@ public class ListCommand extends NetherPortalCommand {
 
                               @NotNull PageFilter pageFilter) {
 
-        PageDisplay display = new PageDisplay(
-                this.plugin,
-                sender,
-                ChatColor.DARK_PURPLE + "==== [ " + parseTypeString(linkType) + ChatColor.DARK_PURPLE + " Portal Links ] ====",
-                getPortalLinks(linkType),
-                pageFilter.getFilter(),
-                new ColourAlternator(ChatColor.WHITE, ChatColor.WHITE),
-                pageFilter.getPage(),
-                8
-        );
+        String linkString = parseTypeString(linkType);
 
-        display.showContentAsync();
+        new PageDisplay().withSender(sender)
+                .withHeader(String.format("%s==== [ %s %sPortal Links ] ====", ChatColor.DARK_PURPLE, linkString, ChatColor.DARK_PURPLE))
+                .withCreator(getPortalLinksContent(linkType))
+                .withPageFilter(pageFilter)
+                .withEmptyMessage(String.format("No %s %slinks found.", linkString, ChatColor.WHITE))
+                .build()
+                .runTaskAsynchronously(this.plugin);
     }
 
-    private ContentCreator<List<String>> getPortalLinks(PortalType linkType) {
+    private ContentCreator<List<String>> getPortalLinksContent(PortalType linkType) {
         return () -> buildLinkContent(linkType);
     }
 
@@ -108,6 +97,7 @@ public class ListCommand extends NetherPortalCommand {
 
     private List<String> buildLinkContent(@NotNull PortalType linkType,
                                           @NotNull String prefix) {
+
         Map<String, String> links = (linkType == PortalType.NETHER)
                 ? this.plugin.getWorldLinks()
                 : this.plugin.getEndWorldLinks();

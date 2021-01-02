@@ -1,6 +1,6 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
-import com.onarandombox.MultiverseCore.commandTools.display.ColourAlternator;
+import com.onarandombox.MultiverseCore.commandTools.display.ColorAlternator;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import com.onarandombox.acf.annotation.CommandAlias;
 import com.onarandombox.acf.annotation.Description;
@@ -20,7 +20,7 @@ public class RootCommand extends NetherPortalCommand {
         this.plugin.getCore().getMVCommandManager().showPluginInfo(
                 sender,
                 this.plugin.getDescription(),
-                new ColourAlternator(ChatColor.DARK_PURPLE, ChatColor.LIGHT_PURPLE),
+                new ColorAlternator(ChatColor.DARK_PURPLE, ChatColor.LIGHT_PURPLE),
                 "mvnp"
         );
     }
