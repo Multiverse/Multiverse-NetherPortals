@@ -1,22 +1,13 @@
 package com.onarandombox.MultiverseNetherPortals.commands;
 
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.commandhandler.Command;
-import org.bukkit.command.CommandSender;
+import com.onarandombox.acf.BaseCommand;
 
-import java.util.List;
+public abstract class NetherPortalCommand extends BaseCommand {
 
-public abstract class NetherPortalCommand extends Command {
+    protected final MultiverseNetherPortals plugin;
 
-    protected MultiverseNetherPortals plugin;
-
-    public NetherPortalCommand(MultiverseNetherPortals plugin) {
-        super(plugin);
+    protected NetherPortalCommand(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
-
     }
-
-    @Override
-    public abstract void runCommand(CommandSender arg0, List<String> arg1);
-
 }

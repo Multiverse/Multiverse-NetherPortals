@@ -5,31 +5,4 @@ version: maven-version-number
 api-version: 1.13
 depend: ['Multiverse-Core']
 softdepend: ['Multiverse-Portals']
-commands:
-  mvnp:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnpl:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnpli:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnplist:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnpu:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnps:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnplink:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnpunlink:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
-  mvnpshow:
-    description: Generic Multiverse-NetherPortals Command
-    usage: /<command>
+# Base commands are now defined in Multiverse-Core.
