@@ -63,22 +63,22 @@ public class UnlinkCommand extends NetherPortalCommand {
         }
 
         fromWorld = this.worldManager.getMVWorld(fromWorldString);
-        if (fromWorld == null) {
-            sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " Doesn't look like Multiverse knows about '" + fromWorldString + "'");
-            return;
-        }
+        String coloredFrom = (fromWorld == null) ? fromWorldString : fromWorld.getColoredWorldString();
 
-        toWorldString = this.plugin.getWorldLink(fromWorld.getName(), type);
+        toWorldString = this.plugin.getWorldLink(fromWorldString, type);
         if (toWorldString == null) {
-            sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world " + fromWorld.getColoredWorldString() + ChatColor.WHITE + " was never linked.");
+            sender.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world " + coloredFrom + ChatColor.WHITE + " was never linked.");
             return;
         }
+
+        if (!this.plugin.removeWorldLink(fromWorldString, toWorldString, type)) {
+            sender.sendMessage(ChatColor.RED + "There was an error unlinking the portals! Please check console for errors.");
+            return;
+        }
+
         toWorld = this.worldManager.getMVWorld(toWorldString);
+        String coloredTo = (toWorld == null) ? toWorldString : toWorld.getColoredWorldString();
 
-        String coloredFrom = fromWorld.getColoredWorldString();
-        String coloredTo = toWorld.getColoredWorldString();
         sender.sendMessage("The " + type + " portals in " + coloredFrom + ChatColor.WHITE + " are now " + ChatColor.RED + "unlinked" + ChatColor.WHITE + " from " + coloredTo + ChatColor.WHITE + ".");
-        this.plugin.removeWorldLink(fromWorld.getName(), toWorld.getName(), type);
     }
-
 }

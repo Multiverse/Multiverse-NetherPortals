@@ -77,7 +77,11 @@ public class LinkCommand extends NetherPortalCommand {
             return;
         }
 
-        this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName(), type);
+        if (!this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName(), type)) {
+            sender.sendMessage(ChatColor.RED + "There was an error linking the portals! Please check console for errors.");
+            return;
+        }
+
         String coloredFrom = fromWorld.getColoredWorldString();
         String coloredTo = toWorld.getColoredWorldString();
         if (fromWorld.getName().equals(toWorld.getName())) {
