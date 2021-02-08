@@ -5,7 +5,7 @@ import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.PortalType;
 
 public class MVNameChecker {
-    private MultiverseNetherPortals plugin;
+    private final MultiverseNetherPortals plugin;
 
     public MVNameChecker(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
