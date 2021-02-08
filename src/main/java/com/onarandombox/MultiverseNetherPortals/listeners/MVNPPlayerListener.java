@@ -31,10 +31,10 @@ public class MVNPPlayerListener implements Listener {
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
-        this.nameChecker = new MVNameChecker(plugin);
+        this.nameChecker = this.plugin.getNameChecker();
         this.worldManager = this.plugin.getCore().getMVWorldManager();
         this.pt = new PermissionTools(this.plugin.getCore());
-        this.linkChecker = new MVLinkChecker(this.plugin);
+        this.linkChecker = this.plugin.getLinkChecker();
     }
 
     @EventHandler

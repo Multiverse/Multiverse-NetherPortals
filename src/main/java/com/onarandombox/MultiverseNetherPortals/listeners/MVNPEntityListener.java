@@ -52,8 +52,8 @@ public class MVNPEntityListener implements Listener {
 
     public MVNPEntityListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
-        this.nameChecker = new MVNameChecker(this.plugin);
-        this.linkChecker = new MVLinkChecker(this.plugin);
+        this.nameChecker = this.plugin.getNameChecker();
+        this.linkChecker = this.plugin.getLinkChecker();
         this.worldManager = this.plugin.getCore().getMVWorldManager();
         this.pt = new PermissionTools(this.plugin.getCore());
         this.playerErrors = new HashMap<String, Date>();
