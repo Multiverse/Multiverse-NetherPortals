@@ -313,10 +313,10 @@ public class MVNPEntityListener implements Listener {
         }
 
         PortalType type;
-        if (this.nameChecker.isValidNetherName(originalTo.getWorld().getName())
+        if (originalTo.getWorld().getEnvironment() == World.Environment.NETHER
                 || (currentLocation.getWorld().getEnvironment() == World.Environment.NETHER && originalTo.getWorld().getEnvironment() == World.Environment.NORMAL)) {
             type = PortalType.NETHER;
-        } else if (this.nameChecker.isValidEndName(originalTo.getWorld().getName())
+        } else if (originalTo.getWorld().getEnvironment() == World.Environment.THE_END
                 || (currentLocation.getWorld().getEnvironment() == World.Environment.THE_END && originalTo.getWorld().getEnvironment() == World.Environment.NORMAL)) {
             type = PortalType.ENDER;
         } else {
