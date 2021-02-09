@@ -36,22 +36,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     private static final String NETHER_PORTALS_CONFIG = "config.yml";
+    private static final String DEFAULT_NETHER_PREFIX = "";
+    private static final String DEFAULT_NETHER_SUFFIX = "_nether";
+    private static final String DEFAULT_END_PREFIX = "";
+    private static final String DEFAULT_END_SUFFIX = "_the_end";
+    private final static int requiresProtocol = 24;
+  
     protected MultiverseCore core;
     protected Plugin multiversePortals;
     protected MVNPPluginListener pluginListener;
     protected MVNPPlayerListener playerListener;
     protected MVNPCoreListener customListener;
     protected FileConfiguration MVNPConfiguration;
-    private static final String DEFAULT_NETHER_SUFFIX = "_nether";
-    private static final String DEFAULT_END_SUFFIX = "_the_end";
-    private String netherPrefix = "";
-    private String netherSuffix = DEFAULT_NETHER_SUFFIX;
-    private String endPrefix = "";
-    private String endSuffix = DEFAULT_END_SUFFIX;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
-    private final static int requiresProtocol = 24;
     private MVNPEntityListener entityListener;
 
     @Override
@@ -107,13 +106,12 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.setTeleportingEntities(this.isTeleportingEntities());
         this.setSendingNoDestinationMessage(this.isSendingNoDestinationMessage());
         this.setSendingDisabledPortalMessage(this.isSendingDisabledPortalMessage());
-        this.setNetherPrefix(this.MVNPConfiguration.getString("netherportals.name.prefix", this.getNetherPrefix()));
-        this.setNetherSuffix(this.MVNPConfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
 
-        if (this.getNetherPrefix().length() == 0 && this.getNetherSuffix().length() == 0) {
-            Logging.warning("I didn't find a prefix OR a suffix defined! I made the suffix \"" + DEFAULT_NETHER_SUFFIX + "\" for you.");
-            this.setNetherSuffix(this.MVNPConfiguration.getString("netherportals.name.suffix", this.getNetherSuffix()));
-        }
+        this.setNetherPrefix(this.getNetherPrefix());
+        this.setNetherSuffix(this.getNetherSuffix());
+        this.setEndPrefix(this.getEndPrefix());
+        this.setEndSuffix(this.getEndSuffix());
+      
         if (this.MVNPConfiguration.getConfigurationSection("worlds") == null) {
             this.MVNPConfiguration.createSection("worlds");
         }
@@ -211,27 +209,35 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     public void setNetherPrefix(String netherPrefix) {
-        this.netherPrefix = netherPrefix;
+        this.MVNPConfiguration.set("portal-auto-link-when.nether.prefix", netherPrefix);
     }
 
     public String getNetherPrefix() {
-        return this.netherPrefix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.nether.prefix", DEFAULT_NETHER_PREFIX);
     }
 
     public void setNetherSuffix(String netherSuffix) {
-        this.netherSuffix = netherSuffix;
+        this.MVNPConfiguration.set("portal-auto-link-when.nether.suffix", netherSuffix);
     }
 
     public String getNetherSuffix() {
-        return this.netherSuffix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.nether.suffix", DEFAULT_NETHER_SUFFIX);
+    }
+
+    public void setEndPrefix(String endPrefix) {
+        this.MVNPConfiguration.set("portal-auto-link-when.end.prefix", endPrefix);
     }
 
     public String getEndPrefix() {
-        return this.endPrefix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.end.prefix", DEFAULT_END_PREFIX);
+    }
+
+    public void setEndSuffix(String endSuffix) {
+        this.MVNPConfiguration.set("portal-auto-link-when.end.suffix", endSuffix);
     }
 
     public String getEndSuffix() {
-        return this.endSuffix;
+        return this.MVNPConfiguration.getString("portal-auto-link-when.end.suffix", DEFAULT_END_SUFFIX);
     }
 
     public String getWorldLink(String fromWorld, PortalType type) {
