@@ -175,7 +175,7 @@ public class MVNPPlayerListener implements Listener {
      */
     private void awardAdvancement(Player player, Advancement advancement, String criteria) {
         if (advancement == null) {
-            Logging.warning("No advancement found for target criteria: %s", criteria);
+            Logging.fine("No advancement found for target criteria: %s", criteria);
             return;
         }
         AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
