@@ -71,7 +71,7 @@ public class UnlinkCommand extends NetherPortalCommand {
             return;
         }
 
-        if (!this.plugin.removeWorldLink(fromWorldString, toWorldString, type)) {
+        if (!this.plugin.deleteWorldLink(fromWorldString, toWorldString, type)) {
             sender.sendMessage(ChatColor.RED + "There was an error unlinking the portals! Please check console for errors.");
             return;
         }
