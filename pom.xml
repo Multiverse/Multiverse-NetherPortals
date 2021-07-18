@@ -18,7 +18,7 @@
         </repository>
         <repository>
             <id>OnARandomBox</id>
-            <url>http://repo.onarandombox.com/content/groups/public/</url>
+            <url>https://repo.onarandombox.com/content/groups/public/</url>
         </repository>
     </repositories>
 
