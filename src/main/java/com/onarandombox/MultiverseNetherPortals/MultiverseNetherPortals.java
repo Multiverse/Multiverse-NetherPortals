@@ -20,6 +20,8 @@ import com.onarandombox.MultiverseNetherPortals.listeners.MVNPCoreListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
 import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
+import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
+import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import com.onarandombox.MultiversePortals.MultiversePortals;
 import com.onarandombox.commandhandler.CommandHandler;
 import org.bukkit.Location;
@@ -52,6 +54,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     private Map<String, String> endLinkMap;
     protected CommandHandler commandHandler;
     private MVNPEntityListener entityListener;
+    private MVLinkChecker linkChecker;
+    private MVNameChecker nameChecker;
 
     @Override
     public void onEnable() {
@@ -79,6 +83,9 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
         this.core.incrementPluginCount();
         // As soon as we know MVCore was found, we can use the debug log!
+
+        this.linkChecker = new MVLinkChecker(this);
+        this.nameChecker = new MVNameChecker(this);
 
         this.pluginListener = new MVNPPluginListener(this);
         this.playerListener = new MVNPPlayerListener(this);
@@ -340,6 +347,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             }
         }
         return true;
+    }
+
+    public MVLinkChecker getLinkChecker() {
+        return linkChecker;
+    }
+
+    public MVNameChecker getNameChecker() {
+        return nameChecker;
     }
 
     public void setPortals(Plugin multiversePortals) {
