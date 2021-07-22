@@ -24,7 +24,7 @@ public class MVNPCoreListener implements Listener {
      */
     @EventHandler
     public void configReloadEvent(MVConfigReloadEvent event) {
-        this.plugin.reloadConfig();
+        this.plugin.loadConfig();
         event.addConfig("Multiverse-NetherPortals - config.yml");
     }
 

@@ -2,7 +2,7 @@
 name: 🐛 Report a Bug
 about: Report a Multiverse-NetherPortals bug. Only use this if you're 100% sure it's something wrong with Multiverse-NetherPortals - otherwise, try "Help!".
 title: ''
-labels: 'Bug'
+labels: 'Bug: Unconfirmed'
 assignees: ''
 
 ---

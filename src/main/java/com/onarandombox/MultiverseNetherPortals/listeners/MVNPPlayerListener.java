@@ -1,7 +1,5 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
-import java.util.logging.Level;
-
 import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
@@ -11,12 +9,15 @@ import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.PortalType;
 import org.bukkit.World;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -28,6 +29,11 @@ public class MVNPPlayerListener implements Listener {
     private final MVLinkChecker linkChecker;
     private final MVWorldManager worldManager;
     private final PermissionTools pt;
+    private final Advancement enterNetherAdvancement;
+    private final Advancement enterEndAdvancement;
+
+    private static final String ENTER_NETHER_CRITERIA = "entered_nether";
+    private static final String ENTER_END_CRITERIA = "entered_end";
 
     public MVNPPlayerListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
@@ -35,6 +41,8 @@ public class MVNPPlayerListener implements Listener {
         this.worldManager = this.plugin.getCore().getMVWorldManager();
         this.pt = new PermissionTools(this.plugin.getCore());
         this.linkChecker = this.plugin.getLinkChecker();
+        this.enterNetherAdvancement = this.plugin.getServer().getAdvancement(NamespacedKey.minecraft("story/enter_the_nether"));
+        this.enterEndAdvancement = this.plugin.getServer().getAdvancement(NamespacedKey.minecraft("story/enter_the_end"));
     }
 
     @EventHandler
@@ -148,6 +156,37 @@ public class MVNPPlayerListener implements Listener {
                     }
                 }
             }
+
+            // Advancements need to be triggered manually
+            if (type == PortalType.NETHER && event.getTo().getWorld().getEnvironment() == World.Environment.NETHER) {
+                awardAdvancement(event.getPlayer(), enterNetherAdvancement, ENTER_NETHER_CRITERIA);
+            } else if (type == PortalType.ENDER && event.getTo().getWorld().getEnvironment() == World.Environment.THE_END) {
+                awardAdvancement(event.getPlayer(), enterEndAdvancement, ENTER_END_CRITERIA);
+            }
         }
+    }
+
+    /**
+     * Award an advancement criteria to a player if not already awarded.
+     *
+     * @param player        Target player to award the advancement criteria to.
+     * @param advancement   {@link Advancement} the criteria belongs to.
+     * @param criteria      Criteria to award the player.
+     */
+    private void awardAdvancement(Player player, Advancement advancement, String criteria) {
+        if (advancement == null) {
+            Logging.fine("No advancement found for target criteria: %s", criteria);
+            return;
+        }
+        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
+        if (advancementProgress.isDone()) {
+            Logging.fine("%s has already been awarded advancement criteria %s.", player.getName(), criteria);
+            return;
+        }
+        if (!advancementProgress.awardCriteria(criteria)) {
+            Logging.warning("Unable to award advancement criteria %s to %s.", criteria, player.getName());
+            return;
+        }
+        Logging.fine("Awarded advancement criteria %s to %s.", criteria, player.getName());
     }
 }
