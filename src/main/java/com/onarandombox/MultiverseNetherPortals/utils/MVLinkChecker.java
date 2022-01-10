@@ -11,8 +11,8 @@ import org.bukkit.entity.Player;
 import java.util.logging.Level;
 
 public class MVLinkChecker {
-    private MultiverseNetherPortals plugin;
-    private MVWorldManager worldManager;
+    private final MultiverseNetherPortals plugin;
+    private final MVWorldManager worldManager;
 
     public MVLinkChecker(MultiverseNetherPortals plugin) {
         this.plugin = plugin;

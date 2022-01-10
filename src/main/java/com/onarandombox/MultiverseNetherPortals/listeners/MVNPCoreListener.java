@@ -11,7 +11,8 @@ import org.bukkit.event.Listener;
 import java.io.File;
 
 public class MVNPCoreListener implements Listener {
-    private MultiverseNetherPortals plugin;
+
+    private final MultiverseNetherPortals plugin;
 
     public MVNPCoreListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
