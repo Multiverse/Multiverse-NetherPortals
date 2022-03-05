@@ -8,8 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.logging.Level;
-
 public class MVLinkChecker {
     private final MultiverseNetherPortals plugin;
     private final MVWorldManager worldManager;
@@ -33,13 +31,10 @@ public class MVLinkChecker {
             Logging.fine("Finding new teleport location for" + entityType + e.getName() + " to world " + worldString);
 
             // Set the output location to the same XYZ coords but different world
-            MultiverseWorld tpFrom = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
+            double fromScaling = this.worldManager.getMVWorld(fromLocation.getWorld().getName()).getScaling();
+            double toScaling = tpTo.getScaling();
 
-            double fromScaling = tpFrom.getScaling();
-            double toScaling = this.worldManager.getMVWorld(tpTo.getName()).getScaling();
-            double yScaling = 1d * tpFrom.getCBWorld().getMaxHeight() / tpTo.getCBWorld().getMaxHeight();
-
-            this.scaleLocation(fromLocation, fromScaling / toScaling, yScaling);
+            this.scaleLocation(fromLocation, fromScaling / toScaling);
             fromLocation.setWorld(tpTo.getCBWorld());
             return fromLocation;
         }
@@ -47,9 +42,8 @@ public class MVLinkChecker {
         return null;
     }
 
-    private void scaleLocation(Location fromLocation, double scaling, double yScaling) {
+    private void scaleLocation(Location fromLocation, double scaling) {
         fromLocation.setX(fromLocation.getX() * scaling);
         fromLocation.setZ(fromLocation.getZ() * scaling);
-        fromLocation.setY(fromLocation.getY() * yScaling);
     }
 }
