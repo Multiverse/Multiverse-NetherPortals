@@ -17,7 +17,7 @@
 
 [Multiverse Nether Portals](https://dev.bukkit.org/projects/multiverse-NetherPortals) is an add-on Plugin for [Multiverse core](https://dev.bukkit.org/projects/multiverse-core) that makes nether and end portals work **just like vanilla** with minimal setup.
 
-Now it's time to create your very own server with Multiverse Inventories, do check out our [Wiki](https://github.com/Multiverse/Multiverse-Core/wiki/Home-(Inventories)) and [Usage Guide](https://github.com/Multiverse/Multiverse-Core/wiki/Basics-(Inventories)) to get started. Feel free to hop onto our [Discord](https://discord.gg/NZtfKky) if you have any questions or just want to have a chat with us!
+Now it's time to create your very own server with Multiverse Nether Portals, do check out our [Wiki](https://github.com/Multiverse/Multiverse-Core/wiki/Home-(Inventories)) and [Usage Guide](https://github.com/Multiverse/Multiverse-Core/wiki/Basics-(Inventories)) to get started. Feel free to hop onto our [Discord](https://discord.gg/NZtfKky) if you have any questions or just want to have a chat with us!
 
 ## Our other amazing sub-modules:
 
