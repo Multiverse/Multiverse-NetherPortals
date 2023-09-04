@@ -38,7 +38,7 @@ jobs:
       modrinth_dependencies: >
         [
           {"project_id": "3wmN97b8", "dependency_type": "required"},
-          {"project_id": "8VMk6P0I", "type": "optional"}
+          {"project_id": "8VMk6P0I", "dependency_type": "optional"}
         ]
 
       dbo_project_id: 30783
