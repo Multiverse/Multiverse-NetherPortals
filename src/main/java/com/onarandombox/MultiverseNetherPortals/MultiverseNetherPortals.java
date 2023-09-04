@@ -275,21 +275,28 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         }
 
         this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, to);
-        this.saveMVNPConfig();
-        return true;
+        return this.saveMVNPConfig();
     }
 
-    public void removeWorldLink(String from, String to, PortalType type) {
+    public boolean deleteWorldLink(String from, String to, PortalType type) {
         if (type == PortalType.NETHER) {
             this.linkMap.remove(from);
         } else if (type == PortalType.ENDER) {
             this.endLinkMap.remove(from);
         } else {
-            return;
+            return false;
         }
 
         this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, null);
-        this.saveMVNPConfig();
+        return this.saveMVNPConfig();
+    }
+
+    /**
+     * @deprecated Use {@link MultiverseNetherPortals#deleteWorldLink(String, String, PortalType)} instead.
+     */
+    @Deprecated
+    public void removeWorldLink(String from, String to, PortalType type) {
+        deleteWorldLink(from, to, type);
     }
 
     public boolean saveMVNPConfig() {
