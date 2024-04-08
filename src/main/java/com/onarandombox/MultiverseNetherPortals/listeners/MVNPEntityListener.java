@@ -146,9 +146,12 @@ public class MVNPEntityListener implements Listener {
             } else {
                 String destinationWorld = "";
 
+                boolean shouldAppearAtSpawn = false;
+
                 if (this.nameChecker.isValidEndName(currentWorld)) {
                     if (type == PortalType.ENDER) {
                         destinationWorld = this.nameChecker.getNormalName(currentWorld, type);
+                        shouldAppearAtSpawn = true;
                     } else if (type == PortalType.NETHER) {
                         destinationWorld = this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, type));
                     }
@@ -166,7 +169,12 @@ public class MVNPEntityListener implements Listener {
                     }
                 }
 
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
+                if (shouldAppearAtSpawn) {
+                    MultiverseWorld tpTo = this.worldManager.getMVWorld(destinationWorld);
+                    newTo = this.linkChecker.findNewTeleportLocation(tpTo.getSpawnLocation(), destinationWorld, e);
+                } else {
+                    newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
+                }
             }
         }
 
