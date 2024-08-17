@@ -5,6 +5,7 @@ import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
+import com.onarandombox.MultiverseCore.api.SafeTTeleporter;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
@@ -171,7 +172,9 @@ public class MVNPEntityListener implements Listener {
 
                 if (shouldAppearAtSpawn) {
                     MultiverseWorld tpTo = this.worldManager.getMVWorld(destinationWorld);
-                    newTo = this.linkChecker.findNewTeleportLocation(tpTo.getSpawnLocation(), destinationWorld, e);
+                    SafeTTeleporter teleporter = this.plugin.getCore().getSafeTTeleporter();
+                    Location safeSpawn = teleporter.getSafeLocation(tpTo.getSpawnLocation());
+                    newTo = this.linkChecker.findNewTeleportLocation(safeSpawn, destinationWorld, e);
                 } else {
                     newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
                 }
