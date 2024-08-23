@@ -17,7 +17,6 @@ public class EndPlatformCreator {
     public static void createEndPlatform(Block spawnLocation) {
         Logging.fine("Creating an end platform at " + spawnLocation.toString());
 
-        // Is this code even required?! - Past self
         for (int x = spawnLocation.getX() - 2; x <= spawnLocation.getX() + 2; x++) {
             for (int z = spawnLocation.getZ() - 2; z <= spawnLocation.getZ() + 2; z++) {
                 Block platformBlock = spawnLocation.getWorld().getBlockAt(x, spawnLocation.getY() - 1, z);
@@ -34,7 +33,7 @@ public class EndPlatformCreator {
                     Block b = platformBlock.getRelative(BlockFace.UP, yMod);
                     if (b.getType() != Material.AIR) {
                         b.breakNaturally();
-                        Logging.warning("Breaking block at " + platformBlock);
+                        Logging.finest("Breaking block at " + platformBlock);
                     }
                 }
             }
