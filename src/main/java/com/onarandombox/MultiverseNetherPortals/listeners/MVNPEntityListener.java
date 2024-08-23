@@ -355,10 +355,6 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        if (event.isCancelled()) { // Superfluous?
-            return;
-        }
-
         // If we are going to the overworld from the end
         if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
             Logging.fine("Entity '" + entity.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
