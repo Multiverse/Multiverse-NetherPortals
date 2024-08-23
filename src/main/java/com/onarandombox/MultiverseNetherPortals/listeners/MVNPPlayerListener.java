@@ -5,17 +5,15 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.utils.EndPlatformCreator;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.PortalType;
 import org.bukkit.World;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -138,23 +136,9 @@ public class MVNPPlayerListener implements Listener {
                     event.setTo(event.getTo());
                 }
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
-                event.setTo(loc);
-                Block block = loc.getBlock();
-                for (int x = block.getX() - 2; x <= block.getX() + 2; x++) {
-                    for (int z = block.getZ() - 2; z <= block.getZ() + 2; z++) {
-                        Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
-                        if (platformBlock.getType() != Material.OBSIDIAN) {
-                            platformBlock.setType(Material.OBSIDIAN);
-                        }
-                        for (int yMod = 1; yMod <= 3; yMod++) {
-                            Block b = platformBlock.getRelative(BlockFace.UP, yMod);
-                            if (b.getType() != Material.AIR) {
-                                b.setType(Material.AIR);
-                            }
-                        }
-                    }
-                }
+                Location spawnLocation = EndPlatformCreator.getVanillaLocation(event.getTo().getWorld());
+                event.setTo(spawnLocation);
+                EndPlatformCreator.createEndPlatform(spawnLocation);
             }
 
             // Advancements need to be triggered manually

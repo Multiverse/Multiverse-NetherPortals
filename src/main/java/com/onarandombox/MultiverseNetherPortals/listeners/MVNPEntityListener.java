@@ -8,6 +8,7 @@ import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.utils.EndPlatformCreator;
 import com.onarandombox.MultiverseNetherPortals.utils.MVEventRecord;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
@@ -31,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 public class MVNPEntityListener implements Listener {
 
@@ -299,14 +299,25 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        Entity e = event.getEntity();
-        Location originalTo = this.locationManipulation.getBlockLocation(event.getTo());
-        Location currentLocation = this.locationManipulation.getBlockLocation(event.getFrom());
+        // Some shortcuts for later
+        Entity entity = event.getEntity();
 
+        Location toLocation = event.getTo();
+        Location fromLocation = event.getFrom();
+
+        MultiverseWorld fromWorld = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
+        MultiverseWorld toWorld = this.worldManager.getMVWorld(toLocation.getWorld().getName());
+
+        Location originalTo = this.locationManipulation.getBlockLocation(toLocation);
+        Location currentLocation = this.locationManipulation.getBlockLocation(fromLocation);
+
+
+        // Don't mess with other people's stuff
         if (!plugin.isHandledByNetherPortals(currentLocation)) {
             return;
         }
 
+        // This is the entity event, don't teleport entities if we're not supposed to
         if (!this.plugin.isTeleportingEntities()) {
             event.setCancelled(true);
             return;
@@ -323,18 +334,19 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
+        // Are we allowed to use the nether portal travel agent?
         if (type == PortalType.NETHER) {
             try {
                 Class.forName("org.bukkit.TravelAgent");
                 event.useTravelAgent(true);
             } catch (ClassNotFoundException ignore) {
-                Logging.fine("TravelAgent not available for EntityPortalEvent for " + e.getName());
+                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName());
             }
         }
 
         String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
-        Location newTo = getLocation(e, currentLocation, type, currentWorld, linkedWorld);
+        Location newTo = getLocation(entity, currentLocation, type, currentWorld, linkedWorld); // Gets the player spawn location from the portal spawn location
 
         if (newTo != null) {
             event.setTo(newTo);
@@ -343,57 +355,53 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
-        MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
+        if (event.isCancelled()) { // Superfluous?
+            return;
+        }
 
-        if (!event.isCancelled()) {
-            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                Logging.fine("Entity '" + e.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-                try {
-                    Class.forName("org.bukkit.TravelAgent");
-                    event.getPortalTravelAgent().setCanCreatePortal(false);
-                } catch (ClassNotFoundException ignore) {
-                    Logging.fine("TravelAgent not available for EntityPortalEvent for " + e.getName() + ". There may be a portal created at spawn.");
-                }
-
-                event.setTo(toWorld.getSpawnLocation());
-            } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-                try {
-                    Class.forName("org.bukkit.TravelAgent");
-                    event.getPortalTravelAgent().setCanCreatePortal(true);
-                    event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
-                } catch (ClassNotFoundException ignore) {
-                    Logging.fine("TravelAgent not available for EntityPortalEvent for " + e.getName() + ". Their destination may not be correct.");
-                    event.setTo(event.getTo());
-                }
-            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
-                event.setTo(loc);
-                Block block = loc.getBlock();
-                for (int x = block.getX() - 2; x <= block.getX() + 2; x++) {
-                    for (int z = block.getZ() - 2; z <= block.getZ() + 2; z++) {
-                        Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
-                        if (platformBlock.getType() != Material.OBSIDIAN) {
-                            platformBlock.setType(Material.OBSIDIAN);
-                        }
-                        for (int yMod = 1; yMod <= 3; yMod++) {
-                            Block b = platformBlock.getRelative(BlockFace.UP, yMod);
-                            if (b.getType() != Material.AIR) {
-                                b.setType(Material.AIR);
-                            }
-                        }
-                    }
-                }
+        // If we are going to the overworld from the end
+        if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+            Logging.fine("Entity '" + entity.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+            try {
+                Class.forName("org.bukkit.TravelAgent");
+                event.getPortalTravelAgent().setCanCreatePortal(false);
+            } catch (ClassNotFoundException ignore) {
+                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". There may be a portal created at spawn.");
             }
+
+            event.setTo(toWorld.getSpawnLocation());
+            return;
+        }
+
+        // If we are going to the overworld from the nether
+        if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+            try {
+                Class.forName("org.bukkit.TravelAgent");
+                event.getPortalTravelAgent().setCanCreatePortal(true);
+                event.setTo(event.getPortalTravelAgent().findOrCreate(toLocation));
+            } catch (ClassNotFoundException ignore) {
+                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". Their destination may not be correct.");
+                event.setTo(toLocation);
+            }
+
+            return;
+        }
+
+        // If we are going to the end from anywhere
+        if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+            Location spawnLocation = EndPlatformCreator.getVanillaLocation(toWorld);
+            event.setTo(spawnLocation);
+            EndPlatformCreator.createEndPlatform(spawnLocation);
+            return;
         }
     }
 
     @EventHandler
     public void onEntityPortalExit(EntityPortalExitEvent event) {
         if (event.getEntity() instanceof Player) {
-            Player p = (Player) event.getEntity();
-            eventRecord.removeFromRecord(PortalType.ENDER, p.getUniqueId());
-            eventRecord.removeFromRecord(PortalType.NETHER, p.getUniqueId());
+            Player player = (Player) event.getEntity();
+            eventRecord.removeFromRecord(PortalType.ENDER, player.getUniqueId());
+            eventRecord.removeFromRecord(PortalType.NETHER, player.getUniqueId());
         }
     }
 }
