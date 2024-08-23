@@ -302,8 +302,13 @@ public class MVNPEntityListener implements Listener {
         // Some shortcuts for later
         Entity entity = event.getEntity();
 
-        Location toLocation = event.getTo();
+        @Nullable Location toLocation = event.getTo();
         Location fromLocation = event.getFrom();
+
+        if (toLocation == null) {
+            Logging.warning("ToLocation in EntityPortalEvent is null.");
+            return;
+        }
 
         MultiverseWorld fromWorld = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
         MultiverseWorld toWorld = this.worldManager.getMVWorld(toLocation.getWorld().getName());
@@ -387,7 +392,7 @@ public class MVNPEntityListener implements Listener {
         if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
             Location spawnLocation = EndPlatformCreator.getVanillaLocation(toWorld);
             event.setTo(spawnLocation);
-            EndPlatformCreator.createEndPlatform(spawnLocation);
+            EndPlatformCreator.createEndPlatform(spawnLocation, plugin.isEndPlatformDropBlocks());
             return;
         }
     }

@@ -2,6 +2,7 @@ package com.onarandombox.MultiverseNetherPortals.utils;
 
 import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
+import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -12,9 +13,11 @@ public class EndPlatformCreator {
 
     /**
      * Creates an end platform at the specified {@code Block}
+     *
      * @param spawnLocation The {@code Block} that the player will spawn at.
+     * @param dropEndBlocks If the platform should drop the broken blocks or delete them
      */
-    public static void createEndPlatform(Block spawnLocation) {
+    public static void createEndPlatform(Block spawnLocation, boolean dropEndBlocks) {
         Logging.fine("Creating an end platform at " + spawnLocation.toString());
 
         for (int x = spawnLocation.getX() - 2; x <= spawnLocation.getX() + 2; x++) {
@@ -30,9 +33,14 @@ public class EndPlatformCreator {
 
                 // Clear space above platform
                 for (int yMod = 1; yMod <= 3; yMod++) {
-                    Block b = platformBlock.getRelative(BlockFace.UP, yMod);
-                    if (b.getType() != Material.AIR) {
-                        b.breakNaturally();
+                    Block block = platformBlock.getRelative(BlockFace.UP, yMod);
+                    if (block.getType() != Material.AIR) {
+                        if (dropEndBlocks) {
+                            block.breakNaturally();
+                        } else {
+                            block.setType(Material.AIR);
+                        }
+
                         Logging.finest("Breaking block at " + platformBlock);
                     }
                 }
@@ -45,8 +53,8 @@ public class EndPlatformCreator {
      * Creates an end platform at the specified {@code Location}
      * @param spawnLocation The {@code Location} that the player will spawn at.
      */
-    public static void createEndPlatform(Location spawnLocation) {
-        createEndPlatform(spawnLocation.getBlock());
+    public static void createEndPlatform(Location spawnLocation, boolean dropEndBlocks) {
+        createEndPlatform(spawnLocation.getBlock(), dropEndBlocks);
     }
 
     /**

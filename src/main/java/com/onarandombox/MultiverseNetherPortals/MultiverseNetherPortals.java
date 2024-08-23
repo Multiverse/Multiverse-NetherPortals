@@ -113,6 +113,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.setTeleportingEntities(this.isTeleportingEntities());
         this.setSendingNoDestinationMessage(this.isSendingNoDestinationMessage());
         this.setSendingDisabledPortalMessage(this.isSendingDisabledPortalMessage());
+        this.setEndPlatformDropBlocks(this.isEndPlatformDropBlocks());
 
         this.setNetherPrefix(this.getNetherPrefix());
         this.setNetherSuffix(this.getNetherSuffix());
@@ -334,6 +335,14 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         this.MVNPConfiguration.set("send_no_destination_message", sendNoDestinationMessage);
     }
 
+    public boolean isEndPlatformDropBlocks() {
+        return this.MVNPConfiguration.getBoolean("end_platform_drop_blocks", true);
+    }
+
+    public void setEndPlatformDropBlocks(boolean endPlatformDropBlocks) {
+        this.MVNPConfiguration.set("end_platform_drop_blocks", endPlatformDropBlocks);
+    }
+
     public boolean isHandledByNetherPortals(Location l) {
         if (multiversePortals != null) {
             // Catch errors which could occur if classes aren't present or are missing methods.
@@ -398,6 +407,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         buffer += logAndAddToPasteBinBuffer("Teleport Entities: " + this.isTeleportingEntities());
         buffer += logAndAddToPasteBinBuffer("Send Disabled Portal Message: " + this.isSendingDisabledPortalMessage());
         buffer += logAndAddToPasteBinBuffer("Send No Destination Message: " + this.isSendingNoDestinationMessage());
+        buffer += logAndAddToPasteBinBuffer("End platform drops blocks: " + this.isEndPlatformDropBlocks());
         buffer += logAndAddToPasteBinBuffer("Special Code: FRN001");
         return buffer;
     }

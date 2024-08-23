@@ -138,7 +138,7 @@ public class MVNPPlayerListener implements Listener {
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 Location spawnLocation = EndPlatformCreator.getVanillaLocation(event.getTo().getWorld());
                 event.setTo(spawnLocation);
-                EndPlatformCreator.createEndPlatform(spawnLocation);
+                EndPlatformCreator.createEndPlatform(spawnLocation, plugin.isEndPlatformDropBlocks());
             }
 
             // Advancements need to be triggered manually
