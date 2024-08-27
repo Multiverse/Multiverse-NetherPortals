@@ -1,6 +1,7 @@
 package com.onarandombox.MultiverseNetherPortals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import com.onarandombox.MultiverseCore.MVWorld;
 import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
@@ -299,26 +300,13 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        // Some shortcuts for later
-        Entity entity = event.getEntity();
-
-        @Nullable Location toLocation = event.getTo();
-        Location fromLocation = event.getFrom();
-
-        if (toLocation == null) {
-            Logging.warning("ToLocation in EntityPortalEvent is null.");
+        if (event.getTo() == null) {
+            Logging.warning("getTo() location in EntityPortalEvent is null.");
             return;
         }
 
-        MultiverseWorld fromWorld = this.worldManager.getMVWorld(fromLocation.getWorld().getName());
-        MultiverseWorld toWorld = this.worldManager.getMVWorld(toLocation.getWorld().getName());
-
-        Location originalTo = this.locationManipulation.getBlockLocation(toLocation);
-        Location currentLocation = this.locationManipulation.getBlockLocation(fromLocation);
-
-
         // Don't mess with other people's stuff
-        if (!plugin.isHandledByNetherPortals(currentLocation)) {
+        if (!plugin.isHandledByNetherPortals(event.getFrom())) {
             return;
         }
 
@@ -328,12 +316,26 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
+        // Some shortcuts for later
+        Entity entity = event.getEntity();
+
+        Location fromLocation = this.locationManipulation.getBlockLocation(event.getFrom());
+        Location originalToLocation = this.locationManipulation.getBlockLocation(event.getTo());
+
+        World fromWorld = fromLocation.getWorld();
+        World originalToWorld = originalToLocation.getWorld();
+
+        if (fromWorld == null || originalToWorld == null) {
+            Logging.warning("from/to world is null in EntityPortalEvent for %s", entity.getName());
+            return;
+        }
+
         PortalType type;
-        if (originalTo.getWorld().getEnvironment() == World.Environment.NETHER
-                || (currentLocation.getWorld().getEnvironment() == World.Environment.NETHER && originalTo.getWorld().getEnvironment() == World.Environment.NORMAL)) {
+        if (fromWorld.getEnvironment() == World.Environment.NETHER
+                || (fromWorld.getEnvironment() == World.Environment.NETHER && originalToWorld.getEnvironment() == World.Environment.NORMAL)) {
             type = PortalType.NETHER;
-        } else if (originalTo.getWorld().getEnvironment() == World.Environment.THE_END
-                || (currentLocation.getWorld().getEnvironment() == World.Environment.THE_END && originalTo.getWorld().getEnvironment() == World.Environment.NORMAL)) {
+        } else if (fromWorld.getEnvironment() == World.Environment.THE_END
+                || (fromWorld.getEnvironment() == World.Environment.THE_END && originalToWorld.getEnvironment() == World.Environment.NORMAL)) {
             type = PortalType.ENDER;
         } else {
             return;
@@ -349,51 +351,46 @@ public class MVNPEntityListener implements Listener {
             }
         }
 
-        String currentWorld = currentLocation.getWorld().getName();
-        String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
-        Location newTo = getLocation(entity, currentLocation, type, currentWorld, linkedWorld); // Gets the player spawn location from the portal spawn location
+        String fromWorldName = fromWorld.getName();
+        String linkedWorldName = this.plugin.getWorldLink(fromWorldName, type);
+        Location newToLocation = getLocation(entity, fromLocation, type, fromWorldName, linkedWorldName); // Gets the player spawn location from the portal spawn location
 
-        if (newTo != null) {
-            event.setTo(newTo);
-        } else {
+        // If we can't get a valid location, cancel the event
+        if (newToLocation == null) {
             event.setCancelled(true);
             return;
         }
 
+        event.setTo(newToLocation);
+        MultiverseWorld newToWorld = this.worldManager.getMVWorld(newToLocation.getWorld());
+
         // If we are going to the overworld from the end
         if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-            Logging.fine("Entity '" + entity.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
+            Logging.fine("Entity '" + entity.getName() + "' will be teleported to the spawn of '" + newToWorld.getName() + "' since they used an end exit portal.");
             try {
                 Class.forName("org.bukkit.TravelAgent");
                 event.getPortalTravelAgent().setCanCreatePortal(false);
             } catch (ClassNotFoundException ignore) {
                 Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". There may be a portal created at spawn.");
             }
-
-            event.setTo(toWorld.getSpawnLocation());
-            return;
+            event.setTo(newToWorld.getSpawnLocation());
         }
-
         // If we are going to the overworld from the nether
-        if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+        else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
             try {
                 Class.forName("org.bukkit.TravelAgent");
                 event.getPortalTravelAgent().setCanCreatePortal(true);
-                event.setTo(event.getPortalTravelAgent().findOrCreate(toLocation));
+                event.setTo(event.getPortalTravelAgent().findOrCreate(newToLocation));
             } catch (ClassNotFoundException ignore) {
                 Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". Their destination may not be correct.");
-                event.setTo(toLocation);
+                event.setTo(newToLocation);
             }
-
-            return;
         }
-
         // If we are going to the end from anywhere
-        if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-            Location spawnLocation = EndPlatformCreator.getVanillaLocation(toWorld);
+        else if (newToWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+            Location spawnLocation = EndPlatformCreator.getVanillaLocation(newToWorld);
             event.setTo(spawnLocation);
             EndPlatformCreator.createEndPlatform(spawnLocation, plugin.isEndPlatformDropBlocks());
-            return;
         }
     }
 
