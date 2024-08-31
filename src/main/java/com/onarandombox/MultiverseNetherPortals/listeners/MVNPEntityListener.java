@@ -389,7 +389,7 @@ public class MVNPEntityListener implements Listener {
         else if (newToWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
             Location spawnLocation = EndPlatformCreator.getVanillaLocation(entity, newToWorld);
             event.setTo(spawnLocation);
-            EndPlatformCreator.createEndPlatform(spawnLocation, plugin.isEndPlatformDropBlocks());
+            EndPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
         }
     }
 
