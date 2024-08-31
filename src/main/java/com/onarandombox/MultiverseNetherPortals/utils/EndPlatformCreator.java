@@ -2,12 +2,13 @@ package com.onarandombox.MultiverseNetherPortals.utils;
 
 import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 public class EndPlatformCreator {
 
@@ -60,14 +61,16 @@ public class EndPlatformCreator {
     /**
      * The default vanilla location for the end platform
      */
-    public static Location getVanillaLocation(World world) {
-        return new Location(world, 100, 49, 0, 90, 0);
+    public static Location getVanillaLocation(Entity entity, World world) {
+        return entity instanceof Player
+                ? new Location(world, 100, 49, 0, 90, 0)
+                : new Location(world, 100.5, 50, 0.5, 90, 0);
     }
 
     /**
      * The default vanilla location for the end platform
      */
-    public static Location getVanillaLocation(MultiverseWorld world) {
-        return getVanillaLocation(world.getCBWorld());
+    public static Location getVanillaLocation(Entity entity, MultiverseWorld world) {
+        return getVanillaLocation(entity, world.getCBWorld());
     }
 }

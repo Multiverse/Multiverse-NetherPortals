@@ -316,11 +316,10 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        // Some shortcuts for later
         Entity entity = event.getEntity();
 
-        Location fromLocation = this.locationManipulation.getBlockLocation(event.getFrom());
-        Location originalToLocation = this.locationManipulation.getBlockLocation(event.getTo());
+        Location fromLocation = event.getFrom();
+        Location originalToLocation = event.getTo();
 
         World fromWorld = fromLocation.getWorld();
         World originalToWorld = originalToLocation.getWorld();
@@ -388,7 +387,7 @@ public class MVNPEntityListener implements Listener {
         }
         // If we are going to the end from anywhere
         else if (newToWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-            Location spawnLocation = EndPlatformCreator.getVanillaLocation(newToWorld);
+            Location spawnLocation = EndPlatformCreator.getVanillaLocation(entity, newToWorld);
             event.setTo(spawnLocation);
             EndPlatformCreator.createEndPlatform(spawnLocation, plugin.isEndPlatformDropBlocks());
         }
