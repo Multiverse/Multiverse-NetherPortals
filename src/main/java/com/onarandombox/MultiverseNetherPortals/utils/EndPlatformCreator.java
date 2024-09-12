@@ -2,23 +2,25 @@ package com.onarandombox.MultiverseNetherPortals.utils;
 
 import com.dumptruckman.minecraft.util.Logging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 public class EndPlatformCreator {
 
     /**
      * Creates an end platform at the specified {@code Block}
      *
-     * @param spawnLocation The {@code Block} that the player will spawn at.
+     * @param world The world to create the platform in
      * @param dropEndBlocks If the platform should drop the broken blocks or delete them
      */
-    public static void createEndPlatform(Block spawnLocation, boolean dropEndBlocks) {
-        Logging.fine("Creating an end platform at " + spawnLocation.toString());
+    public static void createEndPlatform(World world, boolean dropEndBlocks) {
+        Block spawnLocation = new Location(world, 100, 49, 0).getBlock();
+        Logging.fine("Creating an end platform at " + spawnLocation);
 
         for (int x = spawnLocation.getX() - 2; x <= spawnLocation.getX() + 2; x++) {
             for (int z = spawnLocation.getZ() - 2; z <= spawnLocation.getZ() + 2; z++) {
@@ -35,39 +37,29 @@ public class EndPlatformCreator {
                 for (int yMod = 1; yMod <= 3; yMod++) {
                     Block block = platformBlock.getRelative(BlockFace.UP, yMod);
                     if (block.getType() != Material.AIR) {
-                        if (dropEndBlocks) {
-                            block.breakNaturally();
-                        } else {
+                        if (!dropEndBlocks || !block.breakNaturally()) {
                             block.setType(Material.AIR);
                         }
-
-                        Logging.finest("Breaking block at " + platformBlock);
+                        Logging.finest("Breaking block at " + block);
                     }
                 }
             }
         }
     }
 
-
     /**
-     * Creates an end platform at the specified {@code Location}
-     * @param spawnLocation The {@code Location} that the player will spawn at.
+     * The default vanilla location for the end platform
      */
-    public static void createEndPlatform(Location spawnLocation, boolean dropEndBlocks) {
-        createEndPlatform(spawnLocation.getBlock(), dropEndBlocks);
+    public static Location getVanillaLocation(Entity entity, World world) {
+        return entity instanceof Player
+                ? new Location(world, 100, 49, 0, 90, 0)
+                : new Location(world, 100.5, 50, 0.5, 90, 0);
     }
 
     /**
      * The default vanilla location for the end platform
      */
-    public static Location getVanillaLocation(World world) {
-        return new Location(world, 100, 49, 0, 90, 0);
-    }
-
-    /**
-     * The default vanilla location for the end platform
-     */
-    public static Location getVanillaLocation(MultiverseWorld world) {
-        return getVanillaLocation(world.getCBWorld());
+    public static Location getVanillaLocation(Entity entity, MultiverseWorld world) {
+        return getVanillaLocation(entity, world.getCBWorld());
     }
 }
