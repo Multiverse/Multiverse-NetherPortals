@@ -6,6 +6,7 @@ import com.onarandombox.MultiverseCore.api.LocationManipulation;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
+import com.onarandombox.MultiverseCore.api.SafeTTeleporter;
 import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
@@ -147,9 +148,12 @@ public class MVNPEntityListener implements Listener {
             } else {
                 String destinationWorld = "";
 
+                boolean shouldAppearAtSpawn = false;
+
                 if (this.nameChecker.isValidEndName(currentWorld)) {
                     if (type == PortalType.ENDER) {
                         destinationWorld = this.nameChecker.getNormalName(currentWorld, type);
+                        shouldAppearAtSpawn = true;
                     } else if (type == PortalType.NETHER) {
                         destinationWorld = this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, type));
                     }
@@ -167,7 +171,14 @@ public class MVNPEntityListener implements Listener {
                     }
                 }
 
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
+                if (shouldAppearAtSpawn) {
+                    MultiverseWorld tpTo = this.worldManager.getMVWorld(destinationWorld);
+                    SafeTTeleporter teleporter = this.plugin.getCore().getSafeTTeleporter();
+                    Location safeSpawn = teleporter.getSafeLocation(tpTo.getSpawnLocation());
+                    newTo = this.linkChecker.findNewTeleportLocation(safeSpawn, destinationWorld, e);
+                } else {
+                    newTo = this.linkChecker.findNewTeleportLocation(currentLocation, destinationWorld, e);
+                }
             }
         }
 
