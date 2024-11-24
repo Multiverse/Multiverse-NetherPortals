@@ -11,7 +11,8 @@ import org.bukkit.event.Listener;
 import java.io.File;
 
 public class MVNPCoreListener implements Listener {
-    private MultiverseNetherPortals plugin;
+
+    private final MultiverseNetherPortals plugin;
 
     public MVNPCoreListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
@@ -24,7 +25,7 @@ public class MVNPCoreListener implements Listener {
      */
     @EventHandler
     public void configReloadEvent(MVConfigReloadEvent event) {
-        this.plugin.reloadConfig();
+        this.plugin.loadConfig();
         event.addConfig("Multiverse-NetherPortals - config.yml");
     }
 

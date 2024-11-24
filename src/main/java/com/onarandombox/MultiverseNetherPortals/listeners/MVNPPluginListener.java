@@ -10,7 +10,7 @@ import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
 
 public class MVNPPluginListener implements Listener {
 
-    private MultiverseNetherPortals plugin;
+    private final MultiverseNetherPortals plugin;
 
     public MVNPPluginListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
