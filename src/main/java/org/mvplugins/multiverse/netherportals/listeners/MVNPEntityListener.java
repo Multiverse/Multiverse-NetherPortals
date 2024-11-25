@@ -1,18 +1,11 @@
-package com.onarandombox.MultiverseNetherPortals.listeners;
+package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
-import com.onarandombox.MultiverseCore.MVWorld;
-import com.onarandombox.MultiverseCore.api.LocationManipulation;
-import com.onarandombox.MultiverseCore.api.MVWorldManager;
-import com.onarandombox.MultiverseCore.api.MultiverseMessaging;
-import com.onarandombox.MultiverseCore.api.MultiverseWorld;
-import com.onarandombox.MultiverseCore.event.MVPlayerTouchedPortalEvent;
-import com.onarandombox.MultiverseCore.utils.PermissionTools;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.utils.EndPlatformCreator;
-import com.onarandombox.MultiverseNetherPortals.utils.MVEventRecord;
-import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
-import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
+import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
+import org.mvplugins.multiverse.netherportals.utils.MVEventRecord;
+import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
+import org.mvplugins.multiverse.netherportals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.PortalType;
@@ -23,51 +16,70 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityPortalExitEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.mvplugins.multiverse.core.api.LocationManipulation;
+import org.mvplugins.multiverse.core.event.MVPlayerTouchedPortalEvent;
+import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
+import org.mvplugins.multiverse.core.world.WorldManager;
+import org.mvplugins.multiverse.core.world.entrycheck.WorldEntryCheckerProvider;
+import org.mvplugins.multiverse.external.jakarta.inject.Inject;
+import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
+import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
+import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MVNPEntityListener implements Listener {
+@Service
+public class MVNPEntityListener implements MVNPListener {
+
+    private static final int COOLDOWN = 250;
+
+    private final Map<String, Date> playerErrors;
 
     private final MultiverseNetherPortals plugin;
     private final MVNameChecker nameChecker;
     private final MVLinkChecker linkChecker;
-    private final MVWorldManager worldManager;
-    private final PermissionTools pt;
-    private final int cooldown = 250;
-    private final MultiverseMessaging messaging;
-    private final Map<String, Date> playerErrors;
+    private final WorldEntryCheckerProvider entryCheckerProvider;
+    private final WorldManager worldManager;
     private final LocationManipulation locationManipulation;
     private final MVEventRecord eventRecord;
+    private final EndPlatformCreator endPlatformCreator;
     // the event record is used to track players that are currently standing
     // inside portals. it's used so that we don't need to run the the onEntityPortalEnter
     // listener more than once for a given player. that also means players are
     // only messaged once about why they can't go through a given portal.
 
-    public MVNPEntityListener(MultiverseNetherPortals plugin) {
+    @Inject
+    MVNPEntityListener(
+            @NotNull MultiverseNetherPortals plugin,
+            @NotNull MVNameChecker nameChecker,
+            @NotNull MVLinkChecker linkChecker,
+            @NotNull WorldEntryCheckerProvider entryCheckerProvider,
+            @NotNull WorldManager worldManager,
+            @NotNull LocationManipulation locationManipulation,
+            @NotNull MVEventRecord eventRecord,
+            @NotNull EndPlatformCreator endPlatformCreator) {
+        this.playerErrors = new HashMap<>();
         this.plugin = plugin;
-        this.nameChecker = this.plugin.getNameChecker();
-        this.linkChecker = this.plugin.getLinkChecker();
-        this.worldManager = this.plugin.getCore().getMVWorldManager();
-        this.pt = new PermissionTools(this.plugin.getCore());
-        this.playerErrors = new HashMap<String, Date>();
-        this.messaging = this.plugin.getCore().getMessaging();
-        this.locationManipulation = this.plugin.getCore().getLocationManipulation();
-        this.eventRecord = new MVEventRecord(this.plugin);
+        this.nameChecker = nameChecker;
+        this.linkChecker = linkChecker;
+        this.entryCheckerProvider = entryCheckerProvider;
+        this.worldManager = worldManager;
+        this.locationManipulation = locationManipulation;
+        this.eventRecord = eventRecord;
+        this.endPlatformCreator = endPlatformCreator;
     }
 
     /**
      * Shoot a player back from a portal. Returns true iff bounceback is
      * enabled and the PortalType is supported (see below), otherwise
      * returns false.
-     *
+     * <p>
      * Currently, only PortalType.NETHER is supported.
      *
      * @param p     The Player to shoot back.
@@ -224,7 +236,7 @@ public class MVNPEntityListener implements Listener {
 
         if (this.playerErrors.containsKey(p.getName())) {
             Date lastTry = this.playerErrors.get(p.getName());
-            if (lastTry.getTime() + this.cooldown > new Date().getTime()) {
+            if (lastTry.getTime() + this.COOLDOWN > new Date().getTime()) {
                 return;
             }
             this.playerErrors.remove(p.getName());
@@ -242,18 +254,18 @@ public class MVNPEntityListener implements Listener {
             if (currentWorld.equalsIgnoreCase(linkedWorld)) {
                 if (this.plugin.isSendingDisabledPortalMessage()) {
                     if (type == PortalType.ENDER) {
-                        this.messaging.sendMessage(p, "End Portals have been disabled in this world!", false);
+                        p.sendMessage("End Portals have been disabled in this world!");
                     } else {
-                        this.messaging.sendMessage(p, "Nether Portals have been disabled in this world!", false);
+                        p.sendMessage("Nether Portals have been disabled in this world!");
                     }
                 }
             } else {
                 if (this.plugin.isSendingNoDestinationMessage()) {
-                    this.messaging.sendMessage(p, "This portal goes nowhere!", false);
+                    p.sendMessage("This portal goes nowhere!");
                     if (type == PortalType.ENDER) {
-                        this.messaging.sendMessage(p, "No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.", true);
+                        p.sendMessage("No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.");
                     } else {
-                        this.messaging.sendMessage(p, "No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.", true);
+                        p.sendMessage("No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.");
                     }
                 }
             }
@@ -261,36 +273,25 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        MultiverseWorld fromWorld = this.worldManager.getMVWorld(p.getLocation().getWorld().getName());
-        MultiverseWorld toWorld = this.worldManager.getMVWorld(toLocation.getWorld().getName());
+        LoadedMultiverseWorld fromWorld = this.worldManager.getLoadedWorld(p.getLocation().getWorld()).getOrNull();
+        LoadedMultiverseWorld toWorld = this.worldManager.getLoadedWorld(toLocation.getWorld()).getOrNull();
 
-        if (fromWorld.getCBWorld().equals(toWorld.getCBWorld())) {
+        if (fromWorld.getBukkitWorld().eq(toWorld.getBukkitWorld())) {
             // The player is Portaling to the same world.
             Logging.finer("Player '" + p.getName() + "' is portaling to the same world.");
             return;
         }
-        if (!pt.playerHasMoneyToEnter(fromWorld, toWorld, p, p, false)) {
-            if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
-                eventRecord.removeFromRecord(type, p.getUniqueId());
-            }
 
-            Logging.fine("Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
-                    "' because they don't have the FUNDS required to enter.");
-            return;
-        }
-
-        if (this.plugin.getCore().getMVConfig().getEnforceAccess()) {
-            if (!pt.playerCanGoFromTo(fromWorld, toWorld, p, p)) {
-                if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
-                    eventRecord.removeFromRecord(type, p.getUniqueId());
-                }
-
-                Logging.fine("Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getCBWorld().getName() +
-                        "' because they don't have: multiverse.access." + toWorld.getCBWorld().getName());
-            }
-        } else {
-            Logging.fine("Player '" + p.getName() + "' was allowed to go to '" + toWorld.getCBWorld().getName() + "' because enforceaccess is off.");
-        }
+        entryCheckerProvider.forSender(p).canEnterWorld(fromWorld, toWorld)
+                .onSuccess((result) -> {
+                    Logging.fine("Player '" + p.getName() + "' was ALLOWED ACCESS to '" + toWorld.getName() + "'" + ": " + result);
+                })
+                .onFailure((result) -> {
+                    if (this.shootPlayer(p, eventLocation.getBlock(), type)) {
+                        eventRecord.removeFromRecord(type, p.getUniqueId());
+                    }
+                    Logging.fine("Player '" + p.getName() + "' was DENIED ACCESS to '" + toWorld.getName() + "'" + ": " + result);
+                });
     }
 
     @EventHandler
@@ -340,16 +341,6 @@ public class MVNPEntityListener implements Listener {
             return;
         }
 
-        // Are we allowed to use the nether portal travel agent?
-        if (type == PortalType.NETHER) {
-            try {
-                Class.forName("org.bukkit.TravelAgent");
-                event.useTravelAgent(true);
-            } catch (ClassNotFoundException ignore) {
-                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName());
-            }
-        }
-
         String fromWorldName = fromWorld.getName();
         String linkedWorldName = this.plugin.getWorldLink(fromWorldName, type);
         Location newToLocation = getLocation(entity, fromLocation, type, fromWorldName, linkedWorldName); // Gets the player spawn location from the portal spawn location
@@ -361,35 +352,28 @@ public class MVNPEntityListener implements Listener {
         }
 
         event.setTo(newToLocation);
-        MultiverseWorld newToWorld = this.worldManager.getMVWorld(newToLocation.getWorld());
+        LoadedMultiverseWorld newToWorld = this.worldManager.getLoadedWorld(newToLocation.getWorld()).getOrNull();
 
         // If we are going to the overworld from the end
         if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-            Logging.fine("Entity '" + entity.getName() + "' will be teleported to the spawn of '" + newToWorld.getName() + "' since they used an end exit portal.");
-            try {
-                Class.forName("org.bukkit.TravelAgent");
-                event.getPortalTravelAgent().setCanCreatePortal(false);
-            } catch (ClassNotFoundException ignore) {
-                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". There may be a portal created at spawn.");
-            }
             event.setTo(newToWorld.getSpawnLocation());
         }
         // If we are going to the overworld from the nether
-        else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-            try {
-                Class.forName("org.bukkit.TravelAgent");
-                event.getPortalTravelAgent().setCanCreatePortal(true);
-                event.setTo(event.getPortalTravelAgent().findOrCreate(newToLocation));
-            } catch (ClassNotFoundException ignore) {
-                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". Their destination may not be correct.");
-                event.setTo(newToLocation);
-            }
-        }
+//        else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+//            try {
+//                Class.forName("org.bukkit.TravelAgent");
+//                event.getPortalTravelAgent().setCanCreatePortal(true);
+//                event.setTo(event.getPortalTravelAgent().findOrCreate(newToLocation));
+//            } catch (ClassNotFoundException ignore) {
+//                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". Their destination may not be correct.");
+//                event.setTo(newToLocation);
+//            }
+//        }
         // If we are going to the end from anywhere
         else if (newToWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-            Location spawnLocation = EndPlatformCreator.getVanillaLocation(entity, newToWorld);
+            Location spawnLocation = endPlatformCreator.getVanillaLocation(entity, newToWorld);
             event.setTo(spawnLocation);
-            EndPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
+            endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
         }
     }
 
