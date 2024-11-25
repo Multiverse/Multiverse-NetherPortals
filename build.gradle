@@ -2,14 +2,17 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'checkstyle'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '8.3.5'
 }
 
 version = System.getenv('GITHUB_VERSION') ?: 'local'
-group = 'com.onarandombox.multiversenetherportals'
+group = 'org.mvplugins.multiverse.netherportals'
 description = 'Multiverse-NetherPortals'
 
-java.sourceCompatibility = JavaVersion.VERSION_11
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenLocal()
@@ -124,7 +127,7 @@ shadowJar {
 
     configurations = [project.configurations.api]
 
-    archiveFileName = "$baseName-$version.$extension"
+    archiveClassifier.set('')
 }
 
 build.dependsOn shadowJar
