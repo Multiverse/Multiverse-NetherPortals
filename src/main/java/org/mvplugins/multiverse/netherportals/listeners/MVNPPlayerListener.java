@@ -1,13 +1,10 @@
-package com.onarandombox.MultiverseNetherPortals.listeners;
+package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
-import com.onarandombox.MultiverseCore.api.MVWorldManager;
-import com.onarandombox.MultiverseCore.api.MultiverseWorld;
-import com.onarandombox.MultiverseCore.utils.PermissionTools;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.utils.EndPlatformCreator;
-import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
-import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
+import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
+import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
+import org.mvplugins.multiverse.netherportals.utils.MVNameChecker;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.PortalType;
@@ -16,29 +13,42 @@ import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
+import org.mvplugins.multiverse.core.world.WorldManager;
+import org.mvplugins.multiverse.external.jakarta.inject.Inject;
+import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
+import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
-public class MVNPPlayerListener implements Listener {
+@Service
+public class MVNPPlayerListener implements MVNPListener {
 
     private final MultiverseNetherPortals plugin;
     private final MVNameChecker nameChecker;
     private final MVLinkChecker linkChecker;
-    private final MVWorldManager worldManager;
-    private final PermissionTools pt;
+    private final WorldManager worldManager;
+    private final EndPlatformCreator endPlatformCreator;
+
     private final Advancement enterNetherAdvancement;
     private final Advancement enterEndAdvancement;
 
     private static final String ENTER_NETHER_CRITERIA = "entered_nether";
     private static final String ENTER_END_CRITERIA = "entered_end";
 
-    public MVNPPlayerListener(MultiverseNetherPortals plugin) {
+    @Inject
+    public MVNPPlayerListener(
+            @NotNull MultiverseNetherPortals plugin,
+            @NotNull MVNameChecker nameChecker,
+            @NotNull MVLinkChecker linkChecker,
+            @NotNull WorldManager worldManager,
+            @NotNull EndPlatformCreator endPlatformCreator) {
         this.plugin = plugin;
-        this.nameChecker = this.plugin.getNameChecker();
-        this.worldManager = this.plugin.getCore().getMVWorldManager();
-        this.pt = new PermissionTools(this.plugin.getCore());
-        this.linkChecker = this.plugin.getLinkChecker();
+        this.nameChecker = nameChecker;
+        this.linkChecker = linkChecker;
+        this.worldManager = worldManager;
+        this.endPlatformCreator = endPlatformCreator;
+
         this.enterNetherAdvancement = this.plugin.getServer().getAdvancement(NamespacedKey.minecraft("story/enter_the_nether"));
         this.enterEndAdvancement = this.plugin.getServer().getAdvancement(NamespacedKey.minecraft("story/enter_the_end"));
     }
@@ -65,15 +75,6 @@ public class MVNPPlayerListener implements Listener {
         }
 
         Player player = event.getPlayer();
-
-        if (type == PortalType.NETHER) {
-            try {
-                Class.forName("org.bukkit.TravelAgent");
-                event.useTravelAgent(true);
-            } catch (ClassNotFoundException ignore) {
-                Logging.fine("TravelAgent not available for PlayerPortalEvent for " + player.getName());
-            }
-        }
 
         Location newTo;
         String currentWorld = currentLocation.getWorld().getName();
@@ -109,38 +110,26 @@ public class MVNPPlayerListener implements Listener {
             return;
         }
 
-        MultiverseWorld fromWorld = this.worldManager.getMVWorld(event.getFrom().getWorld().getName());
-        MultiverseWorld toWorld = this.worldManager.getMVWorld(event.getTo().getWorld().getName());
+        LoadedMultiverseWorld fromWorld = this.worldManager.getLoadedWorld(event.getFrom().getWorld()).getOrNull();
+        LoadedMultiverseWorld toWorld = this.worldManager.getLoadedWorld(event.getTo().getWorld()).getOrNull();
 
         if (!event.isCancelled()) {
             if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 Logging.fine("Player '" + player.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-                try {
-                    Class.forName("org.bukkit.TravelAgent");
-                    event.getPortalTravelAgent().setCanCreatePortal(false);
-                } catch (ClassNotFoundException ignore) {
-                    Logging.fine("TravelAgent not available for PlayerPortalEvent for " + player.getName() + ". There may be a portal created at spawn.");
-                }
+                event.setCanCreatePortal(false);
                 if (toWorld.getBedRespawn()
                         && player.getBedSpawnLocation() != null
-                        && player.getBedSpawnLocation().getWorld().getUID() == toWorld.getCBWorld().getUID()) {
+                        && toWorld.getUID().equals(player.getBedSpawnLocation().getWorld().getUID())) {
                     event.setTo(player.getBedSpawnLocation());
                 } else {
                     event.setTo(toWorld.getSpawnLocation());
                 }
             } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-                try {
-                    Class.forName("org.bukkit.TravelAgent");
-                    event.getPortalTravelAgent().setCanCreatePortal(true);
-                    event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
-                } catch (ClassNotFoundException ignore) {
-                    Logging.fine("TravelAgent not available for PlayerPortalEvent for " + player.getName() + ". Their destination may not be correct.");
-                    event.setTo(event.getTo());
-                }
+                event.setCanCreatePortal(true);
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                Location spawnLocation = EndPlatformCreator.getVanillaLocation(player, event.getTo().getWorld());
+                Location spawnLocation = endPlatformCreator.getVanillaLocation(player, event.getTo().getWorld());
                 event.setTo(spawnLocation);
-                EndPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
+                endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
             }
 
             // Advancements need to be triggered manually

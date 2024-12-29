@@ -2,14 +2,17 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'checkstyle'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '8.3.5'
 }
 
 version = System.getenv('GITHUB_VERSION') ?: 'local'
-group = 'com.onarandombox.multiversenetherportals'
+group = 'org.mvplugins.multiverse.netherportals'
 description = 'Multiverse-NetherPortals'
 
-java.sourceCompatibility = JavaVersion.VERSION_11
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenLocal()
@@ -24,17 +27,23 @@ repositories {
         name = 'onarandombox'
         url = uri('https://repo.onarandombox.com/content/groups/public')
     }
+
+    maven {
+        // todo: remove before mv5 release
+        name = 'benwoo1110'
+        url = uri('https://repo.c0ding.party/multiverse-beta')
+    }
 }
 
 dependencies {
     // Spigot
-    implementation 'org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT'
+    implementation'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
 
     // Multiverse-Core
-    implementation 'com.onarandombox.multiversecore:multiverse-core:4.3.11'
+    implementation 'org.mvplugins.multiverse.core:multiverse-core:5.0.0-SNAPSHOT'
 
     // Multiverse-Portals
-    implementation 'com.onarandombox.multiverseportals:multiverse-portals:4.2.2'
+    implementation 'org.mvplugins.multiverse.portals:multiverse-portals:5.0.0-SNAPSHOT'
 
     // Utils
     api('com.dumptruckman.minecraft:Logging:1.1.1') {
@@ -113,13 +122,25 @@ javadoc {
 project.configurations.api.canBeResolved = true
 
 shadowJar {
-    relocate 'com.dumptruckman.minecraft.util.Logging', 'com.onarandombox.multiverseportals.util.MVPLogging'
-    relocate 'com.dumptruckman.minecraft.util.DebugLog', 'com.onarandombox.multiverseportals.util.DebugFileLogger'
+    relocate 'com.dumptruckman.minecraft.util.Logging', 'org.mvplugins.multiverse.netherportals.util.MVPLogging'
+    relocate 'com.dumptruckman.minecraft.util.DebugLog', 'org.mvplugins.multiverse.netherportals.util.DebugFileLogger'
 
     configurations = [project.configurations.api]
 
-    archiveFileName = "$baseName-$version.$extension"
+    archiveClassifier.set('')
 }
 
 build.dependsOn shadowJar
 jar.enabled = false
+
+
+tasks.register('runHabitatGenerator', JavaExec) {
+    classpath = configurations["compileClasspath"]
+    mainClass.set('org.mvplugins.multiverse.external.jvnet.hk2.generator.HabitatGenerator')
+
+    args = [
+            '--file', "build/libs/multiverse-netherportals-$version" + ".jar",
+            '--locator', 'Multiverse-NetherPortals',
+    ]
+}
+tasks.named("build") { finalizedBy("runHabitatGenerator") }

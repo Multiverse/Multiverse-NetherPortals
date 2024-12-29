@@ -1,6 +1,6 @@
-package com.onarandombox.MultiverseNetherPortals.runnables;
+package org.mvplugins.multiverse.netherportals.runnables;
 
-import com.onarandombox.MultiverseNetherPortals.utils.MVEventRecord;
+import org.mvplugins.multiverse.netherportals.utils.MVEventRecord;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.PortalType;

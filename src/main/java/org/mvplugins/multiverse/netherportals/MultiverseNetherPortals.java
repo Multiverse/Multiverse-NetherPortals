@@ -1,39 +1,32 @@
-package com.onarandombox.MultiverseNetherPortals;
+package org.mvplugins.multiverse.netherportals;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
 import com.dumptruckman.minecraft.util.Logging;
-import com.onarandombox.MultiverseCore.MultiverseCore;
-import com.onarandombox.MultiverseCore.api.MVPlugin;
-import com.onarandombox.MultiverseCore.commands.HelpCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.LinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.ShowLinkCommand;
-import com.onarandombox.MultiverseNetherPortals.commands.UnlinkCommand;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPCoreListener;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPEntityListener;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPlayerListener;
-import com.onarandombox.MultiverseNetherPortals.listeners.MVNPPluginListener;
-import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
-import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
-import com.onarandombox.MultiversePortals.MultiversePortals;
-import com.onarandombox.commandhandler.CommandHandler;
+import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
+import org.mvplugins.multiverse.netherportals.listeners.MVNPListener;
 import org.bukkit.Location;
 import org.bukkit.PortalType;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mvplugins.multiverse.core.MultiverseCore;
+import org.mvplugins.multiverse.core.api.MVPlugin;
+import org.mvplugins.multiverse.core.commandtools.MVCommandManager;
+import org.mvplugins.multiverse.core.config.MVCoreConfig;
+import org.mvplugins.multiverse.core.inject.PluginServiceLocator;
+import org.mvplugins.multiverse.external.jakarta.inject.Inject;
+import org.mvplugins.multiverse.external.jakarta.inject.Provider;
+import org.mvplugins.multiverse.external.vavr.control.Try;
+import org.mvplugins.multiverse.portals.MultiversePortals;
+import org.mvplugins.multiverse.portals.utils.PortalManager;
 
 public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
@@ -46,16 +39,20 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
   
     protected MultiverseCore core;
     protected Plugin multiversePortals;
-    protected MVNPPluginListener pluginListener;
-    protected MVNPPlayerListener playerListener;
-    protected MVNPCoreListener customListener;
     protected FileConfiguration MVNPConfiguration;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
-    protected CommandHandler commandHandler;
-    private MVNPEntityListener entityListener;
-    private MVLinkChecker linkChecker;
-    private MVNameChecker nameChecker;
+
+    private PluginServiceLocator serviceLocator;
+    @Inject
+    private Provider<MVCoreConfig> mvCoreConfig;
+    @Inject
+    private Provider<MVCommandManager> commandManager;
+
+    @Override
+    public void onLoad() {
+        getDataFolder().mkdirs();
+    }
 
     @Override
     public void onEnable() {
@@ -79,35 +76,35 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             return;
         }
 
-        Logging.setDebugLevel(core.getMVConfig().getGlobalDebug());
+        initializeDependencyInjection();
+        Logging.setDebugLevel(mvCoreConfig.get().getGlobalDebug());
 
         this.core.incrementPluginCount();
         // As soon as we know MVCore was found, we can use the debug log!
 
-        this.linkChecker = new MVLinkChecker(this);
-        this.nameChecker = new MVNameChecker(this);
-
-        this.pluginListener = new MVNPPluginListener(this);
-        this.playerListener = new MVNPPlayerListener(this);
-        this.entityListener = new MVNPEntityListener(this);
-        this.customListener = new MVNPCoreListener(this);
-        PluginManager pm = this.getServer().getPluginManager();
-        pm.registerEvents(this.pluginListener, this);
-        pm.registerEvents(this.playerListener, this);
-        pm.registerEvents(this.entityListener, this);
-        pm.registerEvents(this.customListener, this);
-
         loadConfig();
         this.registerCommands();
+        this.registerEvents();
 
         Logging.log(true, Level.INFO, " Enabled - By %s", getAuthors());
+    }
+
+    private void initializeDependencyInjection() {
+        serviceLocator = core.getServiceLocatorFactory()
+                .registerPlugin(new MultiverseNetherPortalsPluginBinder(this), core.getServiceLocator())
+                .flatMap(PluginServiceLocator::enable)
+                .getOrElseThrow(exception -> {
+                    Logging.severe("Failed to initialize dependency injection!");
+                    getServer().getPluginManager().disablePlugin(this);
+                    return new RuntimeException(exception);
+                });
     }
 
     public void loadConfig() {
         initMVNPConfig();
 
-        this.linkMap = new HashMap<String, String>();
-        this.endLinkMap = new HashMap<String, String>();
+        this.linkMap = new HashMap<>();
+        this.endLinkMap = new HashMap<>();
 
         this.setUsingBounceBack(this.isUsingBounceBack());
         this.setTeleportingEntities(this.isTeleportingEntities());
@@ -170,28 +167,27 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         }
     }
 
-    /** Register commands to Multiverse's CommandHandler so we get a super sexy single menu */
+    /**
+     * Register commands to Multiverse's CommandHandler so we get a super sexy single menu
+     */
     private void registerCommands() {
-        this.commandHandler = this.core.getCommandHandler();
-        this.commandHandler.registerCommand(new LinkCommand(this));
-        this.commandHandler.registerCommand(new UnlinkCommand(this));
-        this.commandHandler.registerCommand(new ShowLinkCommand(this));
-        for (com.onarandombox.commandhandler.Command c : this.commandHandler.getAllCommands()) {
-            if (c instanceof HelpCommand) {
-                c.addKey("mvnp");
-            }
-        }
+        Try.of(() -> commandManager.get())
+                .andThenTry(commandManager -> serviceLocator.getAllServices(NetherPortalsCommand.class)
+                        .forEach(commandManager::registerCommand))
+                .onFailure(e -> {
+                    Logging.severe("Failed to register commands");
+                    e.printStackTrace();
+                });
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        if (!this.isEnabled()) {
-            sender.sendMessage("This plugin is Disabled!");
-            return true;
-        }
-        ArrayList<String> allArgs = new ArrayList<String>(Arrays.asList(args));
-        allArgs.add(0, command.getName());
-        return this.commandHandler.locateAndRunCommand(sender, allArgs);
+    private void registerEvents() {
+        var pluginManager = getServer().getPluginManager();
+
+        Try.run(() -> serviceLocator.getAllServices(MVNPListener.class).forEach(
+                        listener -> pluginManager.registerEvents(listener, this)))
+                .onFailure(e -> {
+                    throw new RuntimeException("Failed to register listeners. Terminating...", e);
+                });
     }
 
     @Override
@@ -200,11 +196,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     @Override
-    public void onLoad() {
-        getDataFolder().mkdirs();
-    }
-
-    private String getAuthors() {
+    public String getAuthors() {
         String authors = "";
         for (int i = 0; i < this.getDescription().getAuthors().size(); i++) {
             if (i == this.getDescription().getAuthors().size() - 1) {
@@ -214,6 +206,11 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             }
         }
         return authors.substring(2);
+    }
+
+    @Override
+    public PluginServiceLocator getServiceLocator() {
+        return serviceLocator;
     }
 
     public void setNetherPrefix(String netherPrefix) {
@@ -280,17 +277,17 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
         return true;
     }
 
-    public void removeWorldLink(String from, String to, PortalType type) {
+    public boolean removeWorldLink(String from, String to, PortalType type) {
         if (type == PortalType.NETHER) {
             this.linkMap.remove(from);
         } else if (type == PortalType.ENDER) {
             this.endLinkMap.remove(from);
         } else {
-            return;
+            return false;
         }
 
         this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, null);
-        this.saveMVNPConfig();
+        return this.saveMVNPConfig();
     }
 
     public boolean saveMVNPConfig() {
@@ -298,7 +295,7 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             this.MVNPConfiguration.save(new File(this.getDataFolder(), NETHER_PORTALS_CONFIG));
             return true;
         } catch (IOException e) {
-            this.log(Level.SEVERE, "Could not save " + NETHER_PORTALS_CONFIG);
+            Logging.severe("Could not save " + NETHER_PORTALS_CONFIG);
         }
         return false;
     }
@@ -348,7 +345,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             // Catch errors which could occur if classes aren't present or are missing methods.
             try {
                 MultiversePortals portals = (MultiversePortals) multiversePortals;
-                if (portals.getPortalManager().isPortal(l)) {
+                PortalManager portalManager = portals.getServiceLocator().getActiveService(PortalManager.class);
+                if (portalManager != null && portalManager.isPortal(l)) {
                     return false;
                 }
             } catch (Throwable t) {
@@ -356,14 +354,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             }
         }
         return true;
-    }
-
-    public MVLinkChecker getLinkChecker() {
-        return linkChecker;
-    }
-
-    public MVNameChecker getNameChecker() {
-        return nameChecker;
     }
 
     public void setPortals(Plugin multiversePortals) {
@@ -380,44 +370,11 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     @Override
-    public void log(Level level, String msg) {
-        Logging.log(level, msg);
-    }
-
-    @Override
-    public void setCore(MultiverseCore core) {
-        this.core = core;
-    }
-
-    @Override
     public int getProtocolVersion() {
         return 1;
     }
 
-    @Override
-    public String dumpVersionInfo(String buffer) {
-        buffer += logAndAddToPasteBinBuffer("Multiverse-NetherPortals Version: " + this.getDescription().getVersion());
-        buffer += logAndAddToPasteBinBuffer("Nether Prefix: " + this.getNetherPrefix());
-        buffer += logAndAddToPasteBinBuffer("Nether Suffix: " + this.getNetherSuffix());
-        buffer += logAndAddToPasteBinBuffer("End Prefix: " + this.getEndPrefix());
-        buffer += logAndAddToPasteBinBuffer("End Suffix: " + this.getEndSuffix());
-        buffer += logAndAddToPasteBinBuffer("Nether Links: " + this.getWorldLinks());
-        buffer += logAndAddToPasteBinBuffer("End Links: " + this.getEndWorldLinks());
-        buffer += logAndAddToPasteBinBuffer("Bounceback: " + this.isUsingBounceBack());
-        buffer += logAndAddToPasteBinBuffer("Teleport Entities: " + this.isTeleportingEntities());
-        buffer += logAndAddToPasteBinBuffer("Send Disabled Portal Message: " + this.isSendingDisabledPortalMessage());
-        buffer += logAndAddToPasteBinBuffer("Send No Destination Message: " + this.isSendingNoDestinationMessage());
-        buffer += logAndAddToPasteBinBuffer("End platform drops blocks: " + this.isEndPlatformDropBlocks());
-        buffer += logAndAddToPasteBinBuffer("Special Code: FRN001");
-        return buffer;
-    }
-
-    private String logAndAddToPasteBinBuffer(String string) {
-        this.log(Level.INFO, string);
-        return "[Multiverse-NetherPortals] " + string + '\n';
-    }
-
-    public String getVersionInfo() {
+    public String getDebugInfo() {
         return "[Multiverse-NetherPortals] Multiverse-NetherPortals Version: " + this.getDescription().getVersion() + '\n'
                 + "[Multiverse-NetherPortals] Nether Prefix: " + this.getNetherPrefix() + '\n'
                 + "[Multiverse-NetherPortals] Nether Suffix: " + this.getNetherSuffix() + '\n'
