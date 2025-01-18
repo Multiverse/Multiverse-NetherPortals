@@ -11,6 +11,6 @@ import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Contract;
 @Contract
 public abstract class NetherPortalsCommand extends MultiverseCommand {
     protected NetherPortalsCommand(@NotNull MVCommandManager commandManager) {
-        super(commandManager);
+        super(commandManager, "mvnp");
     }
 }

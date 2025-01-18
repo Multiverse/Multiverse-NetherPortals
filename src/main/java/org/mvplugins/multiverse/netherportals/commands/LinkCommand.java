@@ -4,7 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.commandtools.MVCommandIssuer;
 import org.mvplugins.multiverse.core.commandtools.MVCommandManager;
-import org.mvplugins.multiverse.core.world.MultiverseWorld;
+import org.mvplugins.multiverse.core.api.world.MultiverseWorld;
 import org.mvplugins.multiverse.external.acf.commands.InvalidCommandArgument;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandAlias;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandCompletion;

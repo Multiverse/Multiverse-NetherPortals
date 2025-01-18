@@ -3,7 +3,7 @@ package org.mvplugins.multiverse.netherportals.utils;
 import com.dumptruckman.minecraft.util.Logging;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.bukkit.PortalType;
-import org.mvplugins.multiverse.core.world.WorldManager;
+import org.mvplugins.multiverse.core.api.world.WorldManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;

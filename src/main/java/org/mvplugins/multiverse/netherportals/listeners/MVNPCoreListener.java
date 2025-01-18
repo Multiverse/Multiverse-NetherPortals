@@ -3,9 +3,9 @@ package org.mvplugins.multiverse.netherportals.listeners;
 import com.dumptruckman.minecraft.util.Logging;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.bukkit.event.EventHandler;
-import org.mvplugins.multiverse.core.event.MVConfigReloadEvent;
-import org.mvplugins.multiverse.core.event.MVDebugModeEvent;
-import org.mvplugins.multiverse.core.event.MVDumpsDebugInfoEvent;
+import org.mvplugins.multiverse.core.api.event.MVConfigReloadEvent;
+import org.mvplugins.multiverse.core.api.event.MVDebugModeEvent;
+import org.mvplugins.multiverse.core.api.event.MVDumpsDebugInfoEvent;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
