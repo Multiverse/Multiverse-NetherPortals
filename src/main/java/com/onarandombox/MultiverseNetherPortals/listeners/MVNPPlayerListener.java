@@ -5,6 +5,7 @@ import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.onarandombox.MultiverseCore.utils.PermissionTools;
 import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import com.onarandombox.MultiverseNetherPortals.utils.ClassChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.EndPlatformCreator;
 import com.onarandombox.MultiverseNetherPortals.utils.MVLinkChecker;
 import com.onarandombox.MultiverseNetherPortals.utils.MVNameChecker;
@@ -67,10 +68,9 @@ public class MVNPPlayerListener implements Listener {
         Player player = event.getPlayer();
 
         if (type == PortalType.NETHER) {
-            try {
-                Class.forName("org.bukkit.TravelAgent");
+            if (ClassChecker.isTravelAgentExists) {
                 event.useTravelAgent(true);
-            } catch (ClassNotFoundException ignore) {
+            } else {
                 Logging.fine("TravelAgent not available for PlayerPortalEvent for " + player.getName());
             }
         }
@@ -115,10 +115,9 @@ public class MVNPPlayerListener implements Listener {
         if (!event.isCancelled()) {
             if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 Logging.fine("Player '" + player.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-                try {
-                    Class.forName("org.bukkit.TravelAgent");
+                if (ClassChecker.isTravelAgentExists) {
                     event.getPortalTravelAgent().setCanCreatePortal(false);
-                } catch (ClassNotFoundException ignore) {
+                } else {
                     Logging.fine("TravelAgent not available for PlayerPortalEvent for " + player.getName() + ". There may be a portal created at spawn.");
                 }
                 if (toWorld.getBedRespawn()
@@ -129,11 +128,10 @@ public class MVNPPlayerListener implements Listener {
                     event.setTo(toWorld.getSpawnLocation());
                 }
             } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-                try {
-                    Class.forName("org.bukkit.TravelAgent");
+                if (ClassChecker.isTravelAgentExists) {
                     event.getPortalTravelAgent().setCanCreatePortal(true);
                     event.setTo(event.getPortalTravelAgent().findOrCreate(event.getTo()));
-                } catch (ClassNotFoundException ignore) {
+                } else {
                     Logging.fine("TravelAgent not available for PlayerPortalEvent for " + player.getName() + ". Their destination may not be correct.");
                     event.setTo(event.getTo());
                 }
