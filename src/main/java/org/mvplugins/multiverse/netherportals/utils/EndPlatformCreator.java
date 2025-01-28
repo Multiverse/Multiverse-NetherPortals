@@ -8,7 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.mvplugins.multiverse.core.api.world.LoadedMultiverseWorld;
+import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
 import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
 @Service

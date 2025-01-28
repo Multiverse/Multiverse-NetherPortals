@@ -8,6 +8,10 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.mvplugins.multiverse.core.MultiverseCoreApi;
+import org.mvplugins.multiverse.core.MultiversePlugin;
+import org.mvplugins.multiverse.core.inject.PluginServiceLocatorFactory;
+import org.mvplugins.multiverse.core.utils.StringFormatter;
 import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
 import org.mvplugins.multiverse.netherportals.listeners.MVNPListener;
 import org.bukkit.Location;
@@ -16,11 +20,8 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.mvplugins.multiverse.core.MultiverseCore;
-import org.mvplugins.multiverse.core.submodules.MVPlugin;
 import org.mvplugins.multiverse.core.commandtools.MVCommandManager;
-import org.mvplugins.multiverse.core.api.config.MVCoreConfig;
+import org.mvplugins.multiverse.core.config.MVCoreConfig;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocator;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
@@ -28,16 +29,16 @@ import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.portals.MultiversePortals;
 import org.mvplugins.multiverse.portals.utils.PortalManager;
 
-public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
+public class MultiverseNetherPortals extends MultiversePlugin {
 
     private static final String NETHER_PORTALS_CONFIG = "config.yml";
     private static final String DEFAULT_NETHER_PREFIX = "";
     private static final String DEFAULT_NETHER_SUFFIX = "_nether";
     private static final String DEFAULT_END_PREFIX = "";
     private static final String DEFAULT_END_SUFFIX = "_the_end";
-    private final static int requiresProtocol = 24;
+    private final static int requiresProtocol = 50;
   
-    protected MultiverseCore core;
+    protected MultiverseCoreApi core;
     protected Plugin multiversePortals;
     protected FileConfiguration MVNPConfiguration;
     private Map<String, String> linkMap;
@@ -51,13 +52,15 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     @Override
     public void onLoad() {
+        super.onEnable();
         getDataFolder().mkdirs();
     }
 
     @Override
     public void onEnable() {
+        super.onEnable();
         Logging.init(this);
-        this.core = (MultiverseCore) getServer().getPluginManager().getPlugin("Multiverse-Core");
+        this.core = MultiverseCoreApi.get();
         this.multiversePortals = getServer().getPluginManager().getPlugin("Multiverse-Portals");
 
         // Test if the Core was found, if not we'll disable this plugin.
@@ -66,31 +69,19 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        if (this.core.getProtocolVersion() < requiresProtocol) {
-            Logging.severe("Your Multiverse-Core is OUT OF DATE");
-            Logging.severe("This version of NetherPortals requires Protocol Level: " + requiresProtocol);
-            Logging.severe("Your of Core Protocol Level is: " + this.core.getProtocolVersion());
-            Logging.severe("Grab an updated copy at: ");
-            Logging.severe("http://dev.bukkit.org/bukkit-plugins/multiverse-core/");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
 
         initializeDependencyInjection();
         Logging.setDebugLevel(mvCoreConfig.get().getGlobalDebug());
-
-        this.core.incrementPluginCount();
-        // As soon as we know MVCore was found, we can use the debug log!
 
         loadConfig();
         this.registerCommands();
         this.registerEvents();
 
-        Logging.log(true, Level.INFO, " Enabled - By %s", getAuthors());
+        Logging.log(true, Level.INFO, " Enabled - By %s", StringFormatter.joinAnd(this.getDescription().getAuthors()));
     }
 
     private void initializeDependencyInjection() {
-        serviceLocator = core.getServiceLocatorFactory()
+        serviceLocator = PluginServiceLocatorFactory.get()
                 .registerPlugin(new MultiverseNetherPortalsPluginBinder(this), core.getServiceLocator())
                 .flatMap(PluginServiceLocator::enable)
                 .getOrElseThrow(exception -> {
@@ -196,16 +187,8 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
     }
 
     @Override
-    public String getAuthors() {
-        String authors = "";
-        for (int i = 0; i < this.getDescription().getAuthors().size(); i++) {
-            if (i == this.getDescription().getAuthors().size() - 1) {
-                authors += " and " + this.getDescription().getAuthors().get(i);
-            } else {
-                authors += ", " + this.getDescription().getAuthors().get(i);
-            }
-        }
-        return authors.substring(2);
+    public int getTargetCoreProtocolVersion() {
+        return requiresProtocol;
     }
 
     @Override
@@ -358,20 +341,6 @@ public class MultiverseNetherPortals extends JavaPlugin implements MVPlugin {
 
     public void setPortals(Plugin multiversePortals) {
         this.multiversePortals = multiversePortals;
-    }
-
-    public Plugin getPortals() {
-        return multiversePortals;
-    }
-
-    @Override
-    public MultiverseCore getCore() {
-        return this.core;
-    }
-
-    @Override
-    public int getProtocolVersion() {
-        return 1;
     }
 
     public String getDebugInfo() {
