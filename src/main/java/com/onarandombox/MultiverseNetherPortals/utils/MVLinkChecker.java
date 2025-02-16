@@ -34,16 +34,18 @@ public class MVLinkChecker {
             double fromScaling = this.worldManager.getMVWorld(fromLocation.getWorld().getName()).getScaling();
             double toScaling = tpTo.getScaling();
 
-            this.scaleLocation(fromLocation, fromScaling / toScaling);
-            fromLocation.setWorld(tpTo.getCBWorld());
-            return fromLocation;
+            // Clone new location to avoid affecting the original location
+            Location newTargetLocation = fromLocation.clone();
+            this.scaleLocation(newTargetLocation, fromScaling / toScaling);
+            newTargetLocation.setWorld(tpTo.getCBWorld());
+            return newTargetLocation;
         }
 
         return null;
     }
 
-    private void scaleLocation(Location fromLocation, double scaling) {
-        fromLocation.setX(fromLocation.getX() * scaling);
-        fromLocation.setZ(fromLocation.getZ() * scaling);
+    private void scaleLocation(Location newTargetLocation, double scaling) {
+        newTargetLocation.setX(newTargetLocation.getX() * scaling);
+        newTargetLocation.setZ(newTargetLocation.getZ() * scaling);
     }
 }
