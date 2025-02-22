@@ -1,20 +1,23 @@
-package com.onarandombox.MultiverseNetherPortals.listeners;
+package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
-import com.onarandombox.MultiverseCore.event.MVConfigReloadEvent;
-import com.onarandombox.MultiverseCore.event.MVDebugModeEvent;
-import com.onarandombox.MultiverseCore.event.MVVersionEvent;
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.mvplugins.multiverse.core.event.MVConfigReloadEvent;
+import org.mvplugins.multiverse.core.event.MVDebugModeEvent;
+import org.mvplugins.multiverse.core.event.MVDumpsDebugInfoEvent;
+import org.mvplugins.multiverse.external.jakarta.inject.Inject;
+import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
 import java.io.File;
 
-public class MVNPCoreListener implements Listener {
+@Service
+public class MVNPCoreListener implements MVNPListener {
 
     private final MultiverseNetherPortals plugin;
 
-    public MVNPCoreListener(MultiverseNetherPortals plugin) {
+    @Inject
+    MVNPCoreListener(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
     }
 
@@ -35,10 +38,10 @@ public class MVNPCoreListener implements Listener {
      * @param event The Version event.
      */
     @EventHandler
-    public void versionEvent(MVVersionEvent event) {
-        event.appendVersionInfo(this.plugin.getVersionInfo());
+    public void versionEvent(MVDumpsDebugInfoEvent event) {
+        event.appendDebugInfo(this.plugin.getDebugInfo());
         File configFile = new File(this.plugin.getDataFolder(), "config.yml");
-        event.putDetailedVersionInfo("multiverse-netherportals/config.yml", configFile);
+        event.putDetailedDebugInfo("multiverse-netherportals/config.yml", configFile);
     }
 
     /**
