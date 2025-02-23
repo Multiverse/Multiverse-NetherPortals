@@ -8,7 +8,7 @@
 [![Hangar](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/hangar_vector.svg)](https://hangar.papermc.io/Multiverse/Multiverse-NetherPortals)
 [![Bukkit](https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/available/bukkit_vector.svg)](https://dev.bukkit.org/projects/multiverse-NetherPortals)
 
-[![GitHub release (with filter)](https://img.shields.io/github/v/release/multiverse/multiverse-netherportals)](https://github.com/Multiverse/Multiverse-NetherPortals/releases/tag/4.2.3)
+[![GitHub release (with filter)](https://img.shields.io/github/v/release/multiverse/multiverse-netherportals)](https://github.com/Multiverse/Multiverse-NetherPortals/releases/latest)
 [![Discord](https://img.shields.io/discord/325459248047980545?label=discord&logo=discord)](https://discord.gg/NZtfKky)
 [![Support us on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Ddumptruckman%26type%3Dpatrons&style=flat)](https://patreon.com/dumptruckman)
 
