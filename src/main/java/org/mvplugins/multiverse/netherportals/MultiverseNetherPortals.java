@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import com.dumptruckman.minecraft.util.Logging;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.MultiversePlugin;
+import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocatorFactory;
 import org.mvplugins.multiverse.core.utils.StringFormatter;
 import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
@@ -21,7 +22,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.mvplugins.multiverse.core.commandtools.MVCommandManager;
-import org.mvplugins.multiverse.core.config.MVCoreConfig;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocator;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
@@ -46,7 +46,7 @@ public class MultiverseNetherPortals extends MultiversePlugin {
 
     private PluginServiceLocator serviceLocator;
     @Inject
-    private Provider<MVCoreConfig> mvCoreConfig;
+    private Provider<CoreConfig> coreConfig;
     @Inject
     private Provider<MVCommandManager> commandManager;
 
@@ -71,7 +71,7 @@ public class MultiverseNetherPortals extends MultiversePlugin {
         }
 
         initializeDependencyInjection();
-        Logging.setDebugLevel(mvCoreConfig.get().getGlobalDebug());
+        Logging.setDebugLevel(coreConfig.get().getGlobalDebug());
 
         loadConfig();
         this.registerCommands();
