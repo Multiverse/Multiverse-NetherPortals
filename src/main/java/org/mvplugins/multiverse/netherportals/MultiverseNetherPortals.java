@@ -21,7 +21,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.mvplugins.multiverse.core.commandtools.MVCommandManager;
+import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocator;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
@@ -31,13 +31,14 @@ import org.mvplugins.multiverse.portals.utils.PortalManager;
 
 public class MultiverseNetherPortals extends MultiversePlugin {
 
+    private static final double TARGET_CORE_API_VERSION = 5.0;
+
     private static final String NETHER_PORTALS_CONFIG = "config.yml";
     private static final String DEFAULT_NETHER_PREFIX = "";
     private static final String DEFAULT_NETHER_SUFFIX = "_nether";
     private static final String DEFAULT_END_PREFIX = "";
     private static final String DEFAULT_END_SUFFIX = "_the_end";
-    private final static int requiresProtocol = 50;
-  
+
     protected MultiverseCoreApi core;
     protected Plugin multiversePortals;
     protected FileConfiguration MVNPConfiguration;
@@ -187,8 +188,8 @@ public class MultiverseNetherPortals extends MultiversePlugin {
     }
 
     @Override
-    public int getTargetCoreProtocolVersion() {
-        return requiresProtocol;
+    public double getTargetCoreVersion() {
+        return TARGET_CORE_API_VERSION;
     }
 
     @Override
