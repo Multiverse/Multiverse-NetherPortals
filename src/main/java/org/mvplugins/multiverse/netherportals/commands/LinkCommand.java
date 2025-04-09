@@ -2,6 +2,7 @@ package org.mvplugins.multiverse.netherportals.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.PortalType;
+import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
@@ -22,18 +23,15 @@ import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import java.util.Objects;
 
 @Service
-@CommandAlias("mvnp")
 class LinkCommand extends NetherPortalsCommand {
 
     private final MultiverseNetherPortals plugin;
 
     @Inject
-    LinkCommand(@NotNull MVCommandManager commandManager, @NotNull MultiverseNetherPortals plugin) {
-        super(commandManager);
+    LinkCommand(@NotNull MultiverseNetherPortals plugin) {
         this.plugin = plugin;
     }
 
-    @CommandAlias("mvnplink|mvnpl")
     @Subcommand("link")
     @CommandPermission("multiverse.netherportals.link")
     @CommandCompletion("nether|end @mvworlds @mvworlds")
@@ -69,5 +67,19 @@ class LinkCommand extends NetherPortalsCommand {
                 ChatColor.RED, ChatColor.WHITE, ChatColor.GREEN, ChatColor.WHITE, linkType, coloredTo)
                 : String.format("The %s portals in %s%s are now linked to %s.",
                 linkType, coloredFrom, ChatColor.WHITE, coloredTo));
+    }
+
+    @Service
+    private final static class LegacyAlias extends LinkCommand implements LegacyAliasCommand {
+        @Inject
+        LegacyAlias(MultiverseNetherPortals plugin) {
+            super(plugin);
+        }
+
+        @Override
+        @CommandAlias("mvnplink|mvnpl")
+        public void onLinkCommand(MVCommandIssuer issuer, String linkType, MultiverseWorld fromWorld, MultiverseWorld toWorld) {
+            super.onLinkCommand(issuer, linkType, fromWorld, toWorld);
+        }
     }
 }

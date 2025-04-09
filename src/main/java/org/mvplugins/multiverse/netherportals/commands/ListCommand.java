@@ -2,6 +2,7 @@ package org.mvplugins.multiverse.netherportals.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.PortalType;
+import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.display.ContentDisplay;
@@ -28,24 +29,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@CommandAlias("mvnp")
 class ListCommand extends NetherPortalsCommand {
 
     private final MultiverseNetherPortals plugin;
     private final WorldManager worldManager;
 
     @Inject
-    ListCommand(
-            @NotNull MVCommandManager commandManager,
-            @NotNull MultiverseNetherPortals plugin,
-            @NotNull WorldManager worldManager) {
-        super(commandManager);
+    ListCommand(@NotNull MultiverseNetherPortals plugin, @NotNull WorldManager worldManager) {
         this.plugin = plugin;
         this.worldManager = worldManager;
     }
 
     // todo page and filter
-    @CommandAlias("mvnplist|mvnpli")
     @Subcommand("list")
     @CommandPermission("multiverse.netherportals.show") // todo: maybe change to multiverse.netherportals.list
     @CommandCompletion("nether|end")
@@ -129,5 +124,19 @@ class ListCommand extends NetherPortalsCommand {
         return this.worldManager.getLoadedWorld(worldName)
                 .map(MultiverseWorld::getAlias)
                 .getOrElse(ChatColor.GRAY + worldName + ChatColor.RED + " !!ERROR!!");
+    }
+
+    @Service
+    private final static class LegacyAlias extends ListCommand implements LegacyAliasCommand {
+        @Inject
+        LegacyAlias(MultiverseNetherPortals plugin, WorldManager worldManager) {
+            super(plugin, worldManager);
+        }
+
+        @Override
+        @CommandAlias("mvnplist|mvnpli")
+        void onListCommand(MVCommandIssuer issuer, String linkTypeString) {
+            super.onListCommand(issuer, linkTypeString);
+        }
     }
 }
