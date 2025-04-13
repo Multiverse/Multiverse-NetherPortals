@@ -159,6 +159,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
 
     @Override
     public void onDisable() {
+        shutdownDependencyInjection();
         Logging.info("- Disabled");
     }
 
