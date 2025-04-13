@@ -9,9 +9,9 @@ import java.util.logging.Level;
 
 import com.dumptruckman.minecraft.util.Logging;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
-import org.mvplugins.multiverse.core.MultiversePlugin;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocatorFactory;
+import org.mvplugins.multiverse.core.module.MultiverseModule;
 import org.mvplugins.multiverse.core.utils.StringFormatter;
 import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
 import org.mvplugins.multiverse.netherportals.listeners.MVNPListener;
@@ -29,7 +29,7 @@ import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.portals.MultiversePortals;
 import org.mvplugins.multiverse.portals.utils.PortalManager;
 
-public class MultiverseNetherPortals extends MultiversePlugin {
+public class MultiverseNetherPortals extends MultiverseModule {
 
     private static final double TARGET_CORE_API_VERSION = 5.0;
 
@@ -45,7 +45,6 @@ public class MultiverseNetherPortals extends MultiversePlugin {
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
 
-    private PluginServiceLocator serviceLocator;
     @Inject
     private Provider<CoreConfig> coreConfig;
     @Inject
@@ -53,7 +52,7 @@ public class MultiverseNetherPortals extends MultiversePlugin {
 
     @Override
     public void onLoad() {
-        super.onEnable();
+        super.onLoad();
         getDataFolder().mkdirs();
     }
 
@@ -71,25 +70,14 @@ public class MultiverseNetherPortals extends MultiversePlugin {
             return;
         }
 
-        initializeDependencyInjection();
+        initializeDependencyInjection(new MultiverseNetherPortalsPluginBinder(this));
         Logging.setDebugLevel(coreConfig.get().getGlobalDebug());
 
         loadConfig();
-        this.registerCommands();
+        this.registerCommands(NetherPortalsCommand.class);
         this.registerEvents();
 
         Logging.log(true, Level.INFO, " Enabled - By %s", StringFormatter.joinAnd(this.getDescription().getAuthors()));
-    }
-
-    private void initializeDependencyInjection() {
-        serviceLocator = PluginServiceLocatorFactory.get()
-                .registerPlugin(new MultiverseNetherPortalsPluginBinder(this), core.getServiceLocator())
-                .flatMap(PluginServiceLocator::enable)
-                .getOrElseThrow(exception -> {
-                    Logging.severe("Failed to initialize dependency injection!");
-                    getServer().getPluginManager().disablePlugin(this);
-                    return new RuntimeException(exception);
-                });
     }
 
     public void loadConfig() {
@@ -159,19 +147,6 @@ public class MultiverseNetherPortals extends MultiversePlugin {
         }
     }
 
-    /**
-     * Register commands to Multiverse's CommandHandler so we get a super sexy single menu
-     */
-    private void registerCommands() {
-        Try.of(() -> commandManager.get())
-                .andThenTry(commandManager -> serviceLocator.getAllServices(NetherPortalsCommand.class)
-                        .forEach(commandManager::registerCommand))
-                .onFailure(e -> {
-                    Logging.severe("Failed to register commands");
-                    e.printStackTrace();
-                });
-    }
-
     private void registerEvents() {
         var pluginManager = getServer().getPluginManager();
 
@@ -190,11 +165,6 @@ public class MultiverseNetherPortals extends MultiversePlugin {
     @Override
     public double getTargetCoreVersion() {
         return TARGET_CORE_API_VERSION;
-    }
-
-    @Override
-    public PluginServiceLocator getServiceLocator() {
-        return serviceLocator;
     }
 
     public void setNetherPrefix(String netherPrefix) {
