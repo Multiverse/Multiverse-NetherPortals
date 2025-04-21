@@ -79,20 +79,14 @@ public class ShowLinkCommand extends NetherPortalCommand {
     }
 
     private void showWorldLink(CommandSender sender, String fromWorldString, String toWorldString) {
-        MultiverseWorld fromWorld = this.worldManager.getMVWorld(fromWorldString);
-        MultiverseWorld toWorld = this.worldManager.getMVWorld(toWorldString);
+        sender.sendMessage(ParseWorldString(fromWorldString) + ChatColor.WHITE + " -> " + ParseWorldString(toWorldString));
+    }
 
-        if (fromWorld == null) {
-            fromWorldString = ChatColor.RED + "!!ERROR!!";
-        } else {
-            fromWorldString = fromWorld.getColoredWorldString();
-        }
-        if (toWorld == null) {
-            toWorldString = ChatColor.RED + "!!ERROR!!";
-        } else {
-            toWorldString = toWorld.getColoredWorldString();
-        }
-        sender.sendMessage(fromWorldString + ChatColor.WHITE + " -> " + toWorldString);
+    private String ParseWorldString(String worldName) {
+        MultiverseWorld world = this.worldManager.getMVWorld(worldName);
+        return (world == null)
+                ? ChatColor.GRAY + worldName + ChatColor.RED + " !!ERROR!!"
+                : world.getColoredWorldString();
     }
 
     private void showPage(int page, CommandSender sender, Map<String, String> links, int totalpages, String headerLabel) {
