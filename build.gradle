@@ -1,31 +1,15 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
     id 'checkstyle'
-    id 'com.gradleup.shadow' version '8.3.5'
+    id 'org.mvplugins.multiverse-plugin' version '1.2.0'
 }
 
-version = System.getenv('GITHUB_VERSION') ?: 'local'
 group = 'org.mvplugins.multiverse.netherportals'
 description = 'Multiverse-NetherPortals'
 
-compileJava {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 repositories {
-    mavenLocal()
-    mavenCentral()
-
     maven {
-        name = 'spigotmc'
-        url = uri('https://hub.spigotmc.org/nexus/content/repositories/snapshots/')
-    }
-
-    maven {
-        name = 'onarandombox'
-        url = uri('https://repo.onarandombox.com/content/groups/public')
+        name = 'enginehub'
+        url = uri('https://maven.enginehub.org/repo/')
     }
 
     maven {
@@ -35,50 +19,51 @@ repositories {
     }
 }
 
+configure(apiDependencies) {
+    serverApiVersion = '1.18.2-R0.1-SNAPSHOT'
+    mockBukkitServerApiVersion = '1.21'
+    mockBukkitVersion = '4.31.1'
+}
+
 dependencies {
-    // Spigot
-    implementation'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
-
-    // Multiverse-Core
-    implementation 'org.mvplugins.multiverse.core:multiverse-core:5.0.0-SNAPSHOT'
-
-    // Multiverse-Portals
-    implementation 'org.mvplugins.multiverse.portals:multiverse-portals:5.0.0-SNAPSHOT'
+    // Multiverse
+    externalPlugin 'org.mvplugins.multiverse.core:multiverse-core:5.0.0-SNAPSHOT'
+    externalPlugin 'org.mvplugins.multiverse.portals:multiverse-portals:5.0.0-SNAPSHOT'
 
     // Utils
-    api('com.dumptruckman.minecraft:Logging:1.1.1') {
-        exclude group: 'org.bukkit', module: 'bukkit'
+    shadowed('com.dumptruckman.minecraft:Logging:1.1.1') {
+        exclude group: 'junit', module: 'junit'
     }
+
+    // hk2 for annotation processing only
+    compileOnly('org.glassfish.hk2:hk2-api:3.0.3') {
+        exclude group: '*', module: '*'
+    }
+    annotationProcessor 'org.glassfish.hk2:hk2-metadata-generator:3.0.3'
+    testAnnotationProcessor 'org.glassfish.hk2:hk2-metadata-generator:3.0.3'
 }
 
-
-java {
-    withSourcesJar()
-    withJavadocJar()
+checkstyle {
+    toolVersion = '6.1.1'
+    configFile file('config/mv_checks.xml')
+    ignoreFailures = true
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
+shadowJar {
+    relocate 'com.dumptruckman.minecraft.util.Logging', 'org.mvplugins.multiverse.netherportals.util.MVPLogging'
+    relocate 'com.dumptruckman.minecraft.util.DebugLog', 'org.mvplugins.multiverse.netherportals.util.DebugFileLogger'
 
-tasks.withType(Javadoc).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-
-configurations {
-    [apiElements, runtimeElements].each {
-        it.outgoing.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(jar) }
-        it.outgoing.artifact(shadowJar)
+    dependencies {
+        exclude(dependency {
+            it.moduleGroup == 'org.ow2.asm'
+        })
+        exclude(dependency {
+            it.moduleGroup == 'org.jetbrains'
+        })
     }
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-        }
-    }
     repositories {
         maven {
             name = "GitHubPackages"
@@ -88,59 +73,12 @@ publishing {
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
+
+        maven {
+            // todo: remove before mv5 release
+            name = "multiverseBeta"
+            url = "https://repo.c0ding.party/multiverse-beta"
+            credentials(PasswordCredentials)
+        }
     }
 }
-
-
-processResources {
-    def props = [version: "${project.version}"]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
-    }
-
-    // This task should never be skipped. The tests depend on this having been run but we want the new version number
-    // that is created after tests are run and before we run again to publish.
-    outputs.upToDateWhen { false }
-}
-
-
-checkstyle {
-    toolVersion = '6.1.1'
-    configFile file('config/mv_checks.xml')
-    ignoreFailures = true
-}
-
-
-javadoc {
-    source = sourceSets.main.allJava
-    classpath = configurations.compileClasspath
-}
-
-
-project.configurations.api.canBeResolved = true
-
-shadowJar {
-    relocate 'com.dumptruckman.minecraft.util.Logging', 'org.mvplugins.multiverse.netherportals.util.MVPLogging'
-    relocate 'com.dumptruckman.minecraft.util.DebugLog', 'org.mvplugins.multiverse.netherportals.util.DebugFileLogger'
-
-    configurations = [project.configurations.api]
-
-    archiveClassifier.set('')
-}
-
-build.dependsOn shadowJar
-jar.enabled = false
-
-
-tasks.register('runHabitatGenerator', JavaExec) {
-    classpath = configurations["compileClasspath"]
-    mainClass.set('org.mvplugins.multiverse.external.jvnet.hk2.generator.HabitatGenerator')
-
-    args = [
-            '--file', "build/libs/multiverse-netherportals-$version" + ".jar",
-            '--locator', 'Multiverse-NetherPortals',
-    ]
-}
-tasks.named("build") { finalizedBy("runHabitatGenerator") }
