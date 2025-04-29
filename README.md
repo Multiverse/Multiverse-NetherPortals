@@ -3,10 +3,10 @@
 </p>
 
 [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/multiverse-NetherPortals)
-[![hangar](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/hangar_vector.svg)](https://hangar.papermc.io/Multiverse/Multiverse-NetherPortals)
-[![bukkit](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/bukkit_vector.svg)](https://dev.bukkit.org/projects/multiverse-NetherPortals)
+[![Hangar](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/hangar_vector.svg)](https://hangar.papermc.io/Multiverse/Multiverse-NetherPortals)
+[![Bukkit](https://raw.githubusercontent.com/intergrav/devins-badges/refs/heads/v3/assets/cozy/available/bukkit_vector.svg)](https://dev.bukkit.org/projects/multiverse-NetherPortals)
 
-![GitHub release (with filter)](https://img.shields.io/github/v/release/multiverse/multiverse-netherportals)
+[![GitHub release (with filter)](https://img.shields.io/github/v/release/multiverse/multiverse-netherportals)](https://github.com/Multiverse/Multiverse-NetherPortals/releases/latest)
 [![Discord](https://img.shields.io/discord/325459248047980545?label=discord&logo=discord)](https://discord.gg/NZtfKky)
 [![Support us on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Ddumptruckman%26type%3Dpatrons&style=flat)](https://patreon.com/dumptruckman)
 
@@ -21,7 +21,7 @@ Now it's time to create your very own server with Multiverse Nether Portals, do 
 
 With just [Multiverse Core](https://github.com/multiverse/multiverse) and any of the below plugins, you can access all of these other related features in the Multiverse ecosystem.
 
-* [Multiverse-Inventories](https://github.com/Multiverse/Multiverse-Inventories) -> Have separate nether and end worlds for each of your overworlds!
+* [Multiverse-Inventories](https://github.com/Multiverse/Multiverse-Inventories) -> Have separated players stats and inventories per world or per group of worlds.
 * [Multiverse-Portals](https://github.com/Multiverse/Multiverse-Portals) -> Make custom portals to go to any destination!
 * [Multiverse-SignPortals](https://github.com/Multiverse/Multiverse-SignPortals) -> Signs as teleporters!
 
