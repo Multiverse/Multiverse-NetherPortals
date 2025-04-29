@@ -1,7 +1,6 @@
-package com.onarandombox.MultiverseNetherPortals.utils;
+package org.mvplugins.multiverse.netherportals.utils;
 
 import com.dumptruckman.minecraft.util.Logging;
-import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -9,7 +8,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
+import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
+@Service
 public class EndPlatformCreator {
 
     /**
@@ -18,7 +20,7 @@ public class EndPlatformCreator {
      * @param world The world to create the platform in
      * @param dropEndBlocks If the platform should drop the broken blocks or delete them
      */
-    public static void createEndPlatform(World world, boolean dropEndBlocks) {
+    public void createEndPlatform(World world, boolean dropEndBlocks) {
         Block spawnLocation = new Location(world, 100, 49, 0).getBlock();
         Logging.fine("Creating an end platform at " + spawnLocation);
 
@@ -50,7 +52,7 @@ public class EndPlatformCreator {
     /**
      * The default vanilla location for the end platform
      */
-    public static Location getVanillaLocation(Entity entity, World world) {
+    public Location getVanillaLocation(Entity entity, World world) {
         return entity instanceof Player
                 ? new Location(world, 100, 49, 0, 90, 0)
                 : new Location(world, 100.5, 50, 0.5, 90, 0);
@@ -59,7 +61,7 @@ public class EndPlatformCreator {
     /**
      * The default vanilla location for the end platform
      */
-    public static Location getVanillaLocation(Entity entity, MultiverseWorld world) {
-        return getVanillaLocation(entity, world.getCBWorld());
+    public Location getVanillaLocation(Entity entity, LoadedMultiverseWorld world) {
+        return getVanillaLocation(entity, world.getBukkitWorld().getOrNull());
     }
 }

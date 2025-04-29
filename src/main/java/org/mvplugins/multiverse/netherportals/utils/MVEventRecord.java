@@ -1,20 +1,24 @@
-package com.onarandombox.MultiverseNetherPortals.utils;
+package org.mvplugins.multiverse.netherportals.utils;
 
-import com.onarandombox.MultiverseNetherPortals.MultiverseNetherPortals;
-import com.onarandombox.MultiverseNetherPortals.runnables.PlayerTouchingPortalTask;
+import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.runnables.PlayerTouchingPortalTask;
 import org.bukkit.PortalType;
 import org.bukkit.scheduler.BukkitTask;
+import org.mvplugins.multiverse.external.jakarta.inject.Inject;
+import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Service
 public class MVEventRecord {
     private final MultiverseNetherPortals plugin;
     private final Map<UUID, BukkitTask> ender;
     private final Map<UUID, BukkitTask> nether;
 
-    public MVEventRecord(MultiverseNetherPortals plugin) {
+    @Inject
+    MVEventRecord(MultiverseNetherPortals plugin) {
         this.plugin = plugin;
         this.ender = new HashMap<>();
         this.nether = new HashMap<>();
