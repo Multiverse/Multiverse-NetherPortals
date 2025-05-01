@@ -28,7 +28,7 @@ import org.mvplugins.multiverse.core.world.entrycheck.WorldEntryCheckerProvider;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
-import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
+import org.jvnet.hk2.annotations.Service;
 
 import java.util.Date;
 import java.util.HashMap;

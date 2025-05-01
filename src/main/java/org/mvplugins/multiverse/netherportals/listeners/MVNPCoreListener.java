@@ -7,7 +7,7 @@ import org.mvplugins.multiverse.core.event.MVConfigReloadEvent;
 import org.mvplugins.multiverse.core.event.MVDebugModeEvent;
 import org.mvplugins.multiverse.core.event.MVDumpsDebugInfoEvent;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
-import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
+import org.jvnet.hk2.annotations.Service;
 
 import java.io.File;
 
