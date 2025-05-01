@@ -5,7 +5,7 @@ import org.mvplugins.multiverse.netherportals.runnables.PlayerTouchingPortalTask
 import org.bukkit.PortalType;
 import org.bukkit.scheduler.BukkitTask;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
-import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
+import org.jvnet.hk2.annotations.Service;
 
 import java.util.HashMap;
 import java.util.Map;

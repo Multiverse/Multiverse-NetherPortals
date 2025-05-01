@@ -6,7 +6,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
-import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
+import org.jvnet.hk2.annotations.Service;
 
 @Service
 public class MVNPPluginListener implements MVNPListener {

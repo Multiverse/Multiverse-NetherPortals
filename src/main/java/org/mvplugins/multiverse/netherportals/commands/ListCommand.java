@@ -21,7 +21,7 @@ import org.mvplugins.multiverse.external.acf.commands.annotation.Values;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
-import org.mvplugins.multiverse.external.jvnet.hk2.annotations.Service;
+import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 
 import java.util.List;
