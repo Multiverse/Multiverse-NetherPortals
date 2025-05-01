@@ -1,6 +1,7 @@
 package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
 import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
@@ -49,8 +50,14 @@ public class MVNPPlayerListener implements MVNPListener {
         this.worldManager = worldManager;
         this.endPlatformCreator = endPlatformCreator;
 
-        this.enterNetherAdvancement = this.plugin.getServer().getAdvancement(NamespacedKey.minecraft("story/enter_the_nether"));
-        this.enterEndAdvancement = this.plugin.getServer().getAdvancement(NamespacedKey.minecraft("story/enter_the_end"));
+        this.enterNetherAdvancement = tryGetAdvancement("story/enter_the_nether");
+        this.enterEndAdvancement = tryGetAdvancement("story/enter_the_end");
+    }
+
+    private Advancement tryGetAdvancement(String advancementName) {
+        return Try.of(() -> this.plugin.getServer().getAdvancement(NamespacedKey.minecraft(advancementName)))
+                .recover(e -> null)
+                .getOrNull();
     }
 
     @EventHandler
@@ -133,9 +140,9 @@ public class MVNPPlayerListener implements MVNPListener {
             }
 
             // Advancements need to be triggered manually
-            if (type == PortalType.NETHER && event.getTo().getWorld().getEnvironment() == World.Environment.NETHER) {
+            if (type == PortalType.NETHER && event.getTo().getWorld().getEnvironment() == World.Environment.NETHER && enterNetherAdvancement != null) {
                 awardAdvancement(player, enterNetherAdvancement, ENTER_NETHER_CRITERIA);
-            } else if (type == PortalType.ENDER && event.getTo().getWorld().getEnvironment() == World.Environment.THE_END) {
+            } else if (type == PortalType.ENDER && event.getTo().getWorld().getEnvironment() == World.Environment.THE_END && enterEndAdvancement != null) {
                 awardAdvancement(player, enterEndAdvancement, ENTER_END_CRITERIA);
             }
         }
