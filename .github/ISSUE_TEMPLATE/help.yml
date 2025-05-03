@@ -1,0 +1,73 @@
+name: "❓ Help!"
+description: "Encountered a problem with Multiverse-NetherPortals? Not sure how to fix it?"
+labels: "Type: Assistance"
+
+body:
+  - type: "markdown"
+    attributes:
+      value: |-
+        # Multiverse-NetherPortals help guide
+
+        Get latest builds from https://ci.onarandombox.com/view/Multiverse
+
+        If you need help with other submodules of Multiverse, go to their respective git repo:
+
+        - [Multiverse-Core](https://github.com/Multiverse/Multiverse-Core/issues)
+        - [Multiverse-Portals](https://github.com/Multiverse/Multiverse-Portals/issues)
+        - [Multiverse-Inventories](https://github.com/Multiverse/Multiverse-Inventories/issues)
+        - [Multiverse-SignPortals](https://github.com/Multiverse/Multiverse-SignPortals/issues)
+
+        Or come join our [Discord Server](https://discord.gg/NZtfKky) to get help sooner.  
+        If you're happy to wait (or you were sent here from Discord), read on:
+
+        1. **Check the Usage and FAQ pages to see if it answers your queries:**
+            - [Basics (NetherPortals)](https://github.com/Multiverse/Multiverse-Core/wiki/Basics-(NetherPortals))
+            - [FAQ (NetherPortals)](https://github.com/Multiverse/Multiverse-Core/wiki/FAQ-(NetherPortals))
+        2. **Fill out the template.**
+            This will help us understand what problem you've encountered and help us find a solution.
+        3. **When linking files, do not attach them to the post!**
+            Copy and paste any logs into https://gist.github.com or other similar service.
+
+        ## Information
+  - type: "input"
+    attributes:
+      label: "Server Version"
+      description: "Insert the output of the `/version` command."
+      placeholder: "Output of '/version' here."
+    validations:
+      required: true
+  - type: "input"
+    attributes:
+      label: "Full output of `/mv version -p`"
+      description: "Insert the generated paste.gg URL. If the command didn't work, use `/mv version -b` instead!"
+      placeholder: "https://paste.gg/..."
+    validations:
+      required: true
+  - type: "input"
+    attributes:
+      label: "Server Log"
+      description: "Upload the content of `logs/latest.log` to https://gist.github.com or similar service and provide the URL."
+      placeholder: "https://gist.github.com/..."
+    validations:
+      required: true
+  - type: "markdown"
+    attributes:
+      value: "## Help request"
+  - type: "textarea"
+    attributes:
+      label: "Problem"
+      description: "What problem did you encounter? Describe it here."
+      placeholder: "When doing X does Y happen."
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "What I have tried"
+      description: "What have you tried so far?"
+      placeholder: "I tried to ..."
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "Screenshots"
+      description: "Upload screenshots here, if relevant"
