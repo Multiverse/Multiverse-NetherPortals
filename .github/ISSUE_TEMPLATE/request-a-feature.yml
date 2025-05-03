@@ -1,0 +1,47 @@
+name: "💡 Request a Feature"
+description: "Suggest a feature you want to see in Multiverse-NetherPortals!"
+labels: "Type: Idea"
+
+body:
+  - type: "markdown"
+    attributes:
+      value: |-
+        # Multiverse-NetherPortals Feature request guide
+        
+        Get latest builds from https://ci.onarandombox.com/view/Multiverse
+        
+        If you have a feature request for another submodules of Multiverse, go to their respective git repo:
+        
+        - [Multiverse-Core](https://github.com/Multiverse/Multiverse-Core/issues)
+        - [Multiverse-Portals](https://github.com/Multiverse/Multiverse-Portals/issues)
+        - [Multiverse-Inventories](https://github.com/Multiverse/Multiverse-Inventories/issues)
+        - [Multiverse-SignPortals](https://github.com/Multiverse/Multiverse-SignPortals/issues)
+
+        Not sure if your feature fits in Multiverse-NetherPortals? Feel free to ask on our [Discord server](https://discord.gg/NZtfKky).
+        
+        If you have a feature suggestion for Multiverse-NetherPortals, read the following tips:
+        
+        2. **Fill out the template.**  
+            This will help us understand what you're requesting and why you want us to add it.
+        2. **Keep it simple.**  
+            Make sure it's easy to understand what you're requesting. a good way is to keep it to one request per GitHub issue, as we can then easily track feature requests.
+        3. **Check whether it has already been asked or added.**  
+            You can search the [Issue tracker](https://github.com/Multiverse/Multiverse-NetherPortals/issues) to see if your feature has already been requested.
+        4. **Ask yourself: "Does this belong in Multiverse-NetherPortals?"**  
+            There are lots of features that we reject because most servers won't need or use them.  
+            If your feature is very specific or already exists in another plugin, it might not be a good fit for Multiverse-NetherPortals.
+        
+        ## Feature request
+  - type: "textarea"
+    attributes:
+      label: "Feature Description"
+      description: "A concise and informative description of the feature."
+      placeholder: "Multiverse-NetherPortals should ..."
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "How the feature is useful"
+      description: "Describe why this feature is useful for other players, server owners and/or other developers."
+    validations:
+      required: true

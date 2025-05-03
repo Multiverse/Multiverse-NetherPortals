@@ -1,0 +1,88 @@
+name: "🐛 Report a Bug"
+description: "Report a Multiverse-NetherPortals bug. Only use this if you're 100% sure it's something wrong with Multiverse-NetherPortals - otherwise, try 'Help!'."
+labels: "Bug: Unconfirmed"
+
+body:
+  - type: "markdown"
+    attributes:
+      value: |-
+        # Multiverse-NetherPortals help guide
+        
+        Get latest builds from https://ci.onarandombox.com/view/Multiverse
+        
+        If you are having issues with other submodules of Multiverse, go to their respective git repo:
+        
+        - [Multiverse-Core](https://github.com/Multiverse/Multiverse-Core/issues)
+        - [Multiverse-Portals](https://github.com/Multiverse/Multiverse-Portals/issues)
+        - [Multiverse-Inventories](https://github.com/Multiverse/Multiverse-Inventories/issues)
+        - [Multiverse-SignPortals](https://github.com/Multiverse/Multiverse-SignPortals/issues)
+        
+        If you're reporting a bug, please follow the following steps:
+        
+        2. **Fill out the template in full.**
+            Run the commands in the console. Don't just put "latest" as a version, or we will ignore it.
+        3. **When linking files, do not attach them to the post!**
+            Copy and paste any logs into https://gist.github.com or other similar service.
+        
+        ## Information
+  - type: "input"
+    attributes:
+      label: "Server Version"
+      description: "Insert the output of the `/version` command."
+      placeholder: "Output of '/version' here."
+    validations:
+      required: true
+  - type: "input"
+    attributes:
+      label: "Full output of `/mv version -p`"
+      description: "Insert the generated paste.gg URL. If the command didn't work, use `/mv version -b` instead!"
+      placeholder: "https://paste.gg/..."
+    validations:
+      required: true
+  - type: "input"
+    attributes:
+      label: "Server Log"
+      description: "Upload the content of `logs/latest.log` to https://gist.github.com or similar service and provide the URL."
+      placeholder: "https://gist.github.com/..."
+    validations:
+      required: true
+  - type: "markdown"
+    attributes:
+      value: "## Details"
+  - type: "dropdown"
+    attributes:
+      label: "I was able to reproduce my issue on a freshly setup and up-to-date server"
+      description: "Please answer this truthfully."
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "Description"
+      description: "A concise and informative description of the issue."
+      placeholder: "When doing X does Y happen because of Z."
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "Steps to reproduce"
+      description: "Provide precise steps to reproduce the issue you're having."
+      placeholder: |-
+        1. Do this.
+        2. 
+        3. Bug!
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "Expected behaviour"
+      description: "What behaviour did you expect?"
+      placeholder: "I expected Multiverse-NetherPortals to..."
+    validations:
+      required: true
+  - type: "textarea"
+    attributes:
+      label: "Screenshots"
+      description: "Upload screenshots here, if relevant."
