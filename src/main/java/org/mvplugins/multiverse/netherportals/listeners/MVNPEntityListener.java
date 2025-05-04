@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class MVNPEntityListener implements MVNPListener {
+final class MVNPEntityListener implements MVNPListener {
 
     private static final int COOLDOWN = 250;
 

@@ -12,7 +12,7 @@ import org.jvnet.hk2.annotations.Service;
 import java.io.File;
 
 @Service
-public class MVNPCoreListener implements MVNPListener {
+final class MVNPCoreListener implements MVNPListener {
 
     private final MultiverseNetherPortals plugin;
 

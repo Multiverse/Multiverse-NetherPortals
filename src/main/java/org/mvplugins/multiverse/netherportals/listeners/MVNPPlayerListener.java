@@ -23,7 +23,7 @@ import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
 
 @Service
-public class MVNPPlayerListener implements MVNPListener {
+final class MVNPPlayerListener implements MVNPListener {
 
     private final MultiverseNetherPortals plugin;
     private final MVNameChecker nameChecker;
