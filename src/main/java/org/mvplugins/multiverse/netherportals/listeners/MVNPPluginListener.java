@@ -9,7 +9,7 @@ import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.jvnet.hk2.annotations.Service;
 
 @Service
-public class MVNPPluginListener implements MVNPListener {
+final class MVNPPluginListener implements MVNPListener {
 
     private final MultiverseNetherPortals plugin;
 
