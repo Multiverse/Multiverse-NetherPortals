@@ -1,8 +1,8 @@
 package org.mvplugins.multiverse.netherportals.listeners;
 
-import org.bukkit.event.Listener;
 import org.jvnet.hk2.annotations.Contract;
+import org.mvplugins.multiverse.core.dynamiclistener.DynamicListener;
 
 @Contract
-public interface MVNPListener extends Listener {
+public interface MVNPListener extends DynamicListener {
 }

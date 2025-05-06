@@ -1,8 +1,8 @@
 package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
-import org.bukkit.event.EventHandler;
 import org.mvplugins.multiverse.core.event.MVConfigReloadEvent;
 import org.mvplugins.multiverse.core.event.MVDebugModeEvent;
 import org.mvplugins.multiverse.core.event.MVDumpsDebugInfoEvent;
@@ -26,7 +26,7 @@ final class MVNPCoreListener implements MVNPListener {
      *
      * @param event The Config Reload event.
      */
-    @EventHandler
+    @EventMethod
     public void configReloadEvent(MVConfigReloadEvent event) {
         this.plugin.loadConfig();
         event.addConfig("Multiverse-NetherPortals - config.yml");
@@ -37,7 +37,7 @@ final class MVNPCoreListener implements MVNPListener {
      *
      * @param event The Version event.
      */
-    @EventHandler
+    @EventMethod
     public void versionEvent(MVDumpsDebugInfoEvent event) {
         event.appendDebugInfo(this.plugin.getDebugInfo());
         File configFile = new File(this.plugin.getDataFolder(), "config.yml");
@@ -49,7 +49,7 @@ final class MVNPCoreListener implements MVNPListener {
      *
      * @param event The Debug Mode event.
      */
-    @EventHandler
+    @EventMethod
     public void debugModeChange(MVDebugModeEvent event) {
         Logging.setDebugLevel(event.getLevel());
     }

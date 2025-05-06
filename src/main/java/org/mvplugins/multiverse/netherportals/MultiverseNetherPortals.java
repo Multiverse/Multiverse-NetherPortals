@@ -23,7 +23,6 @@ import org.bukkit.plugin.Plugin;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
-import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.portals.MultiversePortals;
 import org.mvplugins.multiverse.portals.utils.PortalManager;
 
@@ -73,7 +72,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
 
         loadConfig();
         this.registerCommands(NetherPortalsCommand.class);
-        this.registerEvents();
+        this.registerDynamicListeners(MVNPListener.class);
 
         Logging.log(true, Level.INFO, " Enabled - By %s", StringFormatter.joinAnd(this.getDescription().getAuthors()));
     }
@@ -143,16 +142,6 @@ public class MultiverseNetherPortals extends MultiverseModule {
         catch (InvalidConfigurationException e) {
             Logging.severe(NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
         }
-    }
-
-    private void registerEvents() {
-        var pluginManager = getServer().getPluginManager();
-
-        Try.run(() -> serviceLocator.getAllServices(MVNPListener.class).forEach(
-                        listener -> pluginManager.registerEvents(listener, this)))
-                .onFailure(e -> {
-                    throw new RuntimeException("Failed to register listeners. Terminating...", e);
-                });
     }
 
     @Override
