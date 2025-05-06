@@ -5,10 +5,9 @@ import io.papermc.paper.event.entity.EntityPortalReadyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.PortalType;
 import org.bukkit.World;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.jvnet.hk2.annotations.Service;
-import org.mvplugins.multiverse.core.utils.ReflectHelper;
+import org.mvplugins.multiverse.core.dynamiclistener.EventRunnable;
+import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventClass;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
@@ -24,17 +23,12 @@ final class MVNPEntityPortalReadyListener implements MVNPListener {
     MVNPEntityPortalReadyListener(@NotNull MultiverseNetherPortals plugin, @NotNull MVNameChecker nameChecker) {
         this.plugin = plugin;
         this.nameChecker = nameChecker;
-
-        if (ReflectHelper.hasClass("io.papermc.paper.event.entity.EntityPortalReadyEvent")) {
-            Bukkit.getPluginManager().registerEvents(entityPortalReadyEvent(), plugin);
-            Logging.finer("Registered EntityPortalReadyEvent listener.");
-        }
     }
 
-    private Listener entityPortalReadyEvent() {
-        return new Listener() {
-            @EventHandler
-            public void onEntityPortalReady(EntityPortalReadyEvent event) {
+    @EventClass("io.papermc.paper.event.entity.EntityPortalReadyEvent")
+    private EventRunnable entityPortalReadyEvent() {
+        return new EventRunnable<EntityPortalReadyEvent>() {
+            public void onEvent(EntityPortalReadyEvent event) {
                 String fromWorld = event.getEntity().getWorld().getName();
                 String linkedWorld = getLinkedWorld(fromWorld, event.getPortalType());
                 if (linkedWorld == null) {

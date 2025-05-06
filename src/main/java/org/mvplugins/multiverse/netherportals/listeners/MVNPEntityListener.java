@@ -1,6 +1,8 @@
 package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.mvplugins.multiverse.core.dynamiclistener.annotations.DefaultEventPriority;
+import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
 import org.mvplugins.multiverse.netherportals.utils.MVEventRecord;
@@ -14,7 +16,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
@@ -87,7 +88,7 @@ final class MVNPEntityListener implements MVNPListener {
      * @param type  The type of portal the Player is trying to enter.
      * @return      {@code true} iff the player was bounced back.
      */
-    protected boolean shootPlayer(Player p, Block block, PortalType type) {
+    private boolean shootPlayer(Player p, Block block, PortalType type) {
         if (!plugin.isUsingBounceBack()) {
             Logging.finest("Bounceback is disabled. The player is free to walk into the portal!");
             return false;
@@ -186,7 +187,8 @@ final class MVNPEntityListener implements MVNPListener {
         return newTo;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventMethod
+    @DefaultEventPriority(EventPriority.MONITOR)
     public void onEntityPortalEnter(EntityPortalEnterEvent event) {
         if (!(event.getEntity() instanceof Player)) {
             return;
@@ -294,7 +296,7 @@ final class MVNPEntityListener implements MVNPListener {
                 });
     }
 
-    @EventHandler
+    @EventMethod
     public void onEntityPortal(EntityPortalEvent event) {
         if (event.isCancelled()) {
             Logging.finest("EntityPortalEvent was cancelled! NOT teleporting!");
@@ -377,7 +379,7 @@ final class MVNPEntityListener implements MVNPListener {
         }
     }
 
-    @EventHandler
+    @EventMethod
     public void onEntityPortalExit(EntityPortalExitEvent event) {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();

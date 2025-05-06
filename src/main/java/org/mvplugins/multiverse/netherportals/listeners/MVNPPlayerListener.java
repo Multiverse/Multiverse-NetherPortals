@@ -1,6 +1,7 @@
 package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
@@ -60,7 +61,7 @@ final class MVNPPlayerListener implements MVNPListener {
                 .getOrNull();
     }
 
-    @EventHandler
+    @EventMethod
     public void onPlayerPortal(PlayerPortalEvent event) {
         if (event.isCancelled()) {
             Logging.finest("PlayerPortalEvent was cancelled! NOT teleporting!");
