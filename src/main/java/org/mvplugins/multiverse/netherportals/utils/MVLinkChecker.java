@@ -27,8 +27,6 @@ public class MVLinkChecker {
 
         if (tpTo == null) {
             Logging.fine("Can't find world " + worldString);
-        } else if (e instanceof Player && !this.entryCheckerProvider.forSender(e).canEnterWorld(tpFrom, tpTo).isSuccess()) {
-            Logging.warning("Player " + e.getName() + " can't enter world " + worldString);
         } else if (!this.worldManager.isLoadedWorld(fromLocation.getWorld())) {
             Logging.warning("World " + fromLocation.getWorld().getName() + " is not a Multiverse world");
         } else {
