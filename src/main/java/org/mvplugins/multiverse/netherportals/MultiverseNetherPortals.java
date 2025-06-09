@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.jetbrains.annotations.ApiStatus;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.module.MultiverseModule;
@@ -23,7 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
-import org.mvplugins.multiverse.portals.MultiversePortals;
+import org.mvplugins.multiverse.portals.MultiversePortalsApi;
 import org.mvplugins.multiverse.portals.utils.PortalManager;
 
 public class MultiverseNetherPortals extends MultiverseModule {
@@ -286,9 +287,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
         if (multiversePortals != null) {
             // Catch errors which could occur if classes aren't present or are missing methods.
             try {
-                MultiversePortals portals = (MultiversePortals) multiversePortals;
-                PortalManager portalManager = portals.getServiceLocator().getActiveService(PortalManager.class);
-                if (portalManager != null && portalManager.isPortal(l)) {
+                PortalManager portalManager = MultiversePortalsApi.get().getPortalManager();
+                if (portalManager.isPortal(l)) {
                     return false;
                 }
             } catch (Throwable t) {
@@ -298,6 +298,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
         return true;
     }
 
+    @ApiStatus.Internal
     public void setPortals(Plugin multiversePortals) {
         this.multiversePortals = multiversePortals;
     }
