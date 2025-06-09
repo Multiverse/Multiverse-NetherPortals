@@ -38,7 +38,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private static final String DEFAULT_END_SUFFIX = "_the_end";
 
     protected MultiverseCoreApi core;
-    protected boolean multiversePortalsEnabled;
+    protected Plugin multiversePortals;
     protected FileConfiguration MVNPConfiguration;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
@@ -59,7 +59,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
         super.onEnable();
         Logging.init(this);
         this.core = MultiverseCoreApi.get();
-        this.multiversePortalsEnabled = getServer().getPluginManager().isPluginEnabled("Multiverse-Portals");
+        this.multiversePortals = getServer().getPluginManager().getPlugin("Multiverse-Portals");
 
         // Test if the Core was found, if not we'll disable this plugin.
         if (this.core == null) {
@@ -284,7 +284,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
     }
 
     public boolean isHandledByNetherPortals(Location l) {
-        if (multiversePortalsEnabled) {
+        if (multiversePortals != null) {
             // Catch errors which could occur if classes aren't present or are missing methods.
             try {
                 PortalManager portalManager = MultiversePortalsApi.get().getPortalManager();
@@ -299,16 +299,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
     }
 
     @ApiStatus.Internal
-    public void setPortalsEnabled(boolean enabled) {
-        this.multiversePortalsEnabled = enabled;
-    }
-
-    /**
-     * @deprecated Use {@link MultiversePortalsApi} instead. This method should be internal use only anyways.
-     */
-    @Deprecated
     public void setPortals(Plugin multiversePortals) {
-        // do nothing
+        this.multiversePortals = multiversePortals;
     }
 
     public String getDebugInfo() {
