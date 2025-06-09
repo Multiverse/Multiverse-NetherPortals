@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.jetbrains.annotations.ApiStatus;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.module.MultiverseModule;
@@ -23,7 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
-import org.mvplugins.multiverse.portals.MultiversePortals;
+import org.mvplugins.multiverse.portals.MultiversePortalsApi;
 import org.mvplugins.multiverse.portals.utils.PortalManager;
 
 public class MultiverseNetherPortals extends MultiverseModule {
@@ -37,7 +38,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private static final String DEFAULT_END_SUFFIX = "_the_end";
 
     protected MultiverseCoreApi core;
-    protected Plugin multiversePortals;
+    protected boolean multiversePortalsEnabled;
     protected FileConfiguration MVNPConfiguration;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
@@ -58,7 +59,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
         super.onEnable();
         Logging.init(this);
         this.core = MultiverseCoreApi.get();
-        this.multiversePortals = getServer().getPluginManager().getPlugin("Multiverse-Portals");
+        this.multiversePortalsEnabled = getServer().getPluginManager().isPluginEnabled("Multiverse-Portals");
 
         // Test if the Core was found, if not we'll disable this plugin.
         if (this.core == null) {
@@ -283,12 +284,11 @@ public class MultiverseNetherPortals extends MultiverseModule {
     }
 
     public boolean isHandledByNetherPortals(Location l) {
-        if (multiversePortals != null) {
+        if (multiversePortalsEnabled) {
             // Catch errors which could occur if classes aren't present or are missing methods.
             try {
-                MultiversePortals portals = (MultiversePortals) multiversePortals;
-                PortalManager portalManager = portals.getServiceLocator().getActiveService(PortalManager.class);
-                if (portalManager != null && portalManager.isPortal(l)) {
+                PortalManager portalManager = MultiversePortalsApi.get().getPortalManager();
+                if (portalManager.isPortal(l)) {
                     return false;
                 }
             } catch (Throwable t) {
@@ -298,8 +298,17 @@ public class MultiverseNetherPortals extends MultiverseModule {
         return true;
     }
 
+    @ApiStatus.Internal
+    public void setPortalsEnabled(boolean enabled) {
+        this.multiversePortalsEnabled = enabled;
+    }
+
+    /**
+     * @deprecated Use {@link MultiversePortalsApi} instead. This method should be internal use only anyways.
+     */
+    @Deprecated
     public void setPortals(Plugin multiversePortals) {
-        this.multiversePortals = multiversePortals;
+        // do nothing
     }
 
     public String getDebugInfo() {
