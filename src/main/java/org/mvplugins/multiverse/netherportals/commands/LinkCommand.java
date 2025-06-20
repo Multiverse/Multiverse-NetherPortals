@@ -59,8 +59,8 @@ class LinkCommand extends NetherPortalsCommand {
             throw new InvalidCommandArgument("There was an error creating the link! See console for more details.");
         }
 
-        String coloredFrom = fromWorld.getAlias();
-        String coloredTo = toWorld.getAlias();
+        String coloredFrom = fromWorld.getAliasOrName();
+        String coloredTo = toWorld.getAliasOrName();
 
         issuer.sendMessage((fromWorld.getName().equals(toWorld.getName()))
                 ? String.format("%sNOTE: %sYou have %ssuccessfully disabled %s%s Portals in %s.",
