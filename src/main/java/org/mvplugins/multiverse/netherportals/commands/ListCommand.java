@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
-import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.display.ContentDisplay;
 import org.mvplugins.multiverse.core.display.handlers.PagedSendHandler;
 import org.mvplugins.multiverse.core.display.parsers.ListContentProvider;
@@ -122,7 +121,7 @@ class ListCommand extends NetherPortalsCommand {
 
     private String ParseWorldString(@NotNull String worldName) {
         return this.worldManager.getLoadedWorld(worldName)
-                .map(MultiverseWorld::getAlias)
+                .map(MultiverseWorld::getAliasOrName)
                 .getOrElse(ChatColor.GRAY + worldName + ChatColor.RED + " !!ERROR!!");
     }
 
