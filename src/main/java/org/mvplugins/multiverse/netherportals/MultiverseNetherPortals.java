@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dumptruckman.minecraft.util.Logging;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.module.MultiverseModule;
@@ -37,9 +39,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private static final String DEFAULT_END_PREFIX = "";
     private static final String DEFAULT_END_SUFFIX = "_the_end";
 
-    protected MultiverseCoreApi core;
-    protected Plugin multiversePortals;
-    protected FileConfiguration MVNPConfiguration;
+    private Plugin multiversePortals;
+    private FileConfiguration MVNPConfiguration;
     private Map<String, String> linkMap;
     private Map<String, String> endLinkMap;
 
@@ -51,22 +52,14 @@ public class MultiverseNetherPortals extends MultiverseModule {
     @Override
     public void onLoad() {
         super.onLoad();
+        Logging.init(this);
         getDataFolder().mkdirs();
     }
 
     @Override
     public void onEnable() {
         super.onEnable();
-        Logging.init(this);
-        this.core = MultiverseCoreApi.get();
         this.multiversePortals = getServer().getPluginManager().getPlugin("Multiverse-Portals");
-
-        // Test if the Core was found, if not we'll disable this plugin.
-        if (this.core == null) {
-            Logging.info("Multiverse-Core not found, will keep looking.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
 
         initializeDependencyInjection(new MultiverseNetherPortalsPluginBinder(this));
         Logging.setDebugLevel(coreConfig.get().getGlobalDebug());
@@ -75,7 +68,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
 
-        Logging.log(true, Level.INFO, " Enabled - By %s", StringFormatter.joinAnd(this.getDescription().getAuthors()));
+        Logging.config("Version %s (API v%s) Enabled - By %s",
+                this.getDescription().getVersion(), getVersionAsNumber(), StringFormatter.joinAnd(this.getDescription().getAuthors()));
     }
 
     public void loadConfig() {
@@ -149,11 +143,17 @@ public class MultiverseNetherPortals extends MultiverseModule {
     public void onDisable() {
         shutdownDependencyInjection();
         Logging.info("- Disabled");
+        Logging.shutdown();
     }
 
     @Override
     public double getTargetCoreVersion() {
         return TARGET_CORE_API_VERSION;
+    }
+
+    @Override
+    public @NotNull Logger getLogger() {
+        return Logging.getLogger();
     }
 
     public void setNetherPrefix(String netherPrefix) {
