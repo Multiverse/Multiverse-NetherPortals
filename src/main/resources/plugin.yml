@@ -1,6 +1,8 @@
 name: Multiverse-NetherPortals
 main: org.mvplugins.multiverse.netherportals.MultiverseNetherPortals
 authors: ['Rigby', 'fernferret', 'benwoo1110']
+website: 'https://modrinth.com/plugin/multiverse-netherportals'
+description: 'Make nether and end portals work just like vanilla with minimal setup!'
 version: ${version}
 api-version: 1.13
 depend: ['Multiverse-Core']
