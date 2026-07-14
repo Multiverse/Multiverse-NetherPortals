@@ -17,7 +17,7 @@ class WorldLinkTypeTest {
     }
 
     @Test
-    fun `Link types provide lowercase config keys`() {
+    fun `Link types provide lowercase keys`() {
         assertEquals("nether", WorldLinkType.NETHER.configKey)
         assertEquals("end", WorldLinkType.END.configKey)
     }

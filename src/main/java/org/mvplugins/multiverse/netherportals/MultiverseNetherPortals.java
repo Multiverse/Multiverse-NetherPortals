@@ -60,6 +60,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        this.setUpLocales();
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
 

@@ -1,12 +1,12 @@
 package org.mvplugins.multiverse.netherportals.commands;
 
-import org.bukkit.ChatColor;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
 import org.mvplugins.multiverse.core.config.CoreConfig;
+import org.mvplugins.multiverse.core.exceptions.command.MVInvalidCommandArgument;
+import org.mvplugins.multiverse.core.locale.message.Message;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
 import org.mvplugins.multiverse.core.world.WorldManager;
-import org.mvplugins.multiverse.external.acf.commands.InvalidCommandArgument;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandAlias;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandCompletion;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandPermission;
@@ -20,8 +20,12 @@ import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.external.vavr.control.Option;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
+import org.mvplugins.multiverse.netherportals.locale.MVNPi18n;
 
 import java.util.Locale;
+
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.Replace.WORLD;
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.replace;
 
 @Service
 class UnlinkCommand extends NetherPortalsCommand {
@@ -43,17 +47,17 @@ class UnlinkCommand extends NetherPortalsCommand {
     @CommandPermission("multiverse.netherportals.unlink")
     @CommandCompletion("nether|end @mvworlds:scope=both")
     @Syntax("<nether|end> [fromWorld]")
-    @Description("This will remove a world link that's been set. You do not need to do this before setting a new one.")
+    @Description("{@@mv-netherportals.unlink.description}")
     public void onUnlinkCommand(
             @NotNull MVCommandIssuer issuer,
 
             @Values("nether|end")
             @Syntax("<nether|end>")
-            @Description("Portal type to unlink.")
+            @Description("{@@mv-netherportals.unlink.type.description}")
             @NotNull String linkType,
 
             @Syntax("<fromWorld>")
-            @Description("World the portals are at.")
+            @Description("{@@mv-netherportals.unlink.fromworld.description}")
             @NotNull String fromWorldString
     ) {
         Option<MultiverseWorld> fromWorld = resolveFromWorldString(fromWorldString);
@@ -63,8 +67,9 @@ class UnlinkCommand extends NetherPortalsCommand {
         WorldLinkType worldLinkType = WorldLinkType.valueOf(linkType.toUpperCase(Locale.ROOT));
         String toWorldName = this.linksManager.getWorldLink(fromWorldName, worldLinkType).getOrNull();
         if (toWorldName == null) {
-            issuer.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world "
-                    + fromWorldString + ChatColor.WHITE + " was never linked.");
+            issuer.sendMessage(MVNPi18n.UNLINK_NOTLINKED,
+                    WORLD.with(fromWorldString),
+                    replace("{linkType}").with(worldLinkType));
             return;
         }
 
@@ -73,17 +78,20 @@ class UnlinkCommand extends NetherPortalsCommand {
                 .getOrElse(() -> this.linksManager.removeWorldLink(fromWorldName, worldLinkType));
         if (!linkRemoved
                 || this.linksManager.save().isFailure()) {
-            throw new InvalidCommandArgument("There was an issue unlinking the portals! Please check console for errors.");
+            throw MVInvalidCommandArgument.of(Message.of(MVNPi18n.UNLINK_FAILED));
         }
 
         if (fromWorldName.equals(toWorldName)) {
-            issuer.sendMessage(String.format("You have %ssuccessfully enabled %s%s portals for world %s.",
-                    ChatColor.GREEN, ChatColor.WHITE, linkType, fromWorldName));
+            issuer.sendMessage(MVNPi18n.UNLINK_ENABLED,
+                    replace("{linkType}").with(worldLinkType),
+                    WORLD.with(fromWorldString));
             return;
         }
 
-        issuer.sendMessage(String.format("The %s portals in %s%s are now %sunlinked %sfrom %s%s.",
-                linkType, fromWorldString, ChatColor.WHITE, ChatColor.RED, ChatColor.WHITE, toWorldName, ChatColor.WHITE));
+        issuer.sendMessage(MVNPi18n.UNLINK_SUCCESS,
+                replace("{linkType}").with(worldLinkType),
+                replace("{fromWorld}").with(fromWorldString),
+                replace("{toWorld}").with(toWorldName));
     }
 
     private Option<MultiverseWorld> resolveFromWorldString(@NotNull String fromWorldString) {
