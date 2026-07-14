@@ -63,6 +63,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
         this.setUpLocales();
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
+        MultiverseNetherPortalsApi.init(this);
 
         Logging.config("Version %s (API v%s) Enabled - By %s",
                 this.getDescription().getVersion(), getVersionAsNumber(), StringFormatter.joinAnd(this.getDescription().getAuthors()));
@@ -82,6 +83,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
 
     @Override
     public void onDisable() {
+        MultiverseNetherPortalsApi.shutdown();
         if (netherPortalsConfig != null && linksManager != null) {
             linksManager.get().save().flatMap(ignored -> netherPortalsConfig.get().save());
         }
