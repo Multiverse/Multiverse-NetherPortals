@@ -1,10 +1,8 @@
 package org.mvplugins.multiverse.netherportals.commands;
 
 import org.bukkit.ChatColor;
-import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
-import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
 import org.mvplugins.multiverse.core.world.WorldManager;
@@ -20,22 +18,23 @@ import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.external.vavr.control.Option;
-import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 
-import java.util.Objects;
+import java.util.Locale;
 
 @Service
 class UnlinkCommand extends NetherPortalsCommand {
 
-    private final MultiverseNetherPortals plugin;
+    private final LinksManager linksManager;
     private final CoreConfig coreConfig;
     private final WorldManager worldManager;
 
     @Inject
-    UnlinkCommand(@NotNull MultiverseNetherPortals plugin,
+    UnlinkCommand(@NotNull LinksManager linksManager,
                   @NotNull CoreConfig coreConfig,
                   @NotNull WorldManager worldManager) {
-        this.plugin = plugin;
+        this.linksManager = linksManager;
         this.coreConfig = coreConfig;
         this.worldManager = worldManager;
     }
@@ -57,18 +56,23 @@ class UnlinkCommand extends NetherPortalsCommand {
             @Description("World the portals are at.")
             @NotNull String fromWorldString
     ) {
-        String fromWorldName = resolveFromWorldString(fromWorldString)
+        Option<MultiverseWorld> fromWorld = resolveFromWorldString(fromWorldString);
+        String fromWorldName = fromWorld
                 .map(MultiverseWorld::getName)
                 .getOrElse(fromWorldString); // fallback as its possible world was already deleted!
-        PortalType portalType = Objects.equals(linkType, "nether") ? PortalType.NETHER : PortalType.ENDER;
-        String toWorldName = this.plugin.getWorldLink(fromWorldName, portalType);
+        WorldLinkType worldLinkType = WorldLinkType.valueOf(linkType.toUpperCase(Locale.ROOT));
+        String toWorldName = this.linksManager.getWorldLink(fromWorldName, worldLinkType).getOrNull();
         if (toWorldName == null) {
             issuer.sendMessage(ChatColor.RED + "Whoops!" + ChatColor.WHITE + " The world "
                     + fromWorldString + ChatColor.WHITE + " was never linked.");
             return;
         }
 
-        if (!this.plugin.removeWorldLink(fromWorldName, toWorldName, portalType)) {
+        boolean linkRemoved = fromWorld
+                .map(world -> this.linksManager.removeWorldLink(world, worldLinkType))
+                .getOrElse(() -> this.linksManager.removeWorldLink(fromWorldName, worldLinkType));
+        if (!linkRemoved
+                || this.linksManager.save().isFailure()) {
             throw new InvalidCommandArgument("There was an issue unlinking the portals! Please check console for errors.");
         }
 
@@ -91,10 +95,10 @@ class UnlinkCommand extends NetherPortalsCommand {
     @Service
     private final static class LegacyAlias extends UnlinkCommand implements LegacyAliasCommand {
         @Inject
-        LegacyAlias(@NotNull MultiverseNetherPortals plugin,
+        LegacyAlias(@NotNull LinksManager linksManager,
                     @NotNull CoreConfig coreConfig,
                     @NotNull WorldManager worldManager) {
-            super(plugin, coreConfig, worldManager);
+            super(linksManager, coreConfig, worldManager);
         }
 
         @Override

@@ -10,18 +10,19 @@ import org.mvplugins.multiverse.core.dynamiclistener.EventRunnable;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventClass;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
-import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.mvplugins.multiverse.netherportals.utils.MVNameChecker;
 
 @Service
 final class MVNPEntityPortalReadyListener implements MVNPListener {
 
-    private final MultiverseNetherPortals plugin;
+    private final LinksManager linksManager;
     private final MVNameChecker nameChecker;
 
     @Inject
-    MVNPEntityPortalReadyListener(@NotNull MultiverseNetherPortals plugin, @NotNull MVNameChecker nameChecker) {
-        this.plugin = plugin;
+    MVNPEntityPortalReadyListener(@NotNull LinksManager linksManager, @NotNull MVNameChecker nameChecker) {
+        this.linksManager = linksManager;
         this.nameChecker = nameChecker;
     }
 
@@ -47,7 +48,9 @@ final class MVNPEntityPortalReadyListener implements MVNPListener {
     }
 
     private String getLinkedWorld(String currentWorld, PortalType type) {
-        String linkedWorld = plugin.getWorldLink(currentWorld, type);
+        String linkedWorld = WorldLinkType.fromPortalType(type)
+                .flatMap(worldLinkType -> linksManager.getWorldLink(currentWorld, worldLinkType))
+                .getOrNull();
         if (linkedWorld != null) {
             Logging.finer("Got manually linked world '%s' for world '%s'", linkedWorld, currentWorld);
             return linkedWorld;
