@@ -34,12 +34,13 @@ final class NetherPortalsConfigNodes {
             .comment("#    while your server is running, use Multiverse-Core's reload command.                           #")
             .comment("#                                                                                                  #")
             .comment("####################################################################################################")
+            .comment("")
+            .comment("Controls the prefix and suffix used to automatically find linked dimension worlds.")
+            .comment("For example, by default the world 'cat_nether' nether portal will be linked to world 'cat'.")
             .build());
 
     final ConfigNode<String> netherPrefix = node(ConfigNode.builder(
                     "portal-auto-link-when.nether.prefix", String.class)
-            .comment("")
-            .comment("Controls the prefix and suffix used to automatically find linked dimension worlds.")
             .defaultValue("")
             .name("nether-prefix")
             .build());
