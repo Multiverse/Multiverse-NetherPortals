@@ -17,7 +17,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
@@ -173,7 +172,7 @@ public final class LinksManager {
      * @since 5.1
      */
     @ApiStatus.AvailableSince("5.1")
-    public @NotNull Map<String, String> getLinksForType(@NotNull WorldLinkType worldLinkType) {
+    public @NotNull Map<String, String> getLinksMapForType(@NotNull WorldLinkType worldLinkType) {
         Map<String, String> links = new LinkedHashMap<>();
         worldLinkMap.forEach((worldName, worldLink) -> worldLink.getLinkTo(worldLinkType)
                 .peek(destination -> links.put(worldName, destination)));
