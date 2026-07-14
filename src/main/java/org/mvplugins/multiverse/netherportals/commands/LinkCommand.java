@@ -37,16 +37,15 @@ class LinkCommand extends NetherPortalsCommand {
 
     @Subcommand("link")
     @CommandPermission("multiverse.netherportals.link")
-    @CommandCompletion("nether|end @mvworlds @mvworlds")
+    @CommandCompletion("@worldlinktypes @mvworlds:scope=both @mvworlds:scope=both")
     @Syntax("<nether|end> [fromWorld] <toWorld>")
     @Description("{@@mv-netherportals.link.description}")
     public void onLinkCommand(
             @NotNull MVCommandIssuer issuer,
 
-            @Values("nether|end")
             @Syntax("<nether|end>")
             @Description("{@@mv-netherportals.link.type.description}")
-            @NotNull String linkType,
+            @NotNull WorldLinkType worldLinkType,
 
             @Flags("resolve=issuerAware")
             @Syntax("[fromWorld]")
@@ -57,7 +56,6 @@ class LinkCommand extends NetherPortalsCommand {
             @Description("{@@mv-netherportals.link.toworld.description}")
             @NotNull MultiverseWorld toWorld
     ) {
-        WorldLinkType worldLinkType = WorldLinkType.valueOf(linkType.toUpperCase(Locale.ROOT));
         if (!this.linksManager.addWorldLink(fromWorld, toWorld, worldLinkType)
                 || this.linksManager.save().isFailure()) {
             throw MVInvalidCommandArgument.of(Message.of(MVNPi18n.LINK_FAILED));
@@ -85,8 +83,8 @@ class LinkCommand extends NetherPortalsCommand {
 
         @Override
         @CommandAlias("mvnplink|mvnpl")
-        public void onLinkCommand(MVCommandIssuer issuer, String linkType, MultiverseWorld fromWorld, MultiverseWorld toWorld) {
-            super.onLinkCommand(issuer, linkType, fromWorld, toWorld);
+        public void onLinkCommand(MVCommandIssuer issuer, WorldLinkType worldLinkType, MultiverseWorld fromWorld, MultiverseWorld toWorld) {
+            super.onLinkCommand(issuer, worldLinkType, fromWorld, toWorld);
         }
     }
 }

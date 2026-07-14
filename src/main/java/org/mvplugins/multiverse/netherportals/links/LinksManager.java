@@ -17,6 +17,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
@@ -159,7 +161,7 @@ public final class LinksManager {
      * @since 5.1
      */
     @ApiStatus.AvailableSince("5.1")
-    public @NotNull Collection<WorldLink> getWorldLinks() {
+    public @NotNull @UnmodifiableView Collection<WorldLink> getWorldLinks() {
         return Collections.unmodifiableCollection(worldLinkMap.values());
     }
 

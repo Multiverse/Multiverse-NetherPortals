@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.module.MultiverseModule;
 import org.mvplugins.multiverse.core.utils.StringFormatter;
+import org.mvplugins.multiverse.netherportals.command.MVNPCommandCompletions;
 import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.listeners.MVNPListener;
@@ -38,6 +39,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private Provider<NetherPortalsConfig> netherPortalsConfig;
     @Inject
     private Provider<LinksManager> linksManager;
+    @Inject
+    private Provider<MVNPCommandCompletions> commandCompletionsProvider;
 
     @Override
     public void onLoad() {
@@ -61,6 +64,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
             return;
         }
         this.setUpLocales();
+        commandCompletionsProvider.get();
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
 

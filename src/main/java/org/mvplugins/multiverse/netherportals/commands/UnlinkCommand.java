@@ -45,16 +45,15 @@ class UnlinkCommand extends NetherPortalsCommand {
 
     @Subcommand("unlink")
     @CommandPermission("multiverse.netherportals.unlink")
-    @CommandCompletion("nether|end @mvworlds:scope=both")
+    @CommandCompletion("@worldlinktypes @worldswithlink")
     @Syntax("<nether|end> [fromWorld]")
     @Description("{@@mv-netherportals.unlink.description}")
     public void onUnlinkCommand(
             @NotNull MVCommandIssuer issuer,
 
-            @Values("nether|end")
             @Syntax("<nether|end>")
             @Description("{@@mv-netherportals.unlink.type.description}")
-            @NotNull String linkType,
+            @NotNull WorldLinkType worldLinkType,
 
             @Syntax("<fromWorld>")
             @Description("{@@mv-netherportals.unlink.fromworld.description}")
@@ -64,7 +63,6 @@ class UnlinkCommand extends NetherPortalsCommand {
         String fromWorldName = fromWorld
                 .map(MultiverseWorld::getName)
                 .getOrElse(fromWorldString); // fallback as its possible world was already deleted!
-        WorldLinkType worldLinkType = WorldLinkType.valueOf(linkType.toUpperCase(Locale.ROOT));
         String toWorldName = this.linksManager.getWorldLink(fromWorldName, worldLinkType).getOrNull();
         if (toWorldName == null) {
             issuer.sendMessage(MVNPi18n.UNLINK_NOTLINKED,
@@ -111,8 +109,8 @@ class UnlinkCommand extends NetherPortalsCommand {
 
         @Override
         @CommandAlias("mvnpunlink|mvnpu")
-        public void onUnlinkCommand(MVCommandIssuer issuer, String linkType, String fromWorldString) {
-            super.onUnlinkCommand(issuer, linkType, fromWorldString);
+        public void onUnlinkCommand(MVCommandIssuer issuer, WorldLinkType worldLinkType, String fromWorldString) {
+            super.onUnlinkCommand(issuer, worldLinkType, fromWorldString);
         }
     }
 }
