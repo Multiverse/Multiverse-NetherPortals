@@ -1,10 +1,8 @@
 package org.mvplugins.multiverse.netherportals.commands;
 
 import org.bukkit.ChatColor;
-import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
-import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
 import org.mvplugins.multiverse.external.acf.commands.InvalidCommandArgument;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandAlias;
@@ -18,18 +16,19 @@ import org.mvplugins.multiverse.external.acf.commands.annotation.Values;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
-import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 
-import java.util.Objects;
+import java.util.Locale;
 
 @Service
 class LinkCommand extends NetherPortalsCommand {
 
-    private final MultiverseNetherPortals plugin;
+    private final LinksManager linksManager;
 
     @Inject
-    LinkCommand(@NotNull MultiverseNetherPortals plugin) {
-        this.plugin = plugin;
+    LinkCommand(@NotNull LinksManager linksManager) {
+        this.linksManager = linksManager;
     }
 
     @Subcommand("link")
@@ -54,8 +53,9 @@ class LinkCommand extends NetherPortalsCommand {
             @Description("World the portals should teleport to.")
             @NotNull MultiverseWorld toWorld
     ) {
-        PortalType portalType = Objects.equals(linkType, "nether") ? PortalType.NETHER : PortalType.ENDER;
-        if (!this.plugin.addWorldLink(fromWorld.getName(), toWorld.getName(), portalType)) {
+        WorldLinkType worldLinkType = WorldLinkType.valueOf(linkType.toUpperCase(Locale.ROOT));
+        if (!this.linksManager.addWorldLink(fromWorld, toWorld, worldLinkType)
+                || this.linksManager.save().isFailure()) {
             throw new InvalidCommandArgument("There was an error creating the link! See console for more details.");
         }
 
@@ -72,8 +72,8 @@ class LinkCommand extends NetherPortalsCommand {
     @Service
     private final static class LegacyAlias extends LinkCommand implements LegacyAliasCommand {
         @Inject
-        LegacyAlias(MultiverseNetherPortals plugin) {
-            super(plugin);
+        LegacyAlias(LinksManager linksManager) {
+            super(linksManager);
         }
 
         @Override

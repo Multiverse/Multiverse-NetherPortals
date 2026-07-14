@@ -1,7 +1,6 @@
 package org.mvplugins.multiverse.netherportals.commands;
 
 import org.bukkit.ChatColor;
-import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
 import org.mvplugins.multiverse.core.display.ContentDisplay;
@@ -21,21 +20,23 @@ import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
-import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 class ListCommand extends NetherPortalsCommand {
 
-    private final MultiverseNetherPortals plugin;
+    private final LinksManager linksManager;
     private final WorldManager worldManager;
 
     @Inject
-    ListCommand(@NotNull MultiverseNetherPortals plugin, @NotNull WorldManager worldManager) {
-        this.plugin = plugin;
+    ListCommand(@NotNull LinksManager linksManager, @NotNull WorldManager worldManager) {
+        this.linksManager = linksManager;
         this.worldManager = worldManager;
     }
 
@@ -54,13 +55,9 @@ class ListCommand extends NetherPortalsCommand {
             @Description("Portal type to list.")
             @Nullable String linkTypeString
     ) {
-        PortalType linkType = null;
+        WorldLinkType linkType = null;
         if (linkTypeString != null && !linkTypeString.isEmpty()) {
-            if (linkTypeString.equalsIgnoreCase("nether")) {
-                linkType = PortalType.NETHER;
-            } else if (linkTypeString.equalsIgnoreCase("end")) {
-                linkType = PortalType.ENDER;
-            }
+            linkType = WorldLinkType.valueOf(linkTypeString.toUpperCase(Locale.ROOT));
         }
 
         String linkString = parseTypeString(linkType);
@@ -73,39 +70,36 @@ class ListCommand extends NetherPortalsCommand {
                 .send(issuer);
     }
 
-    private String parseTypeString(@Nullable PortalType linkType) {
+    private String parseTypeString(@Nullable WorldLinkType linkType) {
         if (linkType == null) {
             return "All";
         }
         return switch (linkType) {
             case NETHER -> ChatColor.RED + "Nether";
-            case ENDER -> ChatColor.AQUA + "End";
-            default -> "All";
+            case END -> ChatColor.AQUA + "End";
         };
     }
 
-    private List<String> buildLinkContent(@Nullable PortalType linkType) {
+    private List<String> buildLinkContent(@Nullable WorldLinkType linkType) {
         return linkType == null ? getAllLinksContent() : buildLinkContent(linkType, "");
     }
 
     private List<String> getAllLinksContent() {
         List<String> contents = buildLinkContent(
-                PortalType.NETHER,
+                WorldLinkType.NETHER,
                 ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] "
         );
         contents.addAll(buildLinkContent(
-                PortalType.ENDER,
+                WorldLinkType.END,
                 ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "
         ));
         return contents;
     }
 
-    private List<String> buildLinkContent(@NotNull PortalType linkType,
+    private List<String> buildLinkContent(@NotNull WorldLinkType linkType,
                                           @NotNull String prefix) {
 
-        Map<String, String> links = (linkType == PortalType.NETHER)
-                ? this.plugin.getWorldLinks()
-                : this.plugin.getEndWorldLinks();
+        Map<String, String> links = this.linksManager.getLinksForType(linkType);
 
         return links.entrySet().stream()
                 .map(link -> parseSingleLink(link.getKey(), link.getValue(), prefix))
@@ -128,8 +122,8 @@ class ListCommand extends NetherPortalsCommand {
     @Service
     private final static class LegacyAlias extends ListCommand implements LegacyAliasCommand {
         @Inject
-        LegacyAlias(MultiverseNetherPortals plugin, WorldManager worldManager) {
-            super(plugin, worldManager);
+        LegacyAlias(LinksManager linksManager, WorldManager worldManager) {
+            super(linksManager, worldManager);
         }
 
         @Override

@@ -4,6 +4,9 @@ import com.dumptruckman.minecraft.util.Logging;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
 import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
 import org.mvplugins.multiverse.netherportals.utils.MVNameChecker;
@@ -14,7 +17,6 @@ import org.bukkit.World;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
@@ -27,6 +29,8 @@ import org.jvnet.hk2.annotations.Service;
 final class MVNPPlayerListener implements MVNPListener {
 
     private final MultiverseNetherPortals plugin;
+    private final NetherPortalsConfig config;
+    private final LinksManager linksManager;
     private final MVNameChecker nameChecker;
     private final MVLinkChecker linkChecker;
     private final WorldManager worldManager;
@@ -41,11 +45,15 @@ final class MVNPPlayerListener implements MVNPListener {
     @Inject
     public MVNPPlayerListener(
             @NotNull MultiverseNetherPortals plugin,
+            @NotNull NetherPortalsConfig config,
+            @NotNull LinksManager linksManager,
             @NotNull MVNameChecker nameChecker,
             @NotNull MVLinkChecker linkChecker,
             @NotNull WorldManager worldManager,
             @NotNull EndPlatformCreator endPlatformCreator) {
         this.plugin = plugin;
+        this.config = config;
+        this.linksManager = linksManager;
         this.nameChecker = nameChecker;
         this.linkChecker = linkChecker;
         this.worldManager = worldManager;
@@ -86,7 +94,9 @@ final class MVNPPlayerListener implements MVNPListener {
 
         Location newTo;
         String currentWorld = currentLocation.getWorld().getName();
-        String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
+        String linkedWorld = WorldLinkType.fromPortalType(type)
+                .flatMap(worldLinkType -> linksManager.getWorldLink(currentWorld, worldLinkType))
+                .getOrNull();
         if (currentWorld.equalsIgnoreCase(linkedWorld)) {
             newTo = null;
         } else if (linkedWorld != null) {
@@ -137,7 +147,7 @@ final class MVNPPlayerListener implements MVNPListener {
             } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
                 Location spawnLocation = endPlatformCreator.getVanillaLocation(player, event.getTo().getWorld());
                 event.setTo(spawnLocation);
-                endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
+                endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), config.isEndPlatformDropBlocks());
             }
 
             // Advancements need to be triggered manually

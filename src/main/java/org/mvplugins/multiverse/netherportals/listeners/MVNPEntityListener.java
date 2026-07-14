@@ -4,6 +4,9 @@ import com.dumptruckman.minecraft.util.Logging;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.DefaultEventPriority;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
 import org.mvplugins.multiverse.netherportals.utils.MVEventRecord;
 import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
@@ -43,6 +46,8 @@ final class MVNPEntityListener implements MVNPListener {
     private final Map<String, Date> playerErrors;
 
     private final MultiverseNetherPortals plugin;
+    private final NetherPortalsConfig config;
+    private final LinksManager linksManager;
     private final MVNameChecker nameChecker;
     private final MVLinkChecker linkChecker;
     private final WorldEntryCheckerProvider entryCheckerProvider;
@@ -51,13 +56,15 @@ final class MVNPEntityListener implements MVNPListener {
     private final MVEventRecord eventRecord;
     private final EndPlatformCreator endPlatformCreator;
     // the event record is used to track players that are currently standing
-    // inside portals. it's used so that we don't need to run the the onEntityPortalEnter
+    // inside portals. it's used so that we don't need to run the onEntityPortalEnter
     // listener more than once for a given player. that also means players are
     // only messaged once about why they can't go through a given portal.
 
     @Inject
     MVNPEntityListener(
             @NotNull MultiverseNetherPortals plugin,
+            @NotNull NetherPortalsConfig config,
+            @NotNull LinksManager linksManager,
             @NotNull MVNameChecker nameChecker,
             @NotNull MVLinkChecker linkChecker,
             @NotNull WorldEntryCheckerProvider entryCheckerProvider,
@@ -67,6 +74,8 @@ final class MVNPEntityListener implements MVNPListener {
             @NotNull EndPlatformCreator endPlatformCreator) {
         this.playerErrors = new HashMap<>();
         this.plugin = plugin;
+        this.config = config;
+        this.linksManager = linksManager;
         this.nameChecker = nameChecker;
         this.linkChecker = linkChecker;
         this.entryCheckerProvider = entryCheckerProvider;
@@ -89,7 +98,7 @@ final class MVNPEntityListener implements MVNPListener {
      * @return      {@code true} iff the player was bounced back.
      */
     private boolean shootPlayer(Player p, Block block, PortalType type) {
-        if (!plugin.isUsingBounceBack()) {
+        if (!config.isUsingBounceBack()) {
             Logging.finest("Bounceback is disabled. The player is free to walk into the portal!");
             return false;
         }
@@ -245,7 +254,9 @@ final class MVNPEntityListener implements MVNPListener {
         }
 
         String currentWorld = currentLocation.getWorld().getName();
-        String linkedWorld = this.plugin.getWorldLink(currentWorld, type);
+        String linkedWorld = WorldLinkType.fromPortalType(type)
+                .flatMap(worldLinkType -> linksManager.getWorldLink(currentWorld, worldLinkType))
+                .getOrNull();
         Location toLocation = getLocation(p, currentLocation, type, currentWorld, linkedWorld);
 
         if (toLocation == null) {
@@ -254,7 +265,7 @@ final class MVNPEntityListener implements MVNPListener {
             }
 
             if (currentWorld.equalsIgnoreCase(linkedWorld)) {
-                if (this.plugin.isSendingDisabledPortalMessage()) {
+                if (this.config.isSendingDisabledPortalMessage()) {
                     if (type == PortalType.ENDER) {
                         p.sendMessage("End Portals have been disabled in this world!");
                     } else {
@@ -262,7 +273,7 @@ final class MVNPEntityListener implements MVNPListener {
                     }
                 }
             } else {
-                if (this.plugin.isSendingNoDestinationMessage()) {
+                if (this.config.isSendingNoDestinationMessage()) {
                     p.sendMessage("This portal goes nowhere!");
                     if (type == PortalType.ENDER) {
                         p.sendMessage("No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.");
@@ -314,7 +325,7 @@ final class MVNPEntityListener implements MVNPListener {
         }
 
         // This is the entity event, don't teleport entities if we're not supposed to
-        if (!this.plugin.isTeleportingEntities()) {
+        if (!this.config.isTeleportingEntities()) {
             event.setCancelled(true);
             return;
         }
@@ -344,7 +355,9 @@ final class MVNPEntityListener implements MVNPListener {
         }
 
         String fromWorldName = fromWorld.getName();
-        String linkedWorldName = this.plugin.getWorldLink(fromWorldName, type);
+        String linkedWorldName = WorldLinkType.fromPortalType(type)
+                .flatMap(worldLinkType -> linksManager.getWorldLink(fromWorldName, worldLinkType))
+                .getOrNull();
         Location newToLocation = getLocation(entity, fromLocation, type, fromWorldName, linkedWorldName); // Gets the player spawn location from the portal spawn location
 
         // If we can't get a valid location, cancel the event
@@ -375,14 +388,13 @@ final class MVNPEntityListener implements MVNPListener {
         else if (newToWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
             Location spawnLocation = endPlatformCreator.getVanillaLocation(entity, newToWorld);
             event.setTo(spawnLocation);
-            endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), plugin.isEndPlatformDropBlocks());
+            endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), config.isEndPlatformDropBlocks());
         }
     }
 
     @EventMethod
     public void onEntityPortalExit(EntityPortalExitEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             eventRecord.removeFromRecord(PortalType.ENDER, player.getUniqueId());
             eventRecord.removeFromRecord(PortalType.NETHER, player.getUniqueId());
         }

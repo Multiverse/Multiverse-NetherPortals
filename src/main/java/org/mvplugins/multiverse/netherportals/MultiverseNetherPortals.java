@@ -1,27 +1,22 @@
 package org.mvplugins.multiverse.netherportals;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dumptruckman.minecraft.util.Logging;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.module.MultiverseModule;
 import org.mvplugins.multiverse.core.utils.StringFormatter;
 import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
+import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.listeners.MVNPListener;
+import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.bukkit.Location;
 import org.bukkit.PortalType;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
@@ -33,21 +28,16 @@ public class MultiverseNetherPortals extends MultiverseModule {
 
     private static final double TARGET_CORE_API_VERSION = 5.0;
 
-    private static final String NETHER_PORTALS_CONFIG = "config.yml";
-    private static final String DEFAULT_NETHER_PREFIX = "";
-    private static final String DEFAULT_NETHER_SUFFIX = "_nether";
-    private static final String DEFAULT_END_PREFIX = "";
-    private static final String DEFAULT_END_SUFFIX = "_the_end";
-
     private Plugin multiversePortals;
-    private FileConfiguration MVNPConfiguration;
-    private Map<String, String> linkMap;
-    private Map<String, String> endLinkMap;
 
     @Inject
     private Provider<CoreConfig> coreConfig;
     @Inject
     private Provider<MVCommandManager> commandManager;
+    @Inject
+    private Provider<NetherPortalsConfig> netherPortalsConfig;
+    @Inject
+    private Provider<LinksManager> linksManager;
 
     @Override
     public void onLoad() {
@@ -64,7 +54,12 @@ public class MultiverseNetherPortals extends MultiverseModule {
         initializeDependencyInjection(new MultiverseNetherPortalsPluginBinder(this));
         Logging.setDebugLevel(coreConfig.get().getGlobalDebug());
 
-        loadConfig();
+        if (!setupConfig()) {
+            Logging.severe("Your configs were not loaded.");
+            Logging.severe("Please check your configs and restart the server.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
 
@@ -72,75 +67,23 @@ public class MultiverseNetherPortals extends MultiverseModule {
                 this.getDescription().getVersion(), getVersionAsNumber(), StringFormatter.joinAnd(this.getDescription().getAuthors()));
     }
 
-    public void loadConfig() {
-        initMVNPConfig();
-
-        this.linkMap = new HashMap<>();
-        this.endLinkMap = new HashMap<>();
-
-        this.setUsingBounceBack(this.isUsingBounceBack());
-        this.setTeleportingEntities(this.isTeleportingEntities());
-        this.setSendingNoDestinationMessage(this.isSendingNoDestinationMessage());
-        this.setSendingDisabledPortalMessage(this.isSendingDisabledPortalMessage());
-        this.setEndPlatformDropBlocks(this.isEndPlatformDropBlocks());
-
-        this.setNetherPrefix(this.getNetherPrefix());
-        this.setNetherSuffix(this.getNetherSuffix());
-        this.setEndPrefix(this.getEndPrefix());
-        this.setEndSuffix(this.getEndSuffix());
-      
-        if (this.MVNPConfiguration.getConfigurationSection("worlds") == null) {
-            this.MVNPConfiguration.createSection("worlds");
-        }
-        Set<String> worldKeys = this.MVNPConfiguration.getConfigurationSection("worlds").getKeys(false);
-        if (worldKeys != null) {
-            for (String worldString : worldKeys) {
-                String nether = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.NETHER, null);
-                String ender = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto." + PortalType.ENDER, null);
-              
-                if (nether != null) {
-                    this.linkMap.put(worldString, nether);
-                }
-                if (ender != null) {
-                    this.endLinkMap.put(worldString, ender);
-                }
-
-                // Convert from old version enum which used END not ENDER
-                String oldEnder = this.MVNPConfiguration.getString("worlds." + worldString + ".portalgoesto.END", null);
-                if (oldEnder != null) {
-                    if (this.addWorldLink(worldString, oldEnder, PortalType.ENDER)) {
-                        this.MVNPConfiguration.set("worlds." + worldString + ".portalgoesto.END", null);
-                    }
-                    else {
-                        Logging.warning("Error converting old end link of '%s' to '%s'", worldString, oldEnder);
-                    }
-                }
-
-            }
-        }
-        this.saveMVNPConfig();
-    }
-
-    private void initMVNPConfig() {
-        this.MVNPConfiguration = new YamlConfiguration();
-        try {
-            File configFile = new File(this.getDataFolder(), NETHER_PORTALS_CONFIG);
-            if (!configFile.isFile()) {
-                Logging.info("Creating new %s", NETHER_PORTALS_CONFIG);
-                configFile.createNewFile();
-            }
-            this.MVNPConfiguration.load(configFile);
-        }
-        catch (IOException e) {
-            Logging.severe("Could not load " + NETHER_PORTALS_CONFIG);
-        }
-        catch (InvalidConfigurationException e) {
-            Logging.severe(NETHER_PORTALS_CONFIG + " contained INVALID YAML. Please look at the file.");
-        }
+    private boolean setupConfig() {
+        NetherPortalsConfig config = netherPortalsConfig.get();
+        LinksManager links = linksManager.get();
+        return config.load()
+                .flatMap(ignored -> links.load())
+                .flatMap(ignored -> links.save())
+                .flatMap(ignored -> config.save())
+                .isSuccess()
+                && config.isLoaded()
+                && links.isLoaded();
     }
 
     @Override
     public void onDisable() {
+        if (netherPortalsConfig != null && linksManager != null) {
+            linksManager.get().save().flatMap(ignored -> netherPortalsConfig.get().save());
+        }
         shutdownDependencyInjection();
         Logging.info("- Disabled");
         Logging.shutdown();
@@ -154,133 +97,6 @@ public class MultiverseNetherPortals extends MultiverseModule {
     @Override
     public @NotNull Logger getLogger() {
         return Logging.getLogger();
-    }
-
-    public void setNetherPrefix(String netherPrefix) {
-        this.MVNPConfiguration.set("portal-auto-link-when.nether.prefix", netherPrefix);
-    }
-
-    public String getNetherPrefix() {
-        return this.MVNPConfiguration.getString("portal-auto-link-when.nether.prefix", DEFAULT_NETHER_PREFIX);
-    }
-
-    public void setNetherSuffix(String netherSuffix) {
-        this.MVNPConfiguration.set("portal-auto-link-when.nether.suffix", netherSuffix);
-    }
-
-    public String getNetherSuffix() {
-        return this.MVNPConfiguration.getString("portal-auto-link-when.nether.suffix", DEFAULT_NETHER_SUFFIX);
-    }
-
-    public void setEndPrefix(String endPrefix) {
-        this.MVNPConfiguration.set("portal-auto-link-when.end.prefix", endPrefix);
-    }
-
-    public String getEndPrefix() {
-        return this.MVNPConfiguration.getString("portal-auto-link-when.end.prefix", DEFAULT_END_PREFIX);
-    }
-
-    public void setEndSuffix(String endSuffix) {
-        this.MVNPConfiguration.set("portal-auto-link-when.end.suffix", endSuffix);
-    }
-
-    public String getEndSuffix() {
-        return this.MVNPConfiguration.getString("portal-auto-link-when.end.suffix", DEFAULT_END_SUFFIX);
-    }
-
-    public String getWorldLink(String fromWorld, PortalType type) {
-        if (type == PortalType.NETHER) {
-            return this.linkMap.get(fromWorld);
-        } else if (type == PortalType.ENDER) {
-            return this.endLinkMap.get(fromWorld);
-        }
-
-        return null;
-    }
-
-    public Map<String, String> getWorldLinks() {
-        return this.linkMap;
-    }
-
-    public Map<String, String> getEndWorldLinks() {
-        return this.endLinkMap;
-    }
-
-    public boolean addWorldLink(String from, String to, PortalType type) {
-        if (type == PortalType.NETHER) {
-            this.linkMap.put(from, to);
-        } else if (type == PortalType.ENDER) {
-            this.endLinkMap.put(from, to);
-        } else {
-            return false;
-        }
-
-        this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, to);
-        this.saveMVNPConfig();
-        return true;
-    }
-
-    public boolean removeWorldLink(String from, String to, PortalType type) {
-        if (type == PortalType.NETHER) {
-            this.linkMap.remove(from);
-        } else if (type == PortalType.ENDER) {
-            this.endLinkMap.remove(from);
-        } else {
-            return false;
-        }
-
-        this.MVNPConfiguration.set("worlds." + from + ".portalgoesto." + type, null);
-        return this.saveMVNPConfig();
-    }
-
-    public boolean saveMVNPConfig() {
-        try {
-            this.MVNPConfiguration.save(new File(this.getDataFolder(), NETHER_PORTALS_CONFIG));
-            return true;
-        } catch (IOException e) {
-            Logging.severe("Could not save " + NETHER_PORTALS_CONFIG);
-        }
-        return false;
-    }
-
-    public boolean isUsingBounceBack() {
-        return this.MVNPConfiguration.getBoolean("bounceback", true);
-    }
-
-    public void setUsingBounceBack(boolean useBounceBack) {
-        this.MVNPConfiguration.set("bounceback", useBounceBack);
-    }
-
-    public boolean isTeleportingEntities() {
-        return this.MVNPConfiguration.getBoolean("teleport_entities", true);
-    }
-
-    public void setTeleportingEntities(boolean teleportingEntities) {
-        this.MVNPConfiguration.set("teleport_entities", teleportingEntities);
-    }
-
-    public boolean isSendingDisabledPortalMessage() {
-        return this.MVNPConfiguration.getBoolean("send_disabled_portal_message", true);
-    }
-
-    public void setSendingDisabledPortalMessage(boolean sendDisabledPortalMessage) {
-        this.MVNPConfiguration.set("send_disabled_portal_message", sendDisabledPortalMessage);
-    }
-
-    public boolean isSendingNoDestinationMessage() {
-        return this.MVNPConfiguration.getBoolean("send_no_destination_message", true);
-    }
-
-    public void setSendingNoDestinationMessage(boolean sendNoDestinationMessage) {
-        this.MVNPConfiguration.set("send_no_destination_message", sendNoDestinationMessage);
-    }
-
-    public boolean isEndPlatformDropBlocks() {
-        return this.MVNPConfiguration.getBoolean("end_platform_drop_blocks", true);
-    }
-
-    public void setEndPlatformDropBlocks(boolean endPlatformDropBlocks) {
-        this.MVNPConfiguration.set("end_platform_drop_blocks", endPlatformDropBlocks);
     }
 
     public boolean isHandledByNetherPortals(Location l) {
@@ -303,18 +119,262 @@ public class MultiverseNetherPortals extends MultiverseModule {
         this.multiversePortals = multiversePortals;
     }
 
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#load()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void loadConfig() {
+        setupConfig();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setNetherPrefix(String)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setNetherPrefix(String netherPrefix) {
+        netherPortalsConfig.get().setNetherPrefix(netherPrefix);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#getNetherPrefix()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public String getNetherPrefix() {
+        return netherPortalsConfig.get().getNetherPrefix();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setNetherSuffix(String)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setNetherSuffix(String netherSuffix) {
+        netherPortalsConfig.get().setNetherSuffix(netherSuffix);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#getNetherSuffix()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public String getNetherSuffix() {
+        return netherPortalsConfig.get().getNetherSuffix();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setEndPrefix(String)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setEndPrefix(String endPrefix) {
+        netherPortalsConfig.get().setEndPrefix(endPrefix);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#getEndPrefix()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public String getEndPrefix() {
+        return netherPortalsConfig.get().getEndPrefix();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setEndSuffix(String)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setEndSuffix(String endSuffix) {
+        netherPortalsConfig.get().setEndSuffix(endSuffix);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#getEndSuffix()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public String getEndSuffix() {
+        return netherPortalsConfig.get().getEndSuffix();
+    }
+
+    /**
+     * @deprecated Use {@link LinksManager#getWorldLink(String, WorldLinkType)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public String getWorldLink(String fromWorld, PortalType type) {
+        return WorldLinkType.fromPortalType(type)
+                .flatMap(worldLinkType -> linksManager.get().getWorldLink(fromWorld, worldLinkType))
+                .getOrNull();
+    }
+
+    /**
+     * @deprecated Use {@link LinksManager#getLinksForType(WorldLinkType)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public Map<String, String> getWorldLinks() {
+        return linksManager.get().getLinksForType(WorldLinkType.NETHER);
+    }
+
+    /**
+     * @deprecated Use {@link LinksManager#getLinksForType(WorldLinkType)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public Map<String, String> getEndWorldLinks() {
+        return linksManager.get().getLinksForType(WorldLinkType.END);
+    }
+
+    /**
+     * @deprecated Use {@link LinksManager#addWorldLink(String, String, WorldLinkType)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean addWorldLink(String from, String to, PortalType type) {
+        return WorldLinkType.fromPortalType(type)
+                .map(worldLinkType -> linksManager.get().addWorldLink(from, to, worldLinkType)
+                        && linksManager.get().save().isSuccess())
+                .getOrElse(false);
+    }
+
+    /**
+     * @deprecated Use {@link LinksManager#removeWorldLink(String, WorldLinkType)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean removeWorldLink(String from, String to, PortalType type) {
+        return WorldLinkType.fromPortalType(type)
+                .map(worldLinkType -> linksManager.get().removeWorldLink(from, worldLinkType)
+                        && linksManager.get().save().isSuccess())
+                .getOrElse(false);
+    }
+
+    /**
+     * @deprecated Use {@link LinksManager#save()} and {@link NetherPortalsConfig#save()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean saveMVNPConfig() {
+        return linksManager.get().save()
+                .flatMap(ignored -> netherPortalsConfig.get().save())
+                .isSuccess();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#isUsingBounceBack()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean isUsingBounceBack() {
+        return netherPortalsConfig.get().isUsingBounceBack();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setUsingBounceBack(boolean)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setUsingBounceBack(boolean useBounceBack) {
+        netherPortalsConfig.get().setUsingBounceBack(useBounceBack);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#isTeleportingEntities()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean isTeleportingEntities() {
+        return netherPortalsConfig.get().isTeleportingEntities();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setTeleportingEntities(boolean)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setTeleportingEntities(boolean teleportingEntities) {
+        netherPortalsConfig.get().setTeleportingEntities(teleportingEntities);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#isSendingDisabledPortalMessage()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean isSendingDisabledPortalMessage() {
+        return netherPortalsConfig.get().isSendingDisabledPortalMessage();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setSendingDisabledPortalMessage(boolean)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setSendingDisabledPortalMessage(boolean sendDisabledPortalMessage) {
+        netherPortalsConfig.get().setSendingDisabledPortalMessage(sendDisabledPortalMessage);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#isSendingNoDestinationMessage()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean isSendingNoDestinationMessage() {
+        return netherPortalsConfig.get().isSendingNoDestinationMessage();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setSendingNoDestinationMessage(boolean)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setSendingNoDestinationMessage(boolean sendNoDestinationMessage) {
+        netherPortalsConfig.get().setSendingNoDestinationMessage(sendNoDestinationMessage);
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#isEndPlatformDropBlocks()} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean isEndPlatformDropBlocks() {
+        return netherPortalsConfig.get().isEndPlatformDropBlocks();
+    }
+
+    /**
+     * @deprecated Use {@link NetherPortalsConfig#setEndPlatformDropBlocks(boolean)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public void setEndPlatformDropBlocks(boolean endPlatformDropBlocks) {
+        netherPortalsConfig.get().setEndPlatformDropBlocks(endPlatformDropBlocks);
+    }
+
+    /**
+     * @deprecated Debug info no longer required as dumps command directly uploads all config files.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
     public String getDebugInfo() {
+        NetherPortalsConfig config = netherPortalsConfig.get();
+        LinksManager links = linksManager.get();
         return "[Multiverse-NetherPortals] Multiverse-NetherPortals Version: " + this.getDescription().getVersion() + '\n'
-                + "[Multiverse-NetherPortals] Nether Prefix: " + this.getNetherPrefix() + '\n'
-                + "[Multiverse-NetherPortals] Nether Suffix: " + this.getNetherSuffix() + '\n'
-                + "[Multiverse-NetherPortals] End Prefix: " + this.getEndPrefix() + '\n'
-                + "[Multiverse-NetherPortals] End Suffix: " + this.getEndSuffix() + '\n'
-                + "[Multiverse-NetherPortals] Nether Links: " + this.getWorldLinks() + '\n'
-                + "[Multiverse-NetherPortals] End Links: " + this.getEndWorldLinks() + '\n'
-                + "[Multiverse-NetherPortals] Bounceback: " + this.isUsingBounceBack() + '\n'
-                + "[Multiverse-NetherPortals] Teleport Entities: " + this.isTeleportingEntities() + '\n'
-                + "[Multiverse-NetherPortals] Send Disabled Portal Message: " + this.isSendingDisabledPortalMessage() + '\n'
-                + "[Multiverse-NetherPortals] Send No Destination Message: " + this.isSendingNoDestinationMessage() + '\n'
+                + "[Multiverse-NetherPortals] Nether Prefix: " + config.getNetherPrefix() + '\n'
+                + "[Multiverse-NetherPortals] Nether Suffix: " + config.getNetherSuffix() + '\n'
+                + "[Multiverse-NetherPortals] End Prefix: " + config.getEndPrefix() + '\n'
+                + "[Multiverse-NetherPortals] End Suffix: " + config.getEndSuffix() + '\n'
+                + "[Multiverse-NetherPortals] Nether Links: " + links.getLinksForType(WorldLinkType.NETHER) + '\n'
+                + "[Multiverse-NetherPortals] End Links: " + links.getLinksForType(WorldLinkType.END) + '\n'
+                + "[Multiverse-NetherPortals] Bounceback: " + config.isUsingBounceBack() + '\n'
+                + "[Multiverse-NetherPortals] Teleport Entities: " + config.isTeleportingEntities() + '\n'
+                + "[Multiverse-NetherPortals] Send Disabled Portal Message: "
+                + config.isSendingDisabledPortalMessage() + '\n'
+                + "[Multiverse-NetherPortals] Send No Destination Message: "
+                + config.isSendingNoDestinationMessage() + '\n'
                 + "[Multiverse-NetherPortals] Server Allow Nether: " + this.getServer().getAllowNether() + '\n'
                 + "[Multiverse-NetherPortals] Server Allow End: " + this.getServer().getAllowEnd() + '\n'
                 + "[Multiverse-NetherPortals] Special Code: " + "FRN001" + '\n';

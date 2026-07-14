@@ -1,7 +1,7 @@
 package org.mvplugins.multiverse.netherportals.utils;
 
 import com.dumptruckman.minecraft.util.Logging;
-import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
+import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.world.WorldManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
@@ -11,12 +11,12 @@ import org.jvnet.hk2.annotations.Service;
 @Service
 public class MVNameChecker {
 
-    private final MultiverseNetherPortals plugin;
+    private final NetherPortalsConfig config;
     private final WorldManager worldManager;
 
     @Inject
-    MVNameChecker(@NotNull MultiverseNetherPortals plugin, @NotNull WorldManager worldManager) {
-        this.plugin = plugin;
+    MVNameChecker(@NotNull NetherPortalsConfig config, @NotNull WorldManager worldManager) {
+        this.config = config;
         this.worldManager = worldManager;
     }
 
@@ -28,7 +28,7 @@ public class MVNameChecker {
      */
     public boolean isValidNetherName(String world) {
         try {
-            if (world.matches("^" + this.plugin.getNetherPrefix() + ".+" + this.plugin.getNetherSuffix() + "$")) {
+            if (world.matches("^" + this.config.getNetherPrefix() + ".+" + this.config.getNetherSuffix() + "$")) {
                 return true;
             }
         } catch (IndexOutOfBoundsException e) {
@@ -44,7 +44,7 @@ public class MVNameChecker {
      */
     public boolean isValidEndName(String world) {
         try {
-            if (world.matches("^" + this.plugin.getEndPrefix() + ".+" + this.plugin.getEndSuffix() + "$")) {
+            if (world.matches("^" + this.config.getEndPrefix() + ".+" + this.config.getEndSuffix() + "$")) {
                 return true;
             }
         } catch (IndexOutOfBoundsException e) {
@@ -59,7 +59,7 @@ public class MVNameChecker {
      * @return
      */
     public String getNetherName(String normalName) {
-        final String netherName = this.plugin.getNetherPrefix() + normalName + this.plugin.getNetherSuffix();
+        final String netherName = this.config.getNetherPrefix() + normalName + this.config.getNetherSuffix();
         if (worldManager.isLoadedWorld(netherName)) {
             Logging.finest("Selected nether world '" + netherName + "' for normal '" + normalName + "'");
         }
@@ -73,7 +73,7 @@ public class MVNameChecker {
      * @return
      */
     public String getEndName(String normalName) {
-        final String endName = this.plugin.getEndPrefix() + normalName + this.plugin.getEndSuffix();
+        final String endName = this.config.getEndPrefix() + normalName + this.config.getEndSuffix();
         if (worldManager.isLoadedWorld(endName)) {
             Logging.finest("Selected end world '" + endName + "' for normal '" + normalName + "'");
         }
@@ -90,23 +90,23 @@ public class MVNameChecker {
         String normalName = netherName;
         // Chop off the prefix
         if (type == PortalType.NETHER) {
-            if (!this.plugin.getNetherPrefix().isEmpty()) {
-                String[] split = normalName.split(this.plugin.getNetherPrefix());
+            if (!this.config.getNetherPrefix().isEmpty()) {
+                String[] split = normalName.split(this.config.getNetherPrefix());
                 normalName = split[1];
             }
             // Chop off the suffix
-            if (!this.plugin.getNetherSuffix().isEmpty()) {
-                String[] split = normalName.split(this.plugin.getNetherSuffix());
+            if (!this.config.getNetherSuffix().isEmpty()) {
+                String[] split = normalName.split(this.config.getNetherSuffix());
                 normalName = split[0];
             }
         } else if (type == PortalType.ENDER) {
-            if (!this.plugin.getNetherPrefix().isEmpty()) {
-                String[] split = normalName.split(this.plugin.getEndPrefix());
+            if (!this.config.getEndPrefix().isEmpty()) {
+                String[] split = normalName.split(this.config.getEndPrefix());
                 normalName = split[1];
             }
             // Chop off the suffix
-            if (!this.plugin.getNetherSuffix().isEmpty()) {
-                String[] split = normalName.split(this.plugin.getEndSuffix());
+            if (!this.config.getEndSuffix().isEmpty()) {
+                String[] split = normalName.split(this.config.getEndSuffix());
                 normalName = split[0];
             }
         }
