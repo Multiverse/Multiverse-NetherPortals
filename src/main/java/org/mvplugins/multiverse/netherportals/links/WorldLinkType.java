@@ -5,6 +5,9 @@ import java.util.Locale;
 import org.bukkit.PortalType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.mvplugins.multiverse.core.locale.message.LocalizableMessage;
+import org.mvplugins.multiverse.core.locale.message.Message;
+import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
 import org.mvplugins.multiverse.external.vavr.control.Option;
 
 /**
@@ -13,7 +16,7 @@ import org.mvplugins.multiverse.external.vavr.control.Option;
  * @since 5.1
  */
 @ApiStatus.AvailableSince("5.1")
-public enum WorldLinkType {
+public enum WorldLinkType implements LocalizableMessage {
 
     NETHER(PortalType.NETHER),
     END(PortalType.ENDER);
@@ -61,5 +64,10 @@ public enum WorldLinkType {
             }
         }
         return Option.none();
+    }
+
+    @Override
+    public @Nullable Message getLocalizableMessage() {
+        return Message.of(getConfigKey());
     }
 }

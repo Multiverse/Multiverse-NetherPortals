@@ -6,7 +6,7 @@ import org.mvplugins.multiverse.core.command.MVCommandIssuer;
 import org.mvplugins.multiverse.core.display.ContentDisplay;
 import org.mvplugins.multiverse.core.display.handlers.PagedSendHandler;
 import org.mvplugins.multiverse.core.display.parsers.ListContentProvider;
-import org.mvplugins.multiverse.core.world.MultiverseWorld;
+import org.mvplugins.multiverse.core.locale.message.Message;
 import org.mvplugins.multiverse.core.world.WorldManager;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandAlias;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandCompletion;
@@ -22,11 +22,15 @@ import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
+import org.mvplugins.multiverse.netherportals.locale.MVNPi18n;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.Replace.WORLD;
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.replace;
 
 @Service
 class ListCommand extends NetherPortalsCommand {
@@ -45,14 +49,14 @@ class ListCommand extends NetherPortalsCommand {
     @CommandPermission("multiverse.netherportals.show") // todo: maybe change to multiverse.netherportals.list
     @CommandCompletion("nether|end")
     @Syntax("[nether|end]")
-    @Description("Displays a nicely formatted list of all portal links.")
+    @Description("{@@mv-netherportals.list.description}")
     void onListCommand(
             @NotNull MVCommandIssuer issuer,
 
             @Optional
             @Values("nether|end")
             @Syntax("<nether|end>")
-            @Description("Portal type to list.")
+            @Description("{@@mv-netherportals.list.type.description}")
             @Nullable String linkTypeString
     ) {
         WorldLinkType linkType = null;
@@ -60,63 +64,80 @@ class ListCommand extends NetherPortalsCommand {
             linkType = WorldLinkType.valueOf(linkTypeString.toUpperCase(Locale.ROOT));
         }
 
-        String linkString = parseTypeString(linkType);
+        Message headerMessage = linkType == null
+                ? Message.of(MVNPi18n.LIST_HEADER_ALL)
+                : Message.of(MVNPi18n.LIST_HEADER,
+                        replace("{linkType}").with(linkType));
+        Message noContentMessage = linkType == null
+                ? Message.of(MVNPi18n.LIST_NOCONTENT_ALL)
+                : Message.of(MVNPi18n.LIST_NOCONTENT,
+                        replace("{linkType}").with(linkType));
         ContentDisplay.create()
-                .addContent(ListContentProvider.forContent(buildLinkContent(linkType)))
+                .addContent(ListContentProvider.forContent(buildLinkContent(issuer, linkType)))
                 .withSendHandler(PagedSendHandler.create()
-                        .withHeader(String.format("%s==== [ %s %sPortal Links ] ====", ChatColor.DARK_PURPLE, linkString, ChatColor.DARK_PURPLE))
-                        .noContentMessage(String.format("%sNo %s %slinks found.", ChatColor.WHITE, linkString, ChatColor.WHITE))
+                        .withHeader(headerMessage)
+                        .noContentMessage(noContentMessage)
                         .doPagination(false))
                 .send(issuer);
     }
 
-    private String parseTypeString(@Nullable WorldLinkType linkType) {
-        if (linkType == null) {
-            return "All";
-        }
-        return switch (linkType) {
-            case NETHER -> ChatColor.RED + "Nether";
-            case END -> ChatColor.AQUA + "End";
-        };
+    private List<String> buildLinkContent(
+            @NotNull MVCommandIssuer issuer,
+            @Nullable WorldLinkType linkType) {
+        return linkType == null
+                ? getAllLinksContent(issuer)
+                : buildLinkContent(issuer, linkType, Message.of(""));
     }
 
-    private List<String> buildLinkContent(@Nullable WorldLinkType linkType) {
-        return linkType == null ? getAllLinksContent() : buildLinkContent(linkType, "");
-    }
-
-    private List<String> getAllLinksContent() {
+    private List<String> getAllLinksContent(@NotNull MVCommandIssuer issuer) {
         List<String> contents = buildLinkContent(
+                issuer,
                 WorldLinkType.NETHER,
-                ChatColor.DARK_RED + "[" + ChatColor.RED + "Nether" + ChatColor.DARK_RED + "] "
+                getLinkTypePrefix(WorldLinkType.NETHER)
         );
         contents.addAll(buildLinkContent(
+                issuer,
                 WorldLinkType.END,
-                ChatColor.DARK_AQUA + "[" + ChatColor.AQUA + "End" + ChatColor.DARK_AQUA + "] "
+                getLinkTypePrefix(WorldLinkType.END)
         ));
         return contents;
     }
 
-    private List<String> buildLinkContent(@NotNull WorldLinkType linkType,
-                                          @NotNull String prefix) {
+    private Message getLinkTypePrefix(@NotNull WorldLinkType linkType) {
+        ChatColor primaryColor = linkType == WorldLinkType.NETHER ? ChatColor.RED : ChatColor.AQUA;
+        ChatColor secondaryColor = linkType == WorldLinkType.NETHER ? ChatColor.DARK_RED : ChatColor.DARK_AQUA;
+        return Message.of(secondaryColor + "[" + primaryColor + linkType.getConfigKey()
+                + secondaryColor + "] ");
+    }
+
+    private List<String> buildLinkContent(
+            @NotNull MVCommandIssuer issuer,
+            @NotNull WorldLinkType linkType,
+            @NotNull Message prefix) {
 
         Map<String, String> links = this.linksManager.getLinksForType(linkType);
 
         return links.entrySet().stream()
-                .map(link -> parseSingleLink(link.getKey(), link.getValue(), prefix))
+                .map(link -> parseSingleLink(issuer, link.getKey(), link.getValue(), prefix))
                 .collect(Collectors.toList());
     }
 
-    private String parseSingleLink(@NotNull String fromWorldString,
-                                   @NotNull String toWorldString,
-                                   @NotNull String prefix) {
-
-        return prefix + ChatColor.WHITE + ParseWorldString(fromWorldString) + ChatColor.WHITE + " -> " + ParseWorldString(toWorldString);
+    private String parseSingleLink(
+            @NotNull MVCommandIssuer issuer,
+            @NotNull String fromWorldString,
+            @NotNull String toWorldString,
+            @NotNull Message prefix) {
+        return Message.of(MVNPi18n.LIST_ENTRY,
+                        replace("{prefix}").with(prefix),
+                        replace("{fromWorld}").with(parseWorldString(fromWorldString)),
+                        replace("{toWorld}").with(parseWorldString(toWorldString)))
+                .formatted(issuer);
     }
 
-    private String ParseWorldString(@NotNull String worldName) {
+    private Message parseWorldString(@NotNull String worldName) {
         return this.worldManager.getLoadedWorld(worldName)
-                .map(MultiverseWorld::getAliasOrName)
-                .getOrElse(ChatColor.GRAY + worldName + ChatColor.RED + " !!ERROR!!");
+                .map(world -> Message.of(world.getAliasOrName()))
+                .getOrElse(() -> Message.of(MVNPi18n.LIST_WORLD_NOTFOUND, WORLD.with(worldName)));
     }
 
     @Service

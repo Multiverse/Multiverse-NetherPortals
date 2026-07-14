@@ -7,6 +7,7 @@ import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
+import org.mvplugins.multiverse.netherportals.locale.MVNPi18n;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
 import org.mvplugins.multiverse.netherportals.utils.MVEventRecord;
 import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
@@ -24,6 +25,7 @@ import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityPortalExitEvent;
 import org.bukkit.util.Vector;
+import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.core.teleportation.LocationManipulation;
 import org.mvplugins.multiverse.core.event.MVPlayerTouchedPortalEvent;
 import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
@@ -37,6 +39,9 @@ import org.jvnet.hk2.annotations.Service;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.Replace.WORLD;
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.replace;
 
 @Service
 final class MVNPEntityListener implements MVNPListener {
@@ -52,6 +57,7 @@ final class MVNPEntityListener implements MVNPListener {
     private final MVLinkChecker linkChecker;
     private final WorldEntryCheckerProvider entryCheckerProvider;
     private final WorldManager worldManager;
+    private final MVCommandManager commandManager;
     private final LocationManipulation locationManipulation;
     private final MVEventRecord eventRecord;
     private final EndPlatformCreator endPlatformCreator;
@@ -69,6 +75,7 @@ final class MVNPEntityListener implements MVNPListener {
             @NotNull MVLinkChecker linkChecker,
             @NotNull WorldEntryCheckerProvider entryCheckerProvider,
             @NotNull WorldManager worldManager,
+            @NotNull MVCommandManager commandManager,
             @NotNull LocationManipulation locationManipulation,
             @NotNull MVEventRecord eventRecord,
             @NotNull EndPlatformCreator endPlatformCreator) {
@@ -80,6 +87,7 @@ final class MVNPEntityListener implements MVNPListener {
         this.linkChecker = linkChecker;
         this.entryCheckerProvider = entryCheckerProvider;
         this.worldManager = worldManager;
+        this.commandManager = commandManager;
         this.locationManipulation = locationManipulation;
         this.eventRecord = eventRecord;
         this.endPlatformCreator = endPlatformCreator;
@@ -254,9 +262,10 @@ final class MVNPEntityListener implements MVNPListener {
         }
 
         String currentWorld = currentLocation.getWorld().getName();
-        String linkedWorld = WorldLinkType.fromPortalType(type)
-                .flatMap(worldLinkType -> linksManager.getWorldLink(currentWorld, worldLinkType))
-                .getOrNull();
+        WorldLinkType worldLinkType = type == PortalType.ENDER
+                ? WorldLinkType.END
+                : WorldLinkType.NETHER;
+        String linkedWorld = linksManager.getWorldLink(currentWorld, worldLinkType).getOrNull();
         Location toLocation = getLocation(p, currentLocation, type, currentWorld, linkedWorld);
 
         if (toLocation == null) {
@@ -266,20 +275,18 @@ final class MVNPEntityListener implements MVNPListener {
 
             if (currentWorld.equalsIgnoreCase(linkedWorld)) {
                 if (this.config.isSendingDisabledPortalMessage()) {
-                    if (type == PortalType.ENDER) {
-                        p.sendMessage("End Portals have been disabled in this world!");
-                    } else {
-                        p.sendMessage("Nether Portals have been disabled in this world!");
-                    }
+                    commandManager.getCommandIssuer(p).sendError(MVNPi18n.PORTAL_DISABLED,
+                            replace("{linkType}").with(worldLinkType));
                 }
             } else {
                 if (this.config.isSendingNoDestinationMessage()) {
-                    p.sendMessage("This portal goes nowhere!");
-                    if (type == PortalType.ENDER) {
-                        p.sendMessage("No specific end world has been linked to this world and '" + this.nameChecker.getEndName(currentWorld) + "' is not a world.");
-                    } else {
-                        p.sendMessage("No specific nether world has been linked to this world and '" + this.nameChecker.getNetherName(currentWorld) + "' is not a world.");
-                    }
+                    commandManager.getCommandIssuer(p).sendError(MVNPi18n.PORTAL_NODESTINATION);
+                    String autoLinkedWorld = type == PortalType.ENDER
+                            ? this.nameChecker.getEndName(currentWorld)
+                            : this.nameChecker.getNetherName(currentWorld);
+                    commandManager.getCommandIssuer(p).sendError(MVNPi18n.PORTAL_AUTOLINKEDWORLD_NOTFOUND,
+                            replace("{linkType}").with(worldLinkType),
+                            WORLD.with(autoLinkedWorld));
                 }
             }
 

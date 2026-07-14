@@ -1,10 +1,10 @@
 package org.mvplugins.multiverse.netherportals.commands;
 
-import org.bukkit.ChatColor;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
+import org.mvplugins.multiverse.core.exceptions.command.MVInvalidCommandArgument;
+import org.mvplugins.multiverse.core.locale.message.Message;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
-import org.mvplugins.multiverse.external.acf.commands.InvalidCommandArgument;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandAlias;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandCompletion;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandPermission;
@@ -18,8 +18,12 @@ import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
+import org.mvplugins.multiverse.netherportals.locale.MVNPi18n;
 
 import java.util.Locale;
+
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.Replace.WORLD;
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.replace;
 
 @Service
 class LinkCommand extends NetherPortalsCommand {
@@ -35,38 +39,41 @@ class LinkCommand extends NetherPortalsCommand {
     @CommandPermission("multiverse.netherportals.link")
     @CommandCompletion("nether|end @mvworlds @mvworlds")
     @Syntax("<nether|end> [fromWorld] <toWorld>")
-    @Description("Sets which world to link to when a player enters a NetherPortal in this world.")
+    @Description("{@@mv-netherportals.link.description}")
     public void onLinkCommand(
             @NotNull MVCommandIssuer issuer,
 
             @Values("nether|end")
             @Syntax("<nether|end>")
-            @Description("Portal type to link.")
+            @Description("{@@mv-netherportals.link.type.description}")
             @NotNull String linkType,
 
             @Flags("resolve=issuerAware")
             @Syntax("[fromWorld]")
-            @Description("World the portals are at.")
+            @Description("{@@mv-netherportals.link.fromworld.description}")
             @NotNull MultiverseWorld fromWorld,
 
             @Syntax("<toWorld>")
-            @Description("World the portals should teleport to.")
+            @Description("{@@mv-netherportals.link.toworld.description}")
             @NotNull MultiverseWorld toWorld
     ) {
         WorldLinkType worldLinkType = WorldLinkType.valueOf(linkType.toUpperCase(Locale.ROOT));
         if (!this.linksManager.addWorldLink(fromWorld, toWorld, worldLinkType)
                 || this.linksManager.save().isFailure()) {
-            throw new InvalidCommandArgument("There was an error creating the link! See console for more details.");
+            throw MVInvalidCommandArgument.of(Message.of(MVNPi18n.LINK_FAILED));
         }
 
-        String coloredFrom = fromWorld.getAliasOrName();
-        String coloredTo = toWorld.getAliasOrName();
+        if (fromWorld.getName().equals(toWorld.getName())) {
+            issuer.sendMessage(MVNPi18n.LINK_DISABLED,
+                    replace("{linkType}").with(worldLinkType),
+                    WORLD.with(toWorld.getAliasOrName()));
+            return;
+        }
 
-        issuer.sendMessage((fromWorld.getName().equals(toWorld.getName()))
-                ? String.format("%sNOTE: %sYou have %ssuccessfully disabled %s%s Portals in %s.",
-                ChatColor.RED, ChatColor.WHITE, ChatColor.GREEN, ChatColor.WHITE, linkType, coloredTo)
-                : String.format("The %s portals in %s%s are now linked to %s.",
-                linkType, coloredFrom, ChatColor.WHITE, coloredTo));
+        issuer.sendMessage(MVNPi18n.LINK_SUCCESS,
+                replace("{linkType}").with(worldLinkType),
+                replace("{fromWorld}").with(fromWorld.getAliasOrName()),
+                replace("{toWorld}").with(toWorld.getAliasOrName()));
     }
 
     @Service
