@@ -359,17 +359,7 @@ final class MVNPEntityListener implements MVNPListener {
         if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
             event.setTo(newToWorld.getSpawnLocation());
         }
-        // If we are going to the overworld from the nether
-//        else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-//            try {
-//                Class.forName("org.bukkit.TravelAgent");
-//                event.getPortalTravelAgent().setCanCreatePortal(true);
-//                event.setTo(event.getPortalTravelAgent().findOrCreate(newToLocation));
-//            } catch (ClassNotFoundException ignore) {
-//                Logging.fine("TravelAgent not available for EntityPortalEvent for " + entity.getName() + ". Their destination may not be correct.");
-//                event.setTo(newToLocation);
-//            }
-//        }
+
         // If we are going to the end from anywhere
         else if (newToWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
             Location spawnLocation = endPlatformCreator.getVanillaLocation(entity, newToWorld);
