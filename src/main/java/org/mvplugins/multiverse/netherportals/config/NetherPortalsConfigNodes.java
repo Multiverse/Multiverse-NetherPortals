@@ -63,6 +63,16 @@ final class NetherPortalsConfigNodes {
             .name("end-suffix")
             .build());
 
+    final ConfigNode<Boolean> handleEndExitRespawn = node(ConfigNode.builder("handle-end-exit-respawn", Boolean.class)
+            .comment("")
+            .comment("When enabled, end portal exits from end world will override default behaviour and respawn players")
+            .comment("to the linked world's spawn. This is to handle the special case where player exiting end portal")
+            .comment("in end are treated as respawns instead of portal teleports in Minecraft.")
+            .comment("** This feature is only supported on Paper servers.")
+            .defaultValue(true)
+            .name("handle-end-exit-respawn")
+            .build());
+
     final ConfigNode<Boolean> usingBounceBack = node(ConfigNode.builder("bounceback", Boolean.class)
             .comment("")
             .comment("When enabled, players are pushed out of a portal when its destination is unavailable.")

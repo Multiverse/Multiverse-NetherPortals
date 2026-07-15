@@ -12,6 +12,7 @@ import org.mvplugins.multiverse.core.config.handle.StringPropertyHandle;
 import org.mvplugins.multiverse.core.config.migration.ConfigMigrator;
 import org.mvplugins.multiverse.core.config.migration.VersionMigrator;
 import org.mvplugins.multiverse.core.config.migration.action.MoveMigratorAction;
+import org.mvplugins.multiverse.core.config.migration.action.SetMigratorAction;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
@@ -41,6 +42,7 @@ public final class NetherPortalsConfig {
                 .logger(Logging.getLogger())
                 .migrator(ConfigMigrator.builder(configNodes.version)
                         .addVersionMigrator(VersionMigrator.builder(5.1)
+                                .addAction(SetMigratorAction.of("handle-end-exit-respawn", false))
                                 .addAction(MoveMigratorAction.of("teleport_entities", "teleport-entities"))
                                 .addAction(MoveMigratorAction.of(
                                         "send_disabled_portal_message", "send-disabled-portal-message"))
@@ -190,6 +192,29 @@ public final class NetherPortalsConfig {
     @ApiStatus.AvailableSince("5.1")
     public String getEndSuffix() {
         return configHandle.get(configNodes.endSuffix);
+    }
+
+    /**
+     * Checks whether Multiverse should override end portal exits and respawn players in the linked world's spawn.
+     *
+     * @return Whether end exit respawn is enabled.
+     * @since 5.1
+     */
+    @ApiStatus.AvailableSince("5.1")
+    public boolean shouldHandleEndExitRespawn() {
+        return configHandle.get(configNodes.handleEndExitRespawn);
+    }
+
+    /**
+     * Sets whether Multiverse should override end portal exits and respawn players in the linked world's spawn.
+     *
+     * @param handleEndExitRespawn Whether end exit respawn should be enabled.
+     * @return The result of the update.
+     * @since 5.1
+     */
+    @ApiStatus.AvailableSince("5.1")
+    public Try<Void> setHandleEndExitRespawn(boolean handleEndExitRespawn) {
+        return configHandle.set(configNodes.handleEndExitRespawn, handleEndExitRespawn);
     }
 
     /**
