@@ -34,7 +34,6 @@ final class MVNPPlayerListener implements MVNPListener {
     private final MultiverseNetherPortals plugin;
     private final NetherPortalsConfig config;
     private final LinksManager linksManager;
-    private final MVNameChecker nameChecker;
     private final MVLinkChecker linkChecker;
     private final WorldManager worldManager;
     private final EndPlatformCreator endPlatformCreator;
@@ -53,14 +52,12 @@ final class MVNPPlayerListener implements MVNPListener {
             @NotNull MultiverseNetherPortals plugin,
             @NotNull NetherPortalsConfig config,
             @NotNull LinksManager linksManager,
-            @NotNull MVNameChecker nameChecker,
             @NotNull MVLinkChecker linkChecker,
             @NotNull WorldManager worldManager,
             @NotNull EndPlatformCreator endPlatformCreator) {
         this.plugin = plugin;
         this.config = config;
         this.linksManager = linksManager;
-        this.nameChecker = nameChecker;
         this.linkChecker = linkChecker;
         this.worldManager = worldManager;
         this.endPlatformCreator = endPlatformCreator;
@@ -158,70 +155,55 @@ final class MVNPPlayerListener implements MVNPListener {
 
         Player player = event.getPlayer();
 
-        Location newTo;
         String currentWorld = currentLocation.getWorld().getName();
         String linkedWorld = WorldLinkType.fromPortalType(type)
                 .flatMap(worldLinkType -> linksManager.getWorldLink(currentWorld, worldLinkType))
-                .getOrNull();
-        if (currentWorld.equalsIgnoreCase(linkedWorld)) {
-            newTo = null;
-        } else if (linkedWorld != null) {
-            newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, player);
-        } else if (this.nameChecker.isValidNetherName(currentWorld)) {
-            if (type == PortalType.NETHER) {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.NETHER), player);
-            } else {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, PortalType.NETHER)), player);
-            }
-        } else if (this.nameChecker.isValidEndName(currentWorld)) {
-            if (type == PortalType.NETHER) {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, PortalType.ENDER)), player);
-            } else {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNormalName(currentWorld, PortalType.ENDER), player);
-            }
-        } else {
-            if (type == PortalType.ENDER) {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getEndName(currentWorld), player);
-            } else {
-                newTo = this.linkChecker.findNewTeleportLocation(currentLocation, this.nameChecker.getNetherName(currentWorld), player);
-            }
-        }
+                .getOrElse(() -> linkChecker.getAutoLink(currentWorld, type));
 
-        if (newTo != null) {
-            event.setTo(newTo);
-        } else {
+        if (currentWorld.equalsIgnoreCase(linkedWorld) || linkedWorld == null) {
             event.setCancelled(true);
             return;
         }
 
+        Location newTo = this.linkChecker.findNewTeleportLocation(currentLocation, linkedWorld, player);
+        if  (newTo == null) {
+            event.setCancelled(true);
+            return;
+        }
+        event.setTo(newTo);
+
         LoadedMultiverseWorld fromWorld = this.worldManager.getLoadedWorld(event.getFrom().getWorld()).getOrNull();
         LoadedMultiverseWorld toWorld = this.worldManager.getLoadedWorld(event.getTo().getWorld()).getOrNull();
+        if (fromWorld == null || toWorld == null) {
+            Logging.fine("Player '%s' is trying to enter a portal from/to a world that is not known to Multiverse. From: %s, To: %s",
+                    player.getName(), event.getFrom().getWorld().getName(), event.getTo().getWorld().getName());
+            return;
+        }
 
-        if (!event.isCancelled()) {
-            if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                Logging.fine("Player '" + player.getName() + "' will be teleported to the spawn of '" + toWorld.getName() + "' since they used an end exit portal.");
-                event.setCanCreatePortal(false);
-                if (toWorld.getBedRespawn()
-                        && player.getBedSpawnLocation() != null
-                        && toWorld.getUID().equals(player.getBedSpawnLocation().getWorld().getUID())) {
-                    event.setTo(player.getBedSpawnLocation());
-                } else {
-                    event.setTo(toWorld.getSpawnLocation());
-                }
-            } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
-                event.setCanCreatePortal(true);
-            } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
-                Location spawnLocation = endPlatformCreator.getVanillaLocation(player, event.getTo().getWorld());
-                event.setTo(spawnLocation);
-                endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), config.isEndPlatformDropBlocks());
+        if (fromWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+            Logging.fine("Player '%s' will be teleported to the spawn of '%s' since they used an end exit portal.",
+                    player.getName(), toWorld.getName());
+            event.setCanCreatePortal(false);
+            if (toWorld.getBedRespawn()
+                    && player.getBedSpawnLocation() != null
+                    && toWorld.getUID().equals(player.getBedSpawnLocation().getWorld().getUID())) {
+                event.setTo(player.getBedSpawnLocation());
+            } else {
+                event.setTo(toWorld.getSpawnLocation());
             }
+        } else if (fromWorld.getEnvironment() == World.Environment.NETHER && type == PortalType.NETHER) {
+            event.setCanCreatePortal(true);
+        } else if (toWorld.getEnvironment() == World.Environment.THE_END && type == PortalType.ENDER) {
+            Location spawnLocation = endPlatformCreator.getVanillaLocation(player, event.getTo().getWorld());
+            event.setTo(spawnLocation);
+            endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), config.isEndPlatformDropBlocks());
+        }
 
-            // Advancements need to be triggered manually
-            if (type == PortalType.NETHER && event.getTo().getWorld().getEnvironment() == World.Environment.NETHER && enterNetherAdvancement != null) {
-                awardAdvancement(player, enterNetherAdvancement, ENTER_NETHER_CRITERIA);
-            } else if (type == PortalType.ENDER && event.getTo().getWorld().getEnvironment() == World.Environment.THE_END && enterEndAdvancement != null) {
-                awardAdvancement(player, enterEndAdvancement, ENTER_END_CRITERIA);
-            }
+        // Advancements need to be triggered manually
+        if (type == PortalType.NETHER && event.getTo().getWorld().getEnvironment() == World.Environment.NETHER && enterNetherAdvancement != null) {
+            awardAdvancement(player, enterNetherAdvancement, ENTER_NETHER_CRITERIA);
+        } else if (type == PortalType.ENDER && event.getTo().getWorld().getEnvironment() == World.Environment.THE_END && enterEndAdvancement != null) {
+            awardAdvancement(player, enterEndAdvancement, ENTER_END_CRITERIA);
         }
     }
 
