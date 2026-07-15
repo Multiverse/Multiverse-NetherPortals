@@ -1,6 +1,7 @@
 package org.mvplugins.multiverse.netherportals.listeners;
 
 import com.dumptruckman.minecraft.util.Logging;
+import org.bukkit.Bukkit;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.DefaultEventPriority;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
@@ -35,6 +36,7 @@ import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.external.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
+import org.mvplugins.multiverse.netherportals.utils.customportals.CustomPortalsHandler;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -50,7 +52,6 @@ final class MVNPEntityListener implements MVNPListener {
 
     private final Map<String, Date> playerErrors;
 
-    private final MultiverseNetherPortals plugin;
     private final NetherPortalsConfig config;
     private final LinksManager linksManager;
     private final MVNameChecker nameChecker;
@@ -66,10 +67,10 @@ final class MVNPEntityListener implements MVNPListener {
     // listener more than once for a given player. that also means players are
     // only messaged once about why they can't go through a given portal.
     private final MVEventRecord eventRecord;
+    private final CustomPortalsHandler customPortalsHandler;
 
     @Inject
     MVNPEntityListener(
-            @NotNull MultiverseNetherPortals plugin,
             @NotNull NetherPortalsConfig config,
             @NotNull LinksManager linksManager,
             @NotNull MVNameChecker nameChecker,
@@ -79,9 +80,9 @@ final class MVNPEntityListener implements MVNPListener {
             @NotNull MVCommandManager commandManager,
             @NotNull LocationManipulation locationManipulation,
             @NotNull MVEventRecord eventRecord,
-            @NotNull EndPlatformCreator endPlatformCreator) {
+            @NotNull EndPlatformCreator endPlatformCreator,
+            @NotNull CustomPortalsHandler customPortalsHandler) {
         this.playerErrors = new HashMap<>();
-        this.plugin = plugin;
         this.config = config;
         this.linksManager = linksManager;
         this.nameChecker = nameChecker;
@@ -92,6 +93,7 @@ final class MVNPEntityListener implements MVNPListener {
         this.locationManipulation = locationManipulation;
         this.eventRecord = eventRecord;
         this.endPlatformCreator = endPlatformCreator;
+        this.customPortalsHandler = customPortalsHandler;
     }
 
     /**
@@ -189,7 +191,7 @@ final class MVNPEntityListener implements MVNPListener {
 
         Location currentLocation = this.locationManipulation.getBlockLocation(event.getLocation());
 
-        if (!plugin.isHandledByNetherPortals(currentLocation)) {
+        if (customPortalsHandler.isHandledByCustomPortals(event.getEntity(), currentLocation)) {
             return;
         }
 
@@ -212,7 +214,7 @@ final class MVNPEntityListener implements MVNPListener {
         eventRecord.addToRecord(type, player.getUniqueId());
 
         MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(player, event.getLocation());
-        this.plugin.getServer().getPluginManager().callEvent(playerTouchedPortalEvent);
+        Bukkit.getPluginManager().callEvent(playerTouchedPortalEvent);
         Location eventLocation = event.getLocation().clone();
         if (!playerTouchedPortalEvent.canUseThisPortal()) {
             // Someone else said the player is not allowed to go here.
@@ -308,7 +310,7 @@ final class MVNPEntityListener implements MVNPListener {
         }
 
         // Don't mess with other people's stuff
-        if (!plugin.isHandledByNetherPortals(event.getFrom())) {
+        if (customPortalsHandler.isHandledByCustomPortals(event.getEntity(), event.getFrom())) {
             return;
         }
 
