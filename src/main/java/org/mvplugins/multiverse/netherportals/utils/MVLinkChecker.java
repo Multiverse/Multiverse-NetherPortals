@@ -65,7 +65,7 @@ public class MVLinkChecker {
 
         if (tpTo == null) {
             Logging.fine("Can't find world " + worldString);
-        } else if (!this.worldManager.isLoadedWorld(fromLocation.getWorld())) {
+        } else if (tpFrom == null) {
             Logging.warning("World " + fromLocation.getWorld().getName() + " is not a Multiverse world");
         } else {
             String entityType = (e instanceof Player) ? " player " : " entity ";
