@@ -42,8 +42,6 @@ public enum MVNPi18n implements MessageKeyProvider {
     LIST_HEADER,
     LIST_NOCONTENT_ALL,
     LIST_NOCONTENT,
-    LIST_ENTRY,
-    LIST_WORLD_NOTFOUND,
 
     // Portal use
     PORTAL_DISABLED,

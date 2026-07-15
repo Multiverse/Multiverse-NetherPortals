@@ -23,7 +23,9 @@ import org.jvnet.hk2.annotations.Service;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.mvplugins.multiverse.netherportals.locale.MVNPi18n;
+import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,11 +39,13 @@ class ListCommand extends NetherPortalsCommand {
 
     private final LinksManager linksManager;
     private final WorldManager worldManager;
+    private final MVLinkChecker linkChecker;
 
     @Inject
-    ListCommand(@NotNull LinksManager linksManager, @NotNull WorldManager worldManager) {
+    ListCommand(@NotNull LinksManager linksManager, @NotNull WorldManager worldManager, @NotNull MVLinkChecker linkChecker) {
         this.linksManager = linksManager;
         this.worldManager = worldManager;
+        this.linkChecker = linkChecker;
     }
 
     // todo page and filter
@@ -81,70 +85,105 @@ class ListCommand extends NetherPortalsCommand {
                 .send(issuer);
     }
 
-    private List<String> buildLinkContent(
-            @NotNull MVCommandIssuer issuer,
-            @Nullable WorldLinkType linkType) {
+    private List<String> buildLinkContent(@NotNull MVCommandIssuer issuer, @Nullable WorldLinkType linkType) {
         return linkType == null
                 ? getAllLinksContent(issuer)
-                : buildLinkContent(issuer, linkType, Message.of(""));
+                : buildLinkContentForType(issuer, linkType);
     }
 
     private List<String> getAllLinksContent(@NotNull MVCommandIssuer issuer) {
-        List<String> contents = buildLinkContent(
-                issuer,
-                WorldLinkType.NETHER,
-                getLinkTypePrefix(WorldLinkType.NETHER)
-        );
-        contents.addAll(buildLinkContent(
-                issuer,
-                WorldLinkType.END,
-                getLinkTypePrefix(WorldLinkType.END)
-        ));
+        List<String> contents = buildLinkContentForType(issuer, WorldLinkType.NETHER);
+        contents.addAll(buildLinkContentForType(issuer, WorldLinkType.END));
         return contents;
     }
 
-    private Message getLinkTypePrefix(@NotNull WorldLinkType linkType) {
-        ChatColor primaryColor = linkType == WorldLinkType.NETHER ? ChatColor.RED : ChatColor.AQUA;
-        ChatColor secondaryColor = linkType == WorldLinkType.NETHER ? ChatColor.DARK_RED : ChatColor.DARK_AQUA;
-        return Message.of(secondaryColor + "[" + primaryColor + linkType.getConfigKey()
-                + secondaryColor + "] ");
-    }
+    private List<String> buildLinkContentForType(@NotNull MVCommandIssuer issuer, @NotNull WorldLinkType linkType) {
+        Map<String, String> links = this.linksManager.getLinksMapForType(linkType);
+        Map<String, LinkRow> linkRows = new LinkedHashMap<>();
+        links.forEach((fromWorld, toWorld) -> {
+            if (linkRows.containsKey(toWorld) && fromWorld.equals(linkRows.get(toWorld).toWorld)) {
+                linkRows.get(toWorld).twoWay = true;
+            } else {
+                linkRows.put(fromWorld, new LinkRow(linkType, fromWorld, toWorld));
+            }
+        });
 
-    private List<String> buildLinkContent(
-            @NotNull MVCommandIssuer issuer,
-            @NotNull WorldLinkType linkType,
-            @NotNull Message prefix) {
+        worldManager.getWorlds().forEach(world -> {
+            if (links.containsKey(world.getName())) {
+                return;
+            }
+            String toWorldName = linkChecker.getAutoLink(world.getName(), linkType.toPortalType());
+            if (toWorldName == null || !worldManager.isWorld(toWorldName)) {
+                return;
+            }
+            if (linkRows.containsKey(toWorldName) && linkRows.get(toWorldName).auto) {
+                linkRows.get(toWorldName).twoWay = true;
+                return;
+            }
 
-        Map<String, String> links = this.linksManager.getLinksForType(linkType);
+            LinkRow linkRow = new LinkRow(linkType, world.getName(), toWorldName);
+            linkRow.auto = true;
+            linkRows.put(world.getName(), linkRow);
+        });
 
-        return links.entrySet().stream()
-                .map(link -> parseSingleLink(issuer, link.getKey(), link.getValue(), prefix))
+        return linkRows.values().stream()
+                .map(LinkRow::getRowMessage)
+                .map(message -> message.formatted(issuer))
                 .collect(Collectors.toList());
     }
 
-    private String parseSingleLink(
-            @NotNull MVCommandIssuer issuer,
-            @NotNull String fromWorldString,
-            @NotNull String toWorldString,
-            @NotNull Message prefix) {
-        return Message.of(MVNPi18n.LIST_ENTRY,
-                        replace("{prefix}").with(prefix),
-                        replace("{fromWorld}").with(parseWorldString(fromWorldString)),
-                        replace("{toWorld}").with(parseWorldString(toWorldString)))
-                .formatted(issuer);
-    }
+    private static class LinkRow {
+        private final WorldLinkType linkType;
+        private final String fromWorld;
+        private final String toWorld;
+        private boolean twoWay = false;
+        private boolean auto = false;
 
-    private Message parseWorldString(@NotNull String worldName) {
-        return this.worldManager.getLoadedWorld(worldName)
-                .map(world -> Message.of(world.getAliasOrName()))
-                .getOrElse(() -> Message.of(MVNPi18n.LIST_WORLD_NOTFOUND, WORLD.with(worldName)));
+        private LinkRow(WorldLinkType linkType, String fromWorld, String toWorld) {
+            this.linkType = linkType;
+            this.fromWorld = fromWorld;
+            this.toWorld = toWorld;
+        }
+
+        private Message getRowMessage() {
+            if (fromWorld.equals(toWorld)) {
+                // link disabled
+                return Message.of("{linkType} &f{fromWorld} &7&l-- &cDISABLED",
+                        replace("{fromWorld}").with(fromWorld),
+                        replace("{linkType}").with(getLinkTypeColoured(linkType)));
+            } else if (twoWay) {
+                // two-way link
+                return Message.of("{linkType} &f{fromWorld} &7&l<--->&r &f{toWorld}{auto}",
+                        replace("{fromWorld}").with(fromWorld),
+                        replace("{linkType}").with(getLinkTypeColoured(linkType)),
+                        replace("{toWorld}").with(toWorld),
+                        replace("{auto}").with(autoString()));
+            }
+            // one-way link
+            return Message.of("{linkType} &f{fromWorld} &7&l-->&r &f{toWorld}{auto}",
+                    replace("{fromWorld}").with(fromWorld),
+                    replace("{linkType}").with(getLinkTypeColoured(linkType)),
+                    replace("{toWorld}").with(toWorld),
+                    replace("{auto}").with(autoString()));
+        }
+
+        private String autoString() {
+            return auto ? " &6&o(auto)" : "";
+        }
+
+        private Message getLinkTypeColoured(@NotNull WorldLinkType linkType) {
+            ChatColor primaryColor = linkType == WorldLinkType.NETHER ? ChatColor.RED : ChatColor.AQUA;
+            ChatColor secondaryColor = linkType == WorldLinkType.NETHER ? ChatColor.DARK_RED : ChatColor.DARK_AQUA;
+            return Message.of(secondaryColor + "[" + primaryColor + linkType.getConfigKey()
+                    + secondaryColor + "]");
+        }
     }
 
     @Service
     private final static class LegacyAlias extends ListCommand implements LegacyAliasCommand {
         @Inject
-        LegacyAlias(LinksManager linksManager, WorldManager worldManager) {
-            super(linksManager, worldManager);
+        LegacyAlias(LinksManager linksManager, WorldManager worldManager, MVLinkChecker linkChecker) {
+            super(linksManager, worldManager, linkChecker);
         }
 
         @Override

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.core.config.CoreConfig;
 import org.mvplugins.multiverse.core.module.MultiverseModule;
 import org.mvplugins.multiverse.core.utils.StringFormatter;
+import org.mvplugins.multiverse.netherportals.command.MVNPCommandCompletions;
 import org.mvplugins.multiverse.netherportals.commands.NetherPortalsCommand;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.listeners.MVNPListener;
@@ -38,6 +39,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private Provider<NetherPortalsConfig> netherPortalsConfig;
     @Inject
     private Provider<LinksManager> linksManager;
+    @Inject
+    private Provider<MVNPCommandCompletions> commandCompletionsProvider;
 
     @Override
     public void onLoad() {
@@ -61,6 +64,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
             return;
         }
         this.setUpLocales();
+        commandCompletionsProvider.get();
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
         MultiverseNetherPortalsApi.init(this);
@@ -215,21 +219,21 @@ public class MultiverseNetherPortals extends MultiverseModule {
     }
 
     /**
-     * @deprecated Use {@link LinksManager#getLinksForType(WorldLinkType)} instead.
+     * @deprecated Use {@link LinksManager#getLinksMapForType(WorldLinkType)} instead.
      */
     @Deprecated(since = "5.1", forRemoval = true)
     @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
     public Map<String, String> getWorldLinks() {
-        return linksManager.get().getLinksForType(WorldLinkType.NETHER);
+        return linksManager.get().getLinksMapForType(WorldLinkType.NETHER);
     }
 
     /**
-     * @deprecated Use {@link LinksManager#getLinksForType(WorldLinkType)} instead.
+     * @deprecated Use {@link LinksManager#getLinksMapForType(WorldLinkType)} instead.
      */
     @Deprecated(since = "5.1", forRemoval = true)
     @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
     public Map<String, String> getEndWorldLinks() {
-        return linksManager.get().getLinksForType(WorldLinkType.END);
+        return linksManager.get().getLinksMapForType(WorldLinkType.END);
     }
 
     /**
@@ -370,8 +374,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
                 + "[Multiverse-NetherPortals] Nether Suffix: " + config.getNetherSuffix() + '\n'
                 + "[Multiverse-NetherPortals] End Prefix: " + config.getEndPrefix() + '\n'
                 + "[Multiverse-NetherPortals] End Suffix: " + config.getEndSuffix() + '\n'
-                + "[Multiverse-NetherPortals] Nether Links: " + links.getLinksForType(WorldLinkType.NETHER) + '\n'
-                + "[Multiverse-NetherPortals] End Links: " + links.getLinksForType(WorldLinkType.END) + '\n'
+                + "[Multiverse-NetherPortals] Nether Links: " + links.getLinksMapForType(WorldLinkType.NETHER) + '\n'
+                + "[Multiverse-NetherPortals] End Links: " + links.getLinksMapForType(WorldLinkType.END) + '\n'
                 + "[Multiverse-NetherPortals] Bounceback: " + config.isUsingBounceBack() + '\n'
                 + "[Multiverse-NetherPortals] Teleport Entities: " + config.isTeleportingEntities() + '\n'
                 + "[Multiverse-NetherPortals] Send Disabled Portal Message: "

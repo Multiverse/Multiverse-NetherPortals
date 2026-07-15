@@ -12,18 +12,19 @@ import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
+import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
 import org.mvplugins.multiverse.netherportals.utils.MVNameChecker;
 
 @Service
 final class MVNPEntityPortalReadyListener implements MVNPListener {
 
     private final LinksManager linksManager;
-    private final MVNameChecker nameChecker;
+    private final MVLinkChecker linkChecker;
 
     @Inject
-    MVNPEntityPortalReadyListener(@NotNull LinksManager linksManager, @NotNull MVNameChecker nameChecker) {
+    MVNPEntityPortalReadyListener(@NotNull LinksManager linksManager, @NotNull MVLinkChecker linkChecker) {
         this.linksManager = linksManager;
-        this.nameChecker = nameChecker;
+        this.linkChecker = linkChecker;
     }
 
     @EventClass("io.papermc.paper.event.entity.EntityPortalReadyEvent")
@@ -55,25 +56,6 @@ final class MVNPEntityPortalReadyListener implements MVNPListener {
             Logging.finer("Got manually linked world '%s' for world '%s'", linkedWorld, currentWorld);
             return linkedWorld;
         }
-        if (nameChecker.isValidEndName(currentWorld)) {
-            if (type == PortalType.ENDER) {
-                return nameChecker.getNormalName(currentWorld, type);
-            } else if (type == PortalType.NETHER) {
-                return nameChecker.getNetherName(this.nameChecker.getNormalName(currentWorld, type));
-            }
-        } else if (this.nameChecker.isValidNetherName(currentWorld)) {
-            if (type == PortalType.ENDER) {
-                return nameChecker.getEndName(this.nameChecker.getNormalName(currentWorld, type));
-            } else if (type == PortalType.NETHER) {
-                return nameChecker.getNormalName(currentWorld, type);
-            }
-        } else {
-            if (type == PortalType.ENDER) {
-                return nameChecker.getEndName(currentWorld);
-            } else if (type == PortalType.NETHER) {
-                return nameChecker.getNetherName(currentWorld);
-            }
-        }
-        return null;
+        return linkChecker.getAutoLink(currentWorld, type);
     }
 }
