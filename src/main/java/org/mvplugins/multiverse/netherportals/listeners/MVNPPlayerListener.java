@@ -5,20 +5,15 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.core.utils.ReflectHelper;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
-import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.mvplugins.multiverse.netherportals.utils.EndPlatformCreator;
 import org.mvplugins.multiverse.netherportals.utils.MVLinkChecker;
-import org.mvplugins.multiverse.netherportals.utils.MVNameChecker;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.PortalType;
 import org.bukkit.World;
-import org.bukkit.advancement.Advancement;
-import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -38,12 +33,6 @@ final class MVNPPlayerListener implements MVNPListener {
     private final WorldManager worldManager;
     private final EndPlatformCreator endPlatformCreator;
 
-    private final Advancement enterNetherAdvancement;
-    private final Advancement enterEndAdvancement;
-
-    private static final String ENTER_NETHER_CRITERIA = "entered_nether";
-    private static final String ENTER_END_CRITERIA = "entered_end";
-
     private static final boolean HAS_RESPAWN_REASON = ReflectHelper.hasClass("org.bukkit.event.player.PlayerRespawnEvent$RespawnReason");
     private static final boolean HAS_RESPAWN_FLAG = ReflectHelper.hasClass("org.bukkit.event.player.PlayerRespawnEvent$RespawnFlag");
 
@@ -61,15 +50,6 @@ final class MVNPPlayerListener implements MVNPListener {
         this.linkChecker = linkChecker;
         this.worldManager = worldManager;
         this.endPlatformCreator = endPlatformCreator;
-
-        this.enterNetherAdvancement = tryGetAdvancement("story/enter_the_nether");
-        this.enterEndAdvancement = tryGetAdvancement("story/enter_the_end");
-    }
-
-    private Advancement tryGetAdvancement(String advancementName) {
-        return Try.of(() -> this.plugin.getServer().getAdvancement(NamespacedKey.minecraft(advancementName)))
-                .recover(e -> null)
-                .getOrNull();
     }
 
     @EventMethod
@@ -198,36 +178,5 @@ final class MVNPPlayerListener implements MVNPListener {
             event.setTo(spawnLocation);
             endPlatformCreator.createEndPlatform(spawnLocation.getWorld(), config.isEndPlatformDropBlocks());
         }
-
-        // Advancements need to be triggered manually
-        if (type == PortalType.NETHER && event.getTo().getWorld().getEnvironment() == World.Environment.NETHER && enterNetherAdvancement != null) {
-            awardAdvancement(player, enterNetherAdvancement, ENTER_NETHER_CRITERIA);
-        } else if (type == PortalType.ENDER && event.getTo().getWorld().getEnvironment() == World.Environment.THE_END && enterEndAdvancement != null) {
-            awardAdvancement(player, enterEndAdvancement, ENTER_END_CRITERIA);
-        }
-    }
-
-    /**
-     * Award an advancement criteria to a player if not already awarded.
-     *
-     * @param player        Target player to award the advancement criteria to.
-     * @param advancement   {@link Advancement} the criteria belongs to.
-     * @param criteria      Criteria to award the player.
-     */
-    private void awardAdvancement(Player player, Advancement advancement, String criteria) {
-        if (advancement == null) {
-            Logging.fine("No advancement found for target criteria: %s", criteria);
-            return;
-        }
-        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
-        if (advancementProgress.isDone()) {
-            Logging.fine("%s has already been awarded advancement criteria %s.", player.getName(), criteria);
-            return;
-        }
-        if (!advancementProgress.awardCriteria(criteria)) {
-            Logging.warning("Unable to award advancement criteria %s to %s.", criteria, player.getName());
-            return;
-        }
-        Logging.fine("Awarded advancement criteria %s to %s.", criteria, player.getName());
     }
 }
