@@ -106,7 +106,10 @@ final class NetherPortalsConfigNodes {
     final ConfigNode<Boolean> endPlatformDropBlocks = node(ConfigNode.builder(
                     "end-platform-drop-blocks", Boolean.class)
             .comment("")
-            .comment("When enabled, blocks replaced while creating an End platform drop as items.")
+            .comment("When enabled, blocks replaced while creating an End platform drop as items on non-default worlds to")
+            .comment("mimic vanilla Minecraft behaviour.")
+            .comment("Note: The default end is handled by the server and loaded even without Multiverse installed, thus")
+            .comment("      multiverse will have no control over it's drop items behaviour.")
             .defaultValue(true)
             .name("end-platform-drop-blocks")
             .build());
