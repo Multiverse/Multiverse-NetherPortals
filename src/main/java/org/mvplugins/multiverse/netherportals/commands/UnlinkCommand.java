@@ -3,8 +3,6 @@ package org.mvplugins.multiverse.netherportals.commands;
 import org.mvplugins.multiverse.core.command.LegacyAliasCommand;
 import org.mvplugins.multiverse.core.command.MVCommandIssuer;
 import org.mvplugins.multiverse.core.config.CoreConfig;
-import org.mvplugins.multiverse.core.exceptions.command.MVInvalidCommandArgument;
-import org.mvplugins.multiverse.core.locale.message.Message;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
 import org.mvplugins.multiverse.core.world.WorldManager;
 import org.mvplugins.multiverse.external.acf.commands.annotation.CommandAlias;
@@ -13,7 +11,6 @@ import org.mvplugins.multiverse.external.acf.commands.annotation.CommandPermissi
 import org.mvplugins.multiverse.external.acf.commands.annotation.Description;
 import org.mvplugins.multiverse.external.acf.commands.annotation.Subcommand;
 import org.mvplugins.multiverse.external.acf.commands.annotation.Syntax;
-import org.mvplugins.multiverse.external.acf.commands.annotation.Values;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
@@ -22,9 +19,7 @@ import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.mvplugins.multiverse.netherportals.locale.MVNPi18n;
 
-import java.util.Locale;
-
-import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.Replace.WORLD;
+import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.Replace;
 import static org.mvplugins.multiverse.core.locale.message.MessageReplacement.replace;
 
 @Service
@@ -59,37 +54,33 @@ class UnlinkCommand extends NetherPortalsCommand {
             @Description("{@@mv-netherportals.unlink.fromworld.description}")
             @NotNull String fromWorldString
     ) {
-        Option<MultiverseWorld> fromWorld = resolveFromWorldString(fromWorldString);
-        String fromWorldName = fromWorld
+        String fromWorldName = resolveFromWorldString(fromWorldString)
                 .map(MultiverseWorld::getName)
                 .getOrElse(fromWorldString); // fallback as its possible world was already deleted!
         String toWorldName = this.linksManager.getWorldLink(fromWorldName, worldLinkType).getOrNull();
-        if (toWorldName == null) {
+
+        if (!this.linksManager.removeWorldLink(fromWorldName, worldLinkType)) {
             issuer.sendMessage(MVNPi18n.UNLINK_NOTLINKED,
-                    WORLD.with(fromWorldString),
+                    Replace.WORLD.with(fromWorldString),
                     replace("{linkType}").with(worldLinkType));
             return;
         }
 
-        boolean linkRemoved = fromWorld
-                .map(world -> this.linksManager.removeWorldLink(world, worldLinkType))
-                .getOrElse(() -> this.linksManager.removeWorldLink(fromWorldName, worldLinkType));
-        if (!linkRemoved
-                || this.linksManager.save().isFailure()) {
-            throw MVInvalidCommandArgument.of(Message.of(MVNPi18n.UNLINK_FAILED));
-        }
-
-        if (fromWorldName.equals(toWorldName)) {
-            issuer.sendMessage(MVNPi18n.UNLINK_ENABLED,
-                    replace("{linkType}").with(worldLinkType),
-                    WORLD.with(fromWorldString));
-            return;
-        }
-
-        issuer.sendMessage(MVNPi18n.UNLINK_SUCCESS,
-                replace("{linkType}").with(worldLinkType),
-                replace("{fromWorld}").with(fromWorldString),
-                replace("{toWorld}").with(toWorldName));
+        this.linksManager.save()
+                .onFailure(error -> issuer.sendError(MVNPi18n.UNLINK_FAILED,
+                        Replace.ERROR.with(error)))
+                .onSuccess(ignore -> {
+                    if (fromWorldName.equals(toWorldName)) {
+                        issuer.sendMessage(MVNPi18n.UNLINK_ENABLED,
+                                replace("{linkType}").with(worldLinkType),
+                                Replace.WORLD.with(fromWorldString));
+                        return;
+                    }
+                    issuer.sendMessage(MVNPi18n.UNLINK_SUCCESS,
+                            replace("{linkType}").with(worldLinkType),
+                            replace("{fromWorld}").with(fromWorldString),
+                            replace("{toWorld}").with(toWorldName));
+                });
     }
 
     private Option<MultiverseWorld> resolveFromWorldString(@NotNull String fromWorldString) {
