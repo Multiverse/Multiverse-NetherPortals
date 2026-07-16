@@ -172,10 +172,10 @@ class ListCommand extends NetherPortalsCommand {
         }
 
         private Message getLinkTypeColoured(@NotNull WorldLinkType linkType) {
-            ChatColor primaryColor = linkType == WorldLinkType.NETHER ? ChatColor.RED : ChatColor.AQUA;
-            ChatColor secondaryColor = linkType == WorldLinkType.NETHER ? ChatColor.DARK_RED : ChatColor.DARK_AQUA;
-            return Message.of(secondaryColor + "[" + primaryColor + linkType.getConfigKey()
-                    + secondaryColor + "]");
+            return switch (linkType) {
+                case NETHER -> Message.of("&4[&cnether&4]");
+                case END -> Message.of("&3[&bend&3]");
+            };
         }
     }
 
