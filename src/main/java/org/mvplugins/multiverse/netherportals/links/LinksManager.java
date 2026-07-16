@@ -73,8 +73,9 @@ public final class LinksManager {
         if (!linksConfigFile.exists() && !linksConfigFile.createNewFile()) {
             throw new IllegalStateException("Could not create links.yml config file");
         }
-        linksConfig = new YamlConfiguration();
-        linksConfig.load(linksConfigFile);
+        YamlConfiguration loadedConfig = new YamlConfiguration();
+        loadedConfig.load(linksConfigFile);
+        linksConfig = loadedConfig;
     }
 
     private void parseLinks() {

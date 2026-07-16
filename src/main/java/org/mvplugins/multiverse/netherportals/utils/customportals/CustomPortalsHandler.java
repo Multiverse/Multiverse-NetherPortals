@@ -12,8 +12,9 @@ import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.portals.MultiversePortalsApi;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A handler for managing custom portal conflicting with Multiverse-NetherPortals. Some portal plugins want to use
@@ -34,7 +35,7 @@ public class CustomPortalsHandler {
 
     @Inject
     CustomPortalsHandler() {
-        this.handleChecks = new ArrayList<>();
+        this.handleChecks = new CopyOnWriteArrayList<>();
         registerMultiversePortalsCheck();
     }
 
@@ -63,8 +64,8 @@ public class CustomPortalsHandler {
      * @since 5.1
      */
     @ApiStatus.AvailableSince("5.1")
-    public void registerHandleCheck(CustomPortalsHandleCheck check) {
-        this.handleChecks.add(check);
+    public void registerHandleCheck(@NotNull CustomPortalsHandleCheck check) {
+        this.handleChecks.add(Objects.requireNonNull(check, "check"));
     }
 
     /**
@@ -75,8 +76,8 @@ public class CustomPortalsHandler {
      * @since 5.1
      */
     @ApiStatus.AvailableSince("5.1")
-    public void unregisterHandleCheck(CustomPortalsHandleCheck check) {
-        this.handleChecks.remove(check);
+    public void unregisterHandleCheck(@NotNull CustomPortalsHandleCheck check) {
+        this.handleChecks.remove(Objects.requireNonNull(check, "check"));
     }
 
     /**

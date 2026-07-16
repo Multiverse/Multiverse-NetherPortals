@@ -5,7 +5,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.mvplugins.multiverse.core.dynamiclistener.annotations.EventMethod;
 import org.mvplugins.multiverse.core.utils.ReflectHelper;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
-import org.mvplugins.multiverse.netherportals.MultiverseNetherPortals;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
@@ -86,6 +85,13 @@ final class MVNPPlayerListener implements MVNPListener {
             return;
         }
 
+        MultiverseWorld toWorld = worldManager.getWorld(toWorldName).getOrNull();
+        if (toWorld == null) {
+            Logging.warning("Ignored end portal exit for player '%s' because linked world '%s' is not a multiverse world.",
+                    event.getPlayer().getName(), toWorldName);
+            return;
+        }
+
         if (fromWorld.getBedRespawn()
                 && event.isBedSpawn()
                 && event.getRespawnLocation().getWorld().getName().equals(toWorldName)) {
@@ -94,23 +100,19 @@ final class MVNPPlayerListener implements MVNPListener {
             return;
         }
 
-        String toNetherWorld = linksManager.getWorldLink(toWorldName, WorldLinkType.NETHER).getOrNull();
+        String toNetherWorldName = linksManager.getWorldLink(toWorldName, WorldLinkType.NETHER)
+                .getOrElse(() -> linkChecker.getAutoLink(toWorldName, PortalType.NETHER));
         if (fromWorld.getAnchorRespawn()
                 && event.isAnchorSpawn()
-                && event.getRespawnLocation().getWorld().getName().equals(toNetherWorld)) {
+                && event.getRespawnLocation().getWorld().getName().equals(toNetherWorldName)) {
             Logging.fine("Player '%s' will be respawned in world '%s' at their respawn anchor location due to end portal exit.",
-                    event.getPlayer().getName(), toNetherWorld);
+                    event.getPlayer().getName(), toNetherWorldName);
             return;
         }
 
-        worldManager.getWorld(toWorldName).map(MultiverseWorld::getSpawnLocation)
-                .peek(spawnLocation -> {
-                    event.setRespawnLocation(spawnLocation);
-                    Logging.fine("Player '%s' will be respawned in world '%s' at location %s due to end portal exit.",
-                            event.getPlayer().getName(), toWorldName, spawnLocation);
-                })
-                .onEmpty(() -> Logging.warning("Ignored end portal exit for player '%s' because linked world '%s' is not a multiverse world.",
-                        event.getPlayer().getName(), toWorldName));
+        event.setRespawnLocation(toWorld.getSpawnLocation());
+        Logging.fine("Player '%s' will be respawned in world '%s' at location %s due to end portal exit.",
+                event.getPlayer().getName(), toWorldName, event.getRespawnLocation());
     }
 
     @EventMethod

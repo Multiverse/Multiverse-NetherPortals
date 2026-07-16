@@ -6,6 +6,7 @@ import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -103,5 +104,15 @@ class LinksManagerTest : TestWithMockBukkit() {
         val linksFile = multiverseNetherPortals.dataFolder.resolve(LinksManager.LINKS_FILENAME)
         val yaml = YamlConfiguration.loadConfiguration(linksFile)
         assertEquals("example.world_nether", yaml.getString("example[dot]world.nether"))
+    }
+
+    @Test
+    fun `Failed initial load does not mark manager as loaded`() {
+        val linksFile = multiverseNetherPortals.dataFolder.resolve(LinksManager.LINKS_FILENAME)
+        linksFile.writeText("world: [")
+        val unloadedManager = LinksManager(multiverseNetherPortals, config)
+
+        assertTrue(unloadedManager.load().isFailure)
+        assertFalse(unloadedManager.isLoaded)
     }
 }

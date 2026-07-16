@@ -35,4 +35,17 @@ class MultiverseNetherPortalsApiTest : TestWithMockBukkit() {
 
         assertSame(MultiverseNetherPortalsApi.get(), callbackApi)
     }
+
+    @Test
+    fun `Failure in queued callback does not prevent remaining callbacks or API load`() {
+        MultiverseNetherPortalsApi.shutdown()
+        var callbackApi: MultiverseNetherPortalsApi? = null
+        MultiverseNetherPortalsApi.whenLoaded { error("callback failure") }
+        MultiverseNetherPortalsApi.whenLoaded { callbackApi = it }
+
+        MultiverseNetherPortalsApi.init(multiverseNetherPortals)
+
+        assertTrue(MultiverseNetherPortalsApi.isLoaded())
+        assertSame(MultiverseNetherPortalsApi.get(), callbackApi)
+    }
 }

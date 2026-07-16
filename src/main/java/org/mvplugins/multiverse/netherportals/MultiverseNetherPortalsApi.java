@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import com.dumptruckman.minecraft.util.Logging;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocator;
+import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.utils.customportals.CustomPortalsHandler;
@@ -41,8 +43,18 @@ public final class MultiverseNetherPortalsApi {
                 multiverseNetherPortals,
                 ServicePriority.Normal);
 
-        WHEN_LOADED_CALLBACKS.forEach(callback -> callback.accept(instance));
+        List<Consumer<MultiverseNetherPortalsApi>> callbacks = List.copyOf(WHEN_LOADED_CALLBACKS);
         WHEN_LOADED_CALLBACKS.clear();
+        MultiverseNetherPortalsApi loadedApi = instance;
+        callbacks.forEach(callback -> runLoadCallback(callback, loadedApi));
+    }
+
+    private static void runLoadCallback(
+            @NotNull Consumer<MultiverseNetherPortalsApi> callback,
+            @NotNull MultiverseNetherPortalsApi loadedApi) {
+        Try.run(() -> callback.accept(loadedApi))
+                .onFailure(exception -> Logging.warning(
+                        "A Multiverse-NetherPortals API load callback failed: %s", exception.getMessage()));
     }
 
     /**

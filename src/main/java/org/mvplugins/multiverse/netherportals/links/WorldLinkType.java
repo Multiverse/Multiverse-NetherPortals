@@ -68,7 +68,14 @@ public enum WorldLinkType implements LocalizableMessage {
         return Option.none();
     }
 
+    /**
+     * Gets the localized display name for this link type.
+     *
+     * @return The localized display name.
+     * @since 5.1
+     */
     @Override
+    @ApiStatus.AvailableSince("5.1")
     public @Nullable Message getLocalizableMessage() {
         return Message.of(colourCode + getConfigKey());
     }
