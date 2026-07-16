@@ -20,6 +20,7 @@ import org.bukkit.PortalType;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
+import org.mvplugins.multiverse.external.vavr.control.Try;
 import org.mvplugins.multiverse.netherportals.utils.customportals.CustomPortalsHandler;
 
 public class MultiverseNetherPortals extends MultiverseModule {
@@ -38,6 +39,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private Provider<MVNPCommandCompletions> commandCompletionsProvider;
     @Inject
     private Provider<CustomPortalsHandler> customPortalsHandlerProvider;
+    @Inject
+    private Provider<BstatsMetricsConfigurator> metricsConfiguratorProvider;
 
     @Override
     public void onLoad() {
@@ -63,6 +66,7 @@ public class MultiverseNetherPortals extends MultiverseModule {
         commandCompletionsProvider.get();
         this.registerCommands(NetherPortalsCommand.class);
         this.registerDynamicListeners(MVNPListener.class);
+        this.setupMetrics();
         MultiverseNetherPortalsApi.init(this);
 
         Logging.config("Version %s (API v%s) Enabled - By %s",
@@ -79,6 +83,17 @@ public class MultiverseNetherPortals extends MultiverseModule {
                 .isSuccess()
                 && config.isLoaded()
                 && links.isLoaded();
+    }
+
+    /**
+     * Setup bstats Metrics.
+     */
+    private void setupMetrics() {
+        Try.of(() -> metricsConfiguratorProvider.get())
+                .onFailure(e -> {
+                    Logging.severe("Failed to setup metrics");
+                    e.printStackTrace();
+                });
     }
 
     @Override
