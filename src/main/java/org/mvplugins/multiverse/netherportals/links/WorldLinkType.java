@@ -18,13 +18,15 @@ import org.mvplugins.multiverse.external.vavr.control.Option;
 @ApiStatus.AvailableSince("5.1")
 public enum WorldLinkType implements LocalizableMessage {
 
-    NETHER(PortalType.NETHER),
-    END(PortalType.ENDER);
+    NETHER(PortalType.NETHER, "&c"),
+    END(PortalType.ENDER, "&b");
 
     private final PortalType portalType;
+    private final String colourCode;
 
-    WorldLinkType(PortalType portalType) {
+    WorldLinkType(PortalType portalType, String colourCode) {
         this.portalType = portalType;
+        this.colourCode = colourCode;
     }
 
     /**
@@ -68,6 +70,6 @@ public enum WorldLinkType implements LocalizableMessage {
 
     @Override
     public @Nullable Message getLocalizableMessage() {
-        return Message.of(getConfigKey());
+        return Message.of(colourCode + getConfigKey());
     }
 }
