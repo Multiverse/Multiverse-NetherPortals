@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mvplugins.multiverse.core.inject.PluginServiceLocator;
 import org.mvplugins.multiverse.netherportals.config.NetherPortalsConfig;
 import org.mvplugins.multiverse.netherportals.links.LinksManager;
+import org.mvplugins.multiverse.netherportals.utils.customportals.CustomPortalsHandler;
 
 /**
  * Provides access to the Multiverse-NetherPortals API.
@@ -131,6 +132,19 @@ public final class MultiverseNetherPortalsApi {
     @NotNull
     public LinksManager getLinksManager() {
         return Objects.requireNonNull(serviceLocator.getActiveService(LinksManager.class));
+    }
+
+    /**
+     * Gets the CustomPortalsHandler instance.
+     *
+     * @return The CustomPortalsHandler instance
+     *
+     * @since 5.1
+     */
+    @ApiStatus.AvailableSince("5.1")
+    @NotNull
+    public CustomPortalsHandler getCustomPortalsHandler() {
+        return Objects.requireNonNull(serviceLocator.getActiveService(CustomPortalsHandler.class));
     }
 
     /**

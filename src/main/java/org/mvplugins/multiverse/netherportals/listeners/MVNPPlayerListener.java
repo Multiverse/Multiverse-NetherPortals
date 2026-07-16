@@ -22,34 +22,35 @@ import org.mvplugins.multiverse.core.world.WorldManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
+import org.mvplugins.multiverse.netherportals.utils.customportals.CustomPortalsHandler;
 
 @Service
 final class MVNPPlayerListener implements MVNPListener {
 
-    private final MultiverseNetherPortals plugin;
     private final NetherPortalsConfig config;
     private final LinksManager linksManager;
     private final MVLinkChecker linkChecker;
     private final WorldManager worldManager;
     private final EndPlatformCreator endPlatformCreator;
+    private final CustomPortalsHandler customPortalsHandler;
 
     private static final boolean HAS_RESPAWN_REASON = ReflectHelper.hasClass("org.bukkit.event.player.PlayerRespawnEvent$RespawnReason");
     private static final boolean HAS_RESPAWN_FLAG = ReflectHelper.hasClass("org.bukkit.event.player.PlayerRespawnEvent$RespawnFlag");
 
     @Inject
     public MVNPPlayerListener(
-            @NotNull MultiverseNetherPortals plugin,
             @NotNull NetherPortalsConfig config,
             @NotNull LinksManager linksManager,
             @NotNull MVLinkChecker linkChecker,
             @NotNull WorldManager worldManager,
-            @NotNull EndPlatformCreator endPlatformCreator) {
-        this.plugin = plugin;
+            @NotNull EndPlatformCreator endPlatformCreator,
+            @NotNull CustomPortalsHandler customPortalsHandler) {
         this.config = config;
         this.linksManager = linksManager;
         this.linkChecker = linkChecker;
         this.worldManager = worldManager;
         this.endPlatformCreator = endPlatformCreator;
+        this.customPortalsHandler = customPortalsHandler;
     }
 
     @EventMethod
@@ -120,7 +121,7 @@ final class MVNPPlayerListener implements MVNPListener {
         }
 
         Location currentLocation = event.getFrom().clone();
-        if (!plugin.isHandledByNetherPortals(currentLocation)) {
+        if (customPortalsHandler.isHandledByCustomPortals(event.getPlayer(), currentLocation)) {
             return;
         }
 

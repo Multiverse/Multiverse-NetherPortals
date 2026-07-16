@@ -1,7 +1,6 @@
 package org.mvplugins.multiverse.netherportals;
 
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dumptruckman.minecraft.util.Logging;
@@ -18,18 +17,14 @@ import org.mvplugins.multiverse.netherportals.links.LinksManager;
 import org.mvplugins.multiverse.netherportals.links.WorldLinkType;
 import org.bukkit.Location;
 import org.bukkit.PortalType;
-import org.bukkit.plugin.Plugin;
 import org.mvplugins.multiverse.core.command.MVCommandManager;
 import org.mvplugins.multiverse.external.jakarta.inject.Inject;
 import org.mvplugins.multiverse.external.jakarta.inject.Provider;
-import org.mvplugins.multiverse.portals.MultiversePortalsApi;
-import org.mvplugins.multiverse.portals.utils.PortalManager;
+import org.mvplugins.multiverse.netherportals.utils.customportals.CustomPortalsHandler;
 
 public class MultiverseNetherPortals extends MultiverseModule {
 
     private static final double TARGET_CORE_API_VERSION = 5.0;
-
-    private Plugin multiversePortals;
 
     @Inject
     private Provider<CoreConfig> coreConfig;
@@ -41,6 +36,8 @@ public class MultiverseNetherPortals extends MultiverseModule {
     private Provider<LinksManager> linksManager;
     @Inject
     private Provider<MVNPCommandCompletions> commandCompletionsProvider;
+    @Inject
+    private Provider<CustomPortalsHandler> customPortalsHandlerProvider;
 
     @Override
     public void onLoad() {
@@ -52,7 +49,6 @@ public class MultiverseNetherPortals extends MultiverseModule {
     @Override
     public void onEnable() {
         super.onEnable();
-        this.multiversePortals = getServer().getPluginManager().getPlugin("Multiverse-Portals");
 
         initializeDependencyInjection(new MultiverseNetherPortalsPluginBinder(this));
         Logging.setDebugLevel(coreConfig.get().getGlobalDebug());
@@ -104,26 +100,6 @@ public class MultiverseNetherPortals extends MultiverseModule {
     @Override
     public @NotNull Logger getLogger() {
         return Logging.getLogger();
-    }
-
-    public boolean isHandledByNetherPortals(Location l) {
-        if (multiversePortals != null) {
-            // Catch errors which could occur if classes aren't present or are missing methods.
-            try {
-                PortalManager portalManager = MultiversePortalsApi.get().getPortalManager();
-                if (portalManager.isPortal(l)) {
-                    return false;
-                }
-            } catch (Throwable t) {
-                getLogger().log(Level.WARNING, "Error checking if portal is handled by Multiverse-Portals", t);
-            }
-        }
-        return true;
-    }
-
-    @ApiStatus.Internal
-    public void setPortals(Plugin multiversePortals) {
-        this.multiversePortals = multiversePortals;
     }
 
     /**
@@ -359,6 +335,15 @@ public class MultiverseNetherPortals extends MultiverseModule {
     @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
     public void setEndPlatformDropBlocks(boolean endPlatformDropBlocks) {
         netherPortalsConfig.get().setEndPlatformDropBlocks(endPlatformDropBlocks);
+    }
+
+    /**
+     * @deprecated Use {@link CustomPortalsHandler#isHandledByCustomPortals(org.bukkit.entity.Entity, org.bukkit.Location)} instead.
+     */
+    @Deprecated(since = "5.1", forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    public boolean isHandledByNetherPortals(Location l) {
+        return !customPortalsHandlerProvider.get().isHandledByCustomPortals(null, l);
     }
 
     /**
