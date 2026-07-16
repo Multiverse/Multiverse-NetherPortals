@@ -39,16 +39,19 @@ public class CustomPortalsHandler {
     }
 
     private void registerMultiversePortalsCheck() {
-        registerHandleCheck((entity, portalLocation) -> {
-            if (!Bukkit.getPluginManager().isPluginEnabled("Multiverse-Portals")) {
-                return false;
+        registerHandleCheck(new CustomPortalsHandleCheck() {
+            @Override
+            public boolean isHandledByThisPlugin(@Nullable Entity entity, @NotNull Location portalLocation) {
+                if (!Bukkit.getPluginManager().isPluginEnabled("Multiverse-Portals")) {
+                    return false;
+                }
+                return Try.of(() -> MultiversePortalsApi.get().getPortalManager())
+                        .map(portalManager -> portalManager.isPortal(portalLocation))
+                        .onFailure(throwable ->
+                                Logging.warning("Error while checking if portal is handled by Multiverse-Portals: %s",
+                                        throwable.getMessage()))
+                        .getOrElse(false);
             }
-            return Try.of(() -> MultiversePortalsApi.get().getPortalManager())
-                    .map(portalManager -> portalManager.isPortal(portalLocation))
-                    .onFailure(throwable ->
-                            Logging.warning("Error while checking if portal is handled by Multiverse-Portals: %s",
-                                    throwable.getMessage()))
-                    .getOrElse(false);
         });
     }
 
