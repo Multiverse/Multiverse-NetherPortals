@@ -1,0 +1,25 @@
+portal-auto-link-when:
+  nether:
+    prefix: ''
+    suffix: _nether
+  end:
+    prefix: ''
+    suffix: _the_end
+bounceback: true
+teleport_entities: false
+send_disabled_portal_message: false
+send_no_destination_message: false
+end_platform_drop_blocks: false
+worlds:
+  world:
+    portalgoesto:
+      NETHER: world_nether
+      END: world_the_end
+  other_world:
+    portalgoesto:
+      ENDER: other_world_the_end
+  example:
+    world:
+      portalgoesto:
+        NETHER: example.world_nether
+version: 0.0
