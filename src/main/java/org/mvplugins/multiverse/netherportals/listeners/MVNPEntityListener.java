@@ -191,10 +191,6 @@ final class MVNPEntityListener implements MVNPListener {
 
         Location currentLocation = this.locationManipulation.getBlockLocation(event.getLocation());
 
-        if (customPortalsHandler.isHandledByCustomPortals(event.getEntity(), currentLocation)) {
-            return;
-        }
-
         // determine what kind of portal the player is using
         PortalType type = switch (currentLocation.getBlock().getType()) {
             case END_PORTAL -> PortalType.ENDER;
@@ -213,9 +209,17 @@ final class MVNPEntityListener implements MVNPListener {
         // in a portal. they'll automatically be removed when they leave
         eventRecord.addToRecord(type, player.getUniqueId());
 
+        if (customPortalsHandler.isHandledByCustomPortals(player, event.getLocation().clone())) {
+            return;
+        }
+
         MVPlayerTouchedPortalEvent playerTouchedPortalEvent = new MVPlayerTouchedPortalEvent(player, event.getLocation());
         Bukkit.getPluginManager().callEvent(playerTouchedPortalEvent);
         Location eventLocation = event.getLocation().clone();
+        if (playerTouchedPortalEvent.isCancelled()) {
+            Logging.finest("Another plugin cancelled the enter Event for NetherPortals!");
+            return;
+        }
         if (!playerTouchedPortalEvent.canUseThisPortal()) {
             // Someone else said the player is not allowed to go here.
             if (this.shootPlayer(player, eventLocation.getBlock(), type)) {
@@ -223,10 +227,6 @@ final class MVNPEntityListener implements MVNPListener {
             }
 
             Logging.finest("Someone requested that this player be bounced back!");
-        }
-        if (playerTouchedPortalEvent.isCancelled()) {
-            Logging.finest("Someone cancelled the enter Event for NetherPortals!");
-            return;
         }
 
         if (this.playerErrors.containsKey(player.getName())) {
